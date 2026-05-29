@@ -9,52 +9,122 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #222; }
   .app { display: flex; height: 100vh; }
-  .sidebar { width: 300px; background: #fff; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
-  .main { flex: 1; padding: 20px; min-width: 0; }
-  h1 { font-size: 1.2rem; margin-bottom: 4px; }
-  .subtitle { font-size: 0.75rem; color: #888; margin-bottom: 16px; }
-  h2 { font-size: 0.8rem; text-transform: uppercase; color: #666; margin: 16px 0 8px; letter-spacing: 0.5px; }
-  .ticker-list { list-style: none; margin: 0; }
-  .ticker-list li { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; border-radius: 4px; font-size: 0.85rem; font-family: monospace; }
-  .ticker-list li:nth-child(even) { background: #f9f9f9; }
-  .ticker-list li .market-tag { font-size: 0.65rem; color: #888; font-family: sans-serif; }
-  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.75rem; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #eee; }
-  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .sidebar { width: 320px; background: #fff; border-right: 1px solid #ddd; display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar-scroll { flex: 1; overflow-y: auto; padding: 16px; }
+  .main { flex: 1; padding: 16px; min-width: 0; display: flex; flex-direction: column; }
+
+  h1 { font-size: 1.15rem; }
+  .subtitle { font-size: 0.72rem; color: #888; margin: 2px 0 12px; }
+  h2 { font-size: 0.75rem; text-transform: uppercase; color: #666; margin: 14px 0 8px; letter-spacing: 0.5px; }
+
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.74rem; margin-bottom: 4px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+  .legend-item { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+  .legend-item.disabled { opacity: 0.35; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .legend-dot.earnings { background: #2563eb; }
   .legend-dot.dividend { background: #16a34a; }
   .legend-dot.split { background: #ea580c; }
-  .actions { margin-top: auto; padding-top: 16px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 6px; }
-  .actions a { display: block; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; text-align: center; }
+
+  .filters { display: flex; gap: 12px; font-size: 0.78rem; margin-bottom: 4px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
+  .filters label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .filters input[type=checkbox] { accent-color: #0052cc; cursor: pointer; }
+
+  .detail-panel { display: none; background: #f8f9fa; border-radius: 6px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.8rem; }
+  .detail-panel.visible { display: block; }
+  .detail-panel .dp-close { float: right; cursor: pointer; color: #999; font-size: 1rem; line-height: 1; }
+  .detail-panel .dp-close:hover { color: #333; }
+  .detail-panel .dp-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; }
+  .detail-panel .dp-meta { color: #666; margin-bottom: 4px; }
+  .detail-panel .dp-type { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.65rem; color: #fff; font-weight: 600; text-transform: uppercase; }
+  .detail-panel .dp-type.earnings { background: #2563eb; }
+  .detail-panel .dp-type.dividend { background: #16a34a; }
+  .detail-panel .dp-type.split { background: #ea580c; }
+  .detail-panel .dp-field { margin-top: 2px; }
+  .detail-panel .dp-field strong { color: #555; }
+
+  .upcoming { font-size: 0.78rem; }
+  .upcoming-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; border-radius: 4px; }
+  .upcoming-item:nth-child(even) { background: #f9f9f9; }
+  .upcoming-item .ui-date { font-family: monospace; font-size: 0.72rem; color: #555; }
+  .upcoming-item .ui-ticker { font-weight: 600; font-size: 0.78rem; }
+  .upcoming-item .ui-type { font-size: 0.65rem; padding: 1px 5px; border-radius: 3px; color: #fff; }
+  .upcoming-item .ui-type.earnings { background: #2563eb; }
+  .upcoming-item .ui-type.dividend { background: #16a34a; }
+  .upcoming-item .ui-type.split { background: #ea580c; }
+  .upcoming-empty { color: #999; font-size: 0.75rem; padding: 8px 0; }
+
+  .ticker-list { list-style: none; font-size: 0.82rem; }
+  .ticker-list li { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; border-radius: 4px; }
+  .ticker-list li:nth-child(even) { background: #f9f9f9; }
+  .ticker-list .market-tag { font-size: 0.62rem; color: #888; }
+
+  .status-bar { font-size: 0.68rem; color: #888; padding: 6px 0 0; }
+  .status-bar.error { color: #c00; }
+  .loading { font-size: 0.8rem; color: #888; padding: 20px 0; text-align: center; }
+  .retry-btn { display: inline-block; padding: 6px 16px; background: #0052cc; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; margin-top: 8px; }
+  .retry-btn:hover { background: #003d99; }
+
+  .actions { padding: 12px 16px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 5px; }
+  .actions a { display: block; padding: 7px 12px; border-radius: 5px; text-decoration: none; font-size: 0.78rem; text-align: center; }
   .actions .btn-primary { background: #0052cc; color: #fff; }
   .actions .btn-primary:hover { background: #003d99; }
   .actions .btn-secondary { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
   .actions .btn-secondary:hover { background: #e5e5e5; }
-  .status-bar { font-size: 0.7rem; color: #888; padding: 6px 0; }
-  #calendar { background: #fff; border-radius: 8px; padding: 12px; }
-  #calendar-container { height: calc(100vh - 40px); }
-  #calendar-container .fc { height: 100%; }
+
+  #calendar-container { flex: 1; }
+  #calendar { background: #fff; border-radius: 8px; padding: 12px; height: 100%; }
+  #calendar .fc { height: 100%; }
+
   .fc-event.earnings { background: #2563eb; border-color: #2563eb; }
   .fc-event.dividend { background: #16a34a; border-color: #16a34a; }
   .fc-event.split { background: #ea580c; border-color: #ea580c; }
   .fc-daygrid-event { font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
   .fc-daygrid-event .fc-event-title { font-weight: 500; }
+  .fc-daygrid-dot-event { background: none; }
+
+  @media (max-width: 768px) {
+    .app { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #ddd; max-height: 50vh; }
+    .main { height: 50vh; }
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #ddd; border-top-color: #0052cc; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 6px; vertical-align: middle; }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="sidebar">
-    <h1>Investor Calendar</h1>
-    <div class="subtitle" id="subtitle">Loading...</div>
+    <div class="sidebar-scroll" id="sidebarScroll">
+      <h1>Investor Calendar</h1>
+      <div class="subtitle" id="subtitle">Loading...</div>
 
-    <div class="legend">
-      <span class="legend-item"><span class="legend-dot earnings"></span> Earnings</span>
-      <span class="legend-item"><span class="legend-dot dividend"></span> Dividends</span>
-      <span class="legend-item"><span class="legend-dot split"></span> Splits</span>
+      <div class="legend" id="legend">
+        <span class="legend-item" data-type="earnings"><span class="legend-dot earnings"></span> Earnings</span>
+        <span class="legend-item" data-type="dividend"><span class="legend-dot dividend"></span> Dividends</span>
+        <span class="legend-item" data-type="split"><span class="legend-dot split"></span> Splits</span>
+      </div>
+
+      <div class="filters" id="filters">
+        <label><input type="checkbox" checked data-type="earnings"> Earnings</label>
+        <label><input type="checkbox" checked data-type="dividend"> Dividends</label>
+        <label><input type="checkbox" checked data-type="split"> Splits</label>
+      </div>
+
+      <div class="detail-panel" id="detailPanel">
+        <span class="dp-close" id="dpClose">&times;</span>
+        <div class="dp-title" id="dpTitle"></div>
+        <div class="dp-meta" id="dpMeta"></div>
+        <span class="dp-type" id="dpType"></span>
+        <div id="dpFields"></div>
+      </div>
+
+      <h2>Upcoming 7 Days</h2>
+      <div class="upcoming" id="upcoming"><div class="upcoming-empty">No upcoming events</div></div>
+
+      <h2>Tracked Tickers</h2>
+      <ul class="ticker-list" id="tickerList"><li style="color:#888">Loading...</li></ul>
     </div>
-
-    <h2>Tracked Tickers</h2>
-    <ul class="ticker-list" id="tickerList"><li style="color:#888;font-family:sans-serif">Loading...</li></ul>
 
     <div class="status-bar" id="statusBar"></div>
 
@@ -70,46 +140,64 @@
 </div>
 
 <script>
+(function() {
 const EVENTS_URL = 'events.json';
 
 let calendar;
+let allEvents = [];
+let filters = { earnings: true, dividend: true, split: true };
 
-async function load() {
-  try {
-    const resp = await fetch(EVENTS_URL + '?t=' + Date.now());
-    const data = await resp.json();
-    const events = data.events || [];
-    const generated = data.generated_at || '';
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+}
 
-    // build ticker list from events
-    const tickerMap = {};
-    for (const e of events) {
-      if (!tickerMap[e.ticker]) tickerMap[e.ticker] = e.market || '';
-    }
-    const tickers = Object.entries(tickerMap).sort((a, b) => a[0].localeCompare(b[0]));
+function daysUntil(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return Math.ceil((d - now) / 86400000);
+}
 
-    renderTickers(tickers);
-    renderCalendar(events);
+function populateDetail(e) {
+  const p = e.extendedProps;
+  const det = p.details || {};
+  const panel = document.getElementById('detailPanel');
+  const dpType = document.getElementById('dpType');
 
-    const dateStr = generated ? new Date(generated).toLocaleString() : 'today';
-    document.getElementById('subtitle').textContent = events.length + ' events - updated ' + dateStr;
-  } catch (e) {
-    document.getElementById('subtitle').textContent = 'Failed to load events';
-    document.getElementById('tickerList').innerHTML = '<li style="color:#c00">Error loading data</li>';
+  document.getElementById('dpTitle').textContent = p.rawTitle || e.title;
+  document.getElementById('dpMeta').textContent = e.startStr + ' · ' + (p.market || '-');
+
+  dpType.textContent = p.type;
+  dpType.className = 'dp-type ' + p.type;
+
+  const fields = document.getElementById('dpFields');
+  const entries = Object.entries(det).filter(([k, v]) => v && v !== 'nan' && v !== '');
+  if (entries.length) {
+    fields.innerHTML = entries.map(([k, v]) =>
+      `<div class="dp-field"><strong>${k.replace(/_/g, ' ')}:</strong> ${v}</div>`
+    ).join('');
+  } else {
+    fields.innerHTML = '<div class="dp-field" style="color:#999">No additional details</div>';
   }
+
+  panel.classList.add('visible');
 }
 
-function renderTickers(tickers) {
-  const list = document.getElementById('tickerList');
-  list.innerHTML = tickers.map(([sym, market]) =>
-    `<li><span>${sym}</span> <span class="market-tag">${market}</span></li>`
-  ).join('');
+function hideDetail() {
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+document.getElementById('dpClose').addEventListener('click', hideDetail);
+
+function getFilteredEvents() {
+  return allEvents.filter(e => filters[e.type]);
 }
 
-function renderCalendar(events) {
+function renderCalendar() {
   if (calendar) calendar.destroy();
 
-  const fcEvents = events.map(e => ({
+  const filtered = getFilteredEvents();
+  const fcEvents = filtered.map(e => ({
     id: e.ticker + '-' + e.type + '-' + e.date + '-' + Math.random().toString(36).slice(2,6),
     title: e.ticker,
     start: e.date,
@@ -121,34 +209,153 @@ function renderCalendar(events) {
   calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
     initialView: 'dayGridMonth',
     height: 'auto',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,dayGridWeek,dayGridDay'
+    },
     events: fcEvents,
     eventClick: function(info) {
-      const p = info.event.extendedProps;
-      const det = p.details || {};
-      const lines = [p.rawTitle || info.event.title, 'Market: ' + (p.market || '-')];
-      for (const [k, v] of Object.entries(det)) {
-        if (v && v !== 'nan' && v !== '') {
-          lines.push(k.replace(/_/g, ' ') + ': ' + v);
-        }
-      }
-      alert(lines.join('\n'));
+      populateDetail(info.event);
     },
     eventDidMount: function(info) {
-      const type = info.event.extendedProps.type;
-      info.el.style.background =
-        type === 'earnings' ? '#2563eb' :
-        type === 'dividend' ? '#16a34a' :
-        type === 'split' ? '#ea580c' : '#9333ea';
+      const p = info.event.extendedProps;
+      const bg =
+        p.type === 'earnings' ? '#2563eb' :
+        p.type === 'dividend' ? '#16a34a' :
+        p.type === 'split' ? '#ea580c' : '#9333ea';
+      info.el.style.background = bg;
       info.el.style.borderColor = 'transparent';
+      info.el.title = p.rawTitle + ' (' + info.event.startStr + ')';
     }
   });
   calendar.render();
 
   document.getElementById('statusBar').textContent =
-    `Showing ${fcEvents.length} events on calendar`;
+    filtered.length + ' events shown' + (filtered.length !== allEvents.length ? ' (' + allEvents.length + ' total)' : '');
+  renderUpcoming(filtered);
 }
 
+function renderUpcoming(events) {
+  const today = new Date().toISOString().slice(0, 10);
+  const end = new Date();
+  end.setDate(end.getDate() + 7);
+  const cutoff = end.toISOString().slice(0, 10);
+
+  const upcoming = events
+    .filter(e => e.date >= today && e.date <= cutoff)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const el = document.getElementById('upcoming');
+  if (!upcoming.length) {
+    el.innerHTML = '<div class="upcoming-empty">No upcoming events</div>';
+    return;
+  }
+  el.innerHTML = upcoming.map(e =>
+    '<div class="upcoming-item">' +
+      '<span><span class="ui-date">' + formatDate(e.date) + '</span> ' +
+      '<span class="ui-ticker">' + e.ticker + '</span></span>' +
+      '<span class="ui-type ' + e.type + '">' + e.type + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+function setFilters(newFilters) {
+  filters = newFilters;
+  renderCalendar();
+  updateLegend();
+}
+
+function updateLegend() {
+  document.querySelectorAll('.legend-item').forEach(el => {
+    const type = el.dataset.type;
+    el.classList.toggle('disabled', !filters[type]);
+  });
+  document.querySelectorAll('#filters input').forEach(cb => {
+    cb.checked = filters[cb.dataset.type];
+  });
+}
+
+document.querySelectorAll('#filters input').forEach(cb => {
+  cb.addEventListener('change', function() {
+    const newFilters = { ...filters, [this.dataset.type]: this.checked };
+    setFilters(newFilters);
+  });
+});
+
+document.querySelectorAll('.legend-item').forEach(el => {
+  el.addEventListener('click', function() {
+    const type = this.dataset.type;
+    const newFilters = { ...filters, [type]: !filters[type] };
+    setFilters(newFilters);
+  });
+});
+
+async function load() {
+  const subtitle = document.getElementById('subtitle');
+  const tickerList = document.getElementById('tickerList');
+  const statusBar = document.getElementById('statusBar');
+
+  subtitle.innerHTML = '<span class="loading-spinner"></span> Loading events...';
+
+  try {
+    const resp = await fetch(EVENTS_URL + '?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    allEvents = data.events || [];
+    const generated = data.generated_at || '';
+
+    const tickerMap = {};
+    for (const e of allEvents) {
+      if (!tickerMap[e.ticker]) tickerMap[e.ticker] = e.market || '';
+    }
+    const tickers = Object.entries(tickerMap).sort((a, b) => a[0].localeCompare(b[0]));
+
+    tickerList.innerHTML = tickers.map(([sym, market]) =>
+      '<li><span>' + sym + '</span> <span class="market-tag">' + market + '</span></li>'
+    ).join('');
+
+    renderCalendar();
+
+    const dateStr = generated ? new Date(generated).toLocaleString() : 'today';
+    subtitle.textContent = allEvents.length + ' events tracked · updated ' + dateStr;
+    statusBar.textContent = '';
+    statusBar.className = 'status-bar';
+
+    // apply saved filters from localStorage
+    const saved = localStorage.getItem('invcal_filters');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const newFilters = { ...filters, ...parsed };
+        setFilters(newFilters);
+      } catch(e) {}
+    }
+  } catch (e) {
+    subtitle.textContent = 'Failed to load events';
+    tickerList.innerHTML = '<li style="color:#c00">Error: ' + e.message + '</li>';
+    statusBar.innerHTML = '<button class="retry-btn" onclick="location.reload()">Retry</button>';
+    statusBar.className = 'status-bar error';
+  }
+}
+
+// persist filters to localStorage
+function persistFilters() {
+  try {
+    localStorage.setItem('invcal_filters', JSON.stringify(filters));
+  } catch(e) {}
+}
+// override setFilters to also persist
+const origSetFilters = setFilters;
+setFilters = function(newFilters) {
+  filters = newFilters;
+  renderCalendar();
+  updateLegend();
+  persistFilters();
+};
+
 load();
+})();
 </script>
 </body>
 </html>

@@ -1,4 +1,6 @@
+import argparse
 import json
+import math
 import os
 from datetime import date, datetime, timedelta, timezone
 
@@ -38,11 +40,7 @@ MARKET_MAP = {
     ".SZ": "China (SZSE)",
 }
 
-
-def detect_market(ticker):
-    suffix = ticker[ticker.rfind("."):] if "." in ticker else ""
-    return MARKET_MAP.get(suffix, "US" if not suffix else f"Other ({suffix})")
-
+KNOWN_SUFFIXES = sorted(MARKET_MAP.keys(), key=len, reverse=True)
 
 STOOQ_SUFFIX_MAP = {
     ".WA": "gpw",
@@ -52,6 +50,19 @@ STOOQ_SUFFIX_MAP = {
     ".AS": "nl",
     ".TO": "ca",
 }
+
+
+def detect_market(ticker):
+    suffix = ticker[ticker.rfind("."):] if "." in ticker else ""
+    return MARKET_MAP.get(suffix, "US" if not suffix else f"Other ({suffix})")
+
+
+def strip_suffix(ticker):
+    upper = ticker.upper()
+    for suffix in KNOWN_SUFFIXES:
+        if upper.endswith(suffix.upper()):
+            return ticker[:-len(suffix)]
+    return ticker
 
 
 def stooq_exchange(ticker):
@@ -65,6 +76,18 @@ def safe_strftime(dt):
     if isinstance(dt, datetime):
         return dt.date().isoformat()
     return str(dt)[:10]
+
+
+def clean_val(val):
+    if val is None:
+        return ""
+    try:
+        if isinstance(val, float) and math.isnan(val):
+            return ""
+    except (ValueError, TypeError):
+        pass
+    s = str(val)
+    return "" if s.lower() in ("nan", "nat", "none", "") else s
 
 
 def fetch_events(ticker):
@@ -86,16 +109,16 @@ def fetch_events(ticker):
                     "title": f"{name} — Earnings",
                     "market": market,
                     "details": {
-                        "eps_estimate": str(row.get("EPS Estimate", "")),
-                        "eps_actual": str(row.get("EPS Actual", "")),
-                        "revenue_estimate": str(row.get("Revenue Estimate", "")),
-                        "revenue_actual": str(row.get("Revenue Actual", "")),
+                        "eps_estimate": clean_val(row.get("EPS Estimate")),
+                        "eps_actual": clean_val(row.get("EPS Actual")),
+                        "revenue_estimate": clean_val(row.get("Revenue Estimate")),
+                        "revenue_actual": clean_val(row.get("Revenue Actual")),
                     },
                 })
 
-        calendar = dict(t.calendar)
-        if calendar:
-            ex_div = calendar.get("Ex-Dividend Date")
+        cal = t.calendar or {}
+        if cal:
+            ex_div = cal.get("Ex-Dividend Date")
             if ex_div:
                 events.append({
                     "ticker": ticker,
@@ -104,7 +127,7 @@ def fetch_events(ticker):
                     "title": f"{name} — Ex-Dividend",
                     "market": market,
                     "details": {
-                        "dividend_rate": str(calendar.get("Dividend Rate", "")),
+                        "dividend_rate": clean_val(cal.get("Dividend Rate")),
                     },
                 })
 
@@ -120,7 +143,7 @@ def fetch_events(ticker):
                         "date": d,
                         "title": f"{name} — Dividend",
                         "market": market,
-                        "details": {"amount": str(val)},
+                        "details": {"amount": clean_val(val)},
                     })
                     seen_dates.add(d)
 
@@ -133,7 +156,7 @@ def fetch_events(ticker):
                     "date": str(idx.date() if hasattr(idx, "date") else idx)[:10],
                     "title": f"{name} — Stock Split",
                     "market": market,
-                    "details": {"ratio": str(val)},
+                    "details": {"ratio": clean_val(val)},
                 })
 
     except Exception as e:
@@ -143,6 +166,11 @@ def fetch_events(ticker):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Generate investor calendar events data")
+    parser.add_argument("--days", type=int, default=730,
+                        help="Max days to look ahead/behind (default: 730)")
+    args = parser.parse_args()
+
     with open(TICKERS_PATH) as f:
         tickers = json.load(f)
 
@@ -161,8 +189,8 @@ def main():
         events_with_ticker.setdefault(e["ticker"], []).append(e)
     for sym in tickers:
         if len(events_with_ticker.get(sym, [])) < 3:
-            sym_clean = sym.replace(".WA", "").lower()
-            print(f"  ↳ yfinance sparse for {sym}, trying Stooq.pl...", end=" ", flush=True)
+            sym_clean = strip_suffix(sym).lower()
+            print(f"  -> yfinance sparse for {sym}, trying Stooq.pl...", end=" ", flush=True)
             stooq_evts, err = stock_from_stooq(sym_clean, stooq_exchange(sym))
             if stooq_evts:
                 print(f"{len(stooq_evts)} events from Stooq")
@@ -171,6 +199,15 @@ def main():
                 print(f"no data ({err or 'empty'})")
 
     all_events.sort(key=lambda e: e["date"])
+
+    today = date.today()
+    cutoff = today.isoformat()
+    max_ahead = (today.replace(day=1) + timedelta(days=args.days)).isoformat()
+    max_behind = (today.replace(day=1) - timedelta(days=args.days)).isoformat()
+    all_events = [
+        e for e in all_events
+        if max_behind <= e["date"] <= max_ahead
+    ]
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(EVENTS_PATH, "w") as f:
