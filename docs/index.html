@@ -10,325 +10,146 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; color: #222; }
   .app { display: flex; height: 100vh; }
-  .sidebar { width: 320px; background: #fff; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
-  .main { flex: 1; padding: 20px; }
-  h1 { font-size: 1.2rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  h1 small { font-size: 0.7rem; color: #888; font-weight: normal; }
-  h2 { font-size: 0.85rem; text-transform: uppercase; color: #666; margin: 16px 0 8px; letter-spacing: 0.5px; }
-  .ticker-list { list-style: none; margin-bottom: 12px; }
-  .ticker-list li { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 6px; font-size: 0.9rem; }
-  .ticker-list li:nth-child(odd) { background: #f9f9f9; }
-  .ticker-list li .del { cursor: pointer; color: #c00; opacity: 0.5; font-size: 0.8rem; }
-  .ticker-list li .del:hover { opacity: 1; }
-  .add-form { display: flex; gap: 6px; margin-bottom: 12px; }
-  .add-form input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.85rem; }
-  .add-form button { padding: 8px 14px; background: #0052cc; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-  .add-form button:hover { background: #003d99; }
-  .btn { padding: 8px 14px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-size: 0.8rem; background: #fff; }
-  .btn:hover { background: #f0f0f0; }
-  .btn-primary { background: #0052cc; color: #fff; border-color: #0052cc; }
-  .btn-primary:hover { background: #003d99; }
-  .btn-group { display: flex; gap: 6px; margin-top: auto; padding-top: 16px; flex-wrap: wrap; }
-  .status { font-size: 0.75rem; color: #666; margin-top: 8px; padding: 6px 8px; background: #f0f0f0; border-radius: 6px; }
-  .status.error { background: #ffe0e0; color: #c00; }
-  .status.success { background: #dff0df; color: #060; }
-  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.75rem; margin-bottom: 12px; }
+  .sidebar { width: 300px; background: #fff; border-right: 1px solid #ddd; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
+  .main { flex: 1; padding: 20px; min-width: 0; }
+  h1 { font-size: 1.2rem; margin-bottom: 4px; }
+  .subtitle { font-size: 0.75rem; color: #888; margin-bottom: 16px; }
+  h2 { font-size: 0.8rem; text-transform: uppercase; color: #666; margin: 16px 0 8px; letter-spacing: 0.5px; }
+  .ticker-list { list-style: none; margin: 0; }
+  .ticker-list li { display: flex; justify-content: space-between; align-items: center; padding: 5px 8px; border-radius: 4px; font-size: 0.85rem; font-family: monospace; }
+  .ticker-list li:nth-child(even) { background: #f9f9f9; }
+  .ticker-list li .market-tag { font-size: 0.65rem; color: #888; font-family: sans-serif; }
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.75rem; margin-bottom: 8px; padding: 8px 0; border-bottom: 1px solid #eee; }
   .legend-item { display: flex; align-items: center; gap: 4px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
   .legend-dot.earnings { background: #2563eb; }
   .legend-dot.dividend { background: #16a34a; }
   .legend-dot.split { background: #ea580c; }
-  .legend-dot.meeting { background: #9333ea; }
-  #calendar { background: #fff; border-radius: 8px; padding: 12px; height: calc(100vh - 40px); }
+  .actions { margin-top: auto; padding-top: 16px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 6px; }
+  .actions a { display: block; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; text-align: center; }
+  .actions .btn-primary { background: #0052cc; color: #fff; }
+  .actions .btn-primary:hover { background: #003d99; }
+  .actions .btn-secondary { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
+  .actions .btn-secondary:hover { background: #e5e5e5; }
+  .status-bar { font-size: 0.7rem; color: #888; padding: 6px 0; }
+  #calendar { background: #fff; border-radius: 8px; padding: 12px; }
+  #calendar-container { height: calc(100vh - 40px); }
+  #calendar-container .fc { height: 100%; }
   .fc-event.earnings { background: #2563eb; border-color: #2563eb; }
   .fc-event.dividend { background: #16a34a; border-color: #16a34a; }
   .fc-event.split { background: #ea580c; border-color: #ea580c; }
-  .fc-event.meeting { background: #9333ea; border-color: #9333ea; }
-  .fc-daygrid-event { font-size: 0.7rem; padding: 1px 3px; border-radius: 3px; cursor: pointer; }
+  .fc-daygrid-event { font-size: 0.7rem; padding: 1px 4px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
   .fc-daygrid-event .fc-event-title { font-weight: 500; }
-  .setup-section { display: none; }
-  .setup-section.visible { display: block; }
-  .setup-section label { font-size: 0.8rem; color: #555; display: block; margin-bottom: 4px; }
-  .setup-section input { width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.8rem; margin-bottom: 8px; }
-  .setup-section .help { font-size: 0.7rem; color: #888; margin-bottom: 8px; }
-  .repo-section { display: flex; gap: 4px; margin-bottom: 8px; }
-  .repo-section input { flex: 1; padding: 6px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.75rem; }
 </style>
 </head>
 <body>
 <div class="app">
   <div class="sidebar">
-    <h1>📅 Investor Calendar <small>v1</small></h1>
+    <h1>Investor Calendar</h1>
+    <div class="subtitle" id="subtitle">Loading...</div>
 
     <div class="legend">
       <span class="legend-item"><span class="legend-dot earnings"></span> Earnings</span>
       <span class="legend-item"><span class="legend-dot dividend"></span> Dividends</span>
       <span class="legend-item"><span class="legend-dot split"></span> Splits</span>
-      <span class="legend-item"><span class="legend-dot meeting"></span> Meetings</span>
     </div>
 
-    <h2>Tickers</h2>
-    <ul class="ticker-list" id="tickerList"></ul>
+    <h2>Tracked Tickers</h2>
+    <ul class="ticker-list" id="tickerList"><li style="color:#888;font-family:sans-serif">Loading...</li></ul>
 
-    <div class="add-form">
-      <input type="text" id="tickerInput" placeholder="e.g. AAPL or PKO.WA" />
-      <button id="addBtn">Add</button>
+    <div class="status-bar" id="statusBar"></div>
+
+    <div class="actions">
+      <a class="btn-primary" href="https://github.com/blitq/InvestorCalendar/edit/main/tickers.json" target="_blank">✏️ Edit tickers on GitHub</a>
+      <a class="btn-secondary" href="https://github.com/blitq/InvestorCalendar/actions/workflows/update-data.yml" target="_blank">⟳ Trigger data refresh</a>
     </div>
-
-    <div class="setup-section visible" id="setupSection">
-      <h2>GitHub Setup</h2>
-      <label for="repo">Repository</label>
-      <div class="repo-section">
-        <input type="text" id="repoInput" placeholder="user/repo" value="blitq/InvestorCalendar" />
-      </div>
-      <label for="tokenInput">Personal Access Token (PAT)</label>
-      <input type="password" id="tokenInput" placeholder="github_pat_..." />
-      <div class="help">
-        <strong>Needed for:</strong> saving tickers &amp; triggering data refresh from the browser.<br>
-        <strong>How to create:</strong><br>
-        1. Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
-        2. Click "Generate new token" → "Fine-grained token"<br>
-        3. Repository access: <strong>Only select repositories</strong> → choose this repo<br>
-        4. Permissions → Contents: <strong>Read and write</strong>, Actions: <strong>Read and write</strong><br>
-        5. Generate, then paste it here<br><br>
-        The token is stored in your browser's localStorage — never sent anywhere but GitHub.
-      </div>
-    </div>
-
-    <div class="btn-group">
-      <button class="btn" id="refreshBtn">⟳ Refresh Data</button>
-      <button class="btn" id="saveBtn">💾 Save Tickers</button>
-    </div>
-
-    <div class="status" id="status">Ready</div>
   </div>
 
   <div class="main">
-    <div id="calendar"></div>
+    <div id="calendar-container"><div id="calendar"></div></div>
   </div>
 </div>
 
 <script>
 const EVENTS_URL = 'events.json';
-const GH_API = 'https://api.github.com';
 
 let calendar;
-let eventsData = [];
 
-async function loadEvents() {
+async function load() {
   try {
     const resp = await fetch(EVENTS_URL + '?t=' + Date.now());
     const data = await resp.json();
-    eventsData = data.events || [];
-    renderCalendar();
-    setStatus(`Loaded ${eventsData.length} events`, 'success');
-  } catch (e) {
-    setStatus('Failed to load events. Run the data generator first.', 'error');
-  }
-}
+    const events = data.events || [];
+    const generated = data.generated_at || '';
 
-function renderCalendar() {
-  const calEl = document.getElementById('calendar');
-  if (calendar) calendar.destroy();
-
-  const fcEvents = eventsData.map(e => ({
-    id: e.ticker + '-' + e.type + '-' + e.date + '-' + Math.random().toString(36).slice(2,6),
-    title: e.ticker + ' ' + (e.title || e.type),
-    start: e.date,
-    allDay: true,
-    className: e.type,
-    extendedProps: { ticker: e.ticker, type: e.type, details: e.details, market: e.market }
-  }));
-
-  calendar = new FullCalendar.Calendar(calEl, {
-    initialView: 'dayGridMonth',
-    height: 'auto',
-    events: fcEvents,
-    eventClick: function(info) {
-      const p = info.event.extendedProps;
-      let detailStr = '';
-      if (p.details) {
-        for (const [k, v] of Object.entries(p.details)) {
-          if (v && v !== 'nan' && v !== '') {
-            detailStr += `${k.replace(/_/g, ' ')}: ${v}\n`;
-          }
-        }
-      }
-      alert([
-        `${info.event.title}`,
-        `Market: ${p.market || '-'}`,
-        `Date: ${info.event.startStr}`,
-        detailStr ? `\n${detailStr}` : ''
-      ].join('\n'));
+    // build ticker list from events
+    const tickerMap = {};
+    for (const e of events) {
+      if (!tickerMap[e.ticker]) tickerMap[e.ticker] = e.market || '';
     }
-  });
-  calendar.render();
-}
+    const tickers = Object.entries(tickerMap).sort((a, b) => a[0].localeCompare(b[0]));
 
-async function loadTickers() {
-  try {
-    const resp = await fetch(EVENTS_URL + '?t=' + Date.now());
-    const data = await resp.json();
-    // extract unique tickers from events
-    const tickers = [...new Set(data.events.map(e => e.ticker))].sort();
     renderTickers(tickers);
-  } catch (e) {
-    // fallback to GitHub raw
-    loadTickersFromGh();
-  }
-}
+    renderCalendar(events);
 
-async function loadTickersFromGh() {
-  const repo = document.getElementById('repoInput').value.trim();
-  if (!repo) return;
-  try {
-    const resp = await fetch(`https://raw.githubusercontent.com/${repo}/main/tickers.json`);
-    const tickers = await resp.json();
-    renderTickers(tickers);
+    const dateStr = generated ? new Date(generated).toLocaleString() : 'today';
+    document.getElementById('subtitle').textContent = `${events.length} events · updated ${dateStr}`;
   } catch (e) {
-    // ignore
+    document.getElementById('subtitle').textContent = 'Failed to load events';
+    document.getElementById('tickerList').innerHTML = '<li style="color:#c00">Error loading data</li>';
   }
 }
 
 function renderTickers(tickers) {
   const list = document.getElementById('tickerList');
-  list.innerHTML = tickers.map(t =>
-    `<li><span>${t}</span><span class="del" data-ticker="${t}">✕</span></li>`
+  list.innerHTML = tickers.map(([sym, market]) =>
+    `<li><span>${sym}</span> <span class="market-tag">${market}</span></li>`
   ).join('');
-  document.querySelectorAll('.del').forEach(el => {
-    el.addEventListener('click', () => removeTicker(el.dataset.ticker));
-  });
 }
 
-function getTickersFromDom() {
-  return [...document.querySelectorAll('#tickerList li')]
-    .map(li => li.firstElementChild.textContent)
-    .filter(Boolean);
-}
+function renderCalendar(events) {
+  if (calendar) calendar.destroy();
 
-function addTicker(sym) {
-  sym = sym.toUpperCase().trim();
-  if (!sym) return;
-  const current = getTickersFromDom();
-  if (current.includes(sym)) {
-    setStatus(`${sym} already in list`, 'error');
-    return;
-  }
-  current.push(sym);
-  current.sort();
-  renderTickers(current);
-  document.getElementById('tickerInput').value = '';
-  setStatus(`${sym} added (not saved yet)`, '');
-}
+  const fcEvents = events.map(e => ({
+    id: e.ticker + '-' + e.type + '-' + e.date + '-' + Math.random().toString(36).slice(2,6),
+    title: e.ticker,
+    start: e.date,
+    allDay: true,
+    className: e.type,
+    extendedProps: { type: e.type, market: e.market, details: e.details, rawTitle: e.title }
+  }));
 
-function removeTicker(sym) {
-  const current = getTickersFromDom().filter(t => t !== sym);
-  renderTickers(current);
-  setStatus(`${sym} removed (not saved yet)`, '');
-}
-
-async function saveTickers() {
-  const repo = document.getElementById('repoInput').value.trim();
-  const token = document.getElementById('tokenInput').value.trim();
-  if (!repo || !token) {
-    setStatus('Set repository and PAT in GitHub Setup', 'error');
-    return;
-  }
-
-  const tickers = getTickersFromDom();
-  const content = JSON.stringify(tickers, null, 4) + '\n';
-
-  try {
-    const [owner, repoName] = repo.split('/');
-
-    // get current file SHA
-    let sha = '';
-    try {
-      const existing = await fetch(`${GH_API}/repos/${repo}/contents/tickers.json`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (existing.ok) {
-        const ex = await existing.json();
-        sha = ex.sha;
+  calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    initialView: 'dayGridMonth',
+    height: 'auto',
+    events: fcEvents,
+    eventClick: function(info) {
+      const p = info.event.extendedProps;
+      const det = p.details || {};
+      const lines = [p.rawTitle || info.event.title, 'Market: ' + (p.market || '-')];
+      for (const [k, v] of Object.entries(det)) {
+        if (v && v !== 'nan' && v !== '') {
+          lines.push(k.replace(/_/g, ' ') + ': ' + v);
+        }
       }
-    } catch (e) {}
-
-    const resp = await fetch(`${GH_API}/repos/${repo}/contents/tickers.json`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: 'Update tickers',
-        content: btoa(content),
-        sha: sha || undefined
-      })
-    });
-
-    if (resp.ok) {
-      setStatus('Tickers saved to GitHub! Trigger a refresh to rebuild data.', 'success');
-    } else {
-      const err = await resp.json();
-      setStatus(`Save failed: ${err.message}`, 'error');
+      alert(lines.join('\n'));
+    },
+    eventDidMount: function(info) {
+      const type = info.event.extendedProps.type;
+      info.el.style.background =
+        type === 'earnings' ? '#2563eb' :
+        type === 'dividend' ? '#16a34a' :
+        type === 'split' ? '#ea580c' : '#9333ea';
+      info.el.style.borderColor = 'transparent';
     }
-  } catch (e) {
-    setStatus(`Save error: ${e.message}`, 'error');
-  }
+  });
+  calendar.render();
+
+  document.getElementById('statusBar').textContent =
+    `Showing ${fcEvents.length} events on calendar`;
 }
 
-async function triggerRefresh() {
-  const repo = document.getElementById('repoInput').value.trim();
-  const token = document.getElementById('tokenInput').value.trim();
-  if (!repo || !token) {
-    // try without token (public repo may have workflow_dispatch enabled)
-    setStatus('Triggering refresh...', '');
-  }
-
-  try {
-    const resp = await fetch(`${GH_API}/repos/${repo}/actions/workflows/update-data.yml/dispatches`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/vnd.github.v3+json'
-      },
-      body: JSON.stringify({ ref: 'main' })
-    });
-
-    if (resp.ok || resp.status === 204) {
-      setStatus('Refresh triggered! Data will update in ~1-2 min.', 'success');
-    } else {
-      const err = await resp.json();
-      setStatus(`Trigger failed: ${err.message}`, 'error');
-    }
-  } catch (e) {
-    setStatus(`Error: ${e.message}`, 'error');
-  }
-}
-
-function setStatus(msg, cls) {
-  const el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = 'status' + (cls ? ' ' + cls : '');
-}
-
-document.getElementById('addBtn').addEventListener('click', () => addTicker(document.getElementById('tickerInput').value));
-document.getElementById('tickerInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTicker(e.target.value); });
-document.getElementById('saveBtn').addEventListener('click', saveTickers);
-document.getElementById('refreshBtn').addEventListener('click', triggerRefresh);
-
-// persist & restore PAT and repo from localStorage
-['repoInput', 'tokenInput'].forEach(id => {
-  const el = document.getElementById(id);
-  const saved = localStorage.getItem(id);
-  if (saved) el.value = saved;
-  el.addEventListener('input', () => localStorage.setItem(id, el.value));
-});
-
-// init
-loadEvents();
-loadTickers();
+load();
 </script>
 </body>
 </html>
