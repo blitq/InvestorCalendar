@@ -79,11 +79,20 @@
       <h2>GitHub Setup</h2>
       <label for="repo">Repository</label>
       <div class="repo-section">
-        <input type="text" id="repoInput" placeholder="user/repo" value="dblitek/InvestorCalendar" />
+        <input type="text" id="repoInput" placeholder="user/repo" value="blitq/InvestorCalendar" />
       </div>
-      <label for="tokenInput">Personal Access Token</label>
-      <input type="password" id="tokenInput" placeholder="ghp_..." />
-      <div class="help">Needed to save tickers and trigger refresh. <a href="https://github.com/settings/tokens" target="_blank">Create a token</a> with repo scope.</div>
+      <label for="tokenInput">Personal Access Token (PAT)</label>
+      <input type="password" id="tokenInput" placeholder="github_pat_..." />
+      <div class="help">
+        <strong>Needed for:</strong> saving tickers &amp; triggering data refresh from the browser.<br>
+        <strong>How to create:</strong><br>
+        1. Go to <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
+        2. Click "Generate new token" → "Fine-grained token"<br>
+        3. Repository access: <strong>Only select repositories</strong> → choose this repo<br>
+        4. Permissions → Contents: <strong>Read and write</strong>, Actions: <strong>Read and write</strong><br>
+        5. Generate, then paste it here<br><br>
+        The token is stored in your browser's localStorage — never sent anywhere but GitHub.
+      </div>
     </div>
 
     <div class="btn-group">
@@ -308,6 +317,14 @@ document.getElementById('addBtn').addEventListener('click', () => addTicker(docu
 document.getElementById('tickerInput').addEventListener('keydown', e => { if (e.key === 'Enter') addTicker(e.target.value); });
 document.getElementById('saveBtn').addEventListener('click', saveTickers);
 document.getElementById('refreshBtn').addEventListener('click', triggerRefresh);
+
+// persist & restore PAT and repo from localStorage
+['repoInput', 'tokenInput'].forEach(id => {
+  const el = document.getElementById(id);
+  const saved = localStorage.getItem(id);
+  if (saved) el.value = saved;
+  el.addEventListener('input', () => localStorage.setItem(id, el.value));
+});
 
 // init
 loadEvents();
