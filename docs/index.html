@@ -60,8 +60,8 @@
     <div class="status-bar" id="statusBar"></div>
 
     <div class="actions">
-      <a class="btn-primary" href="https://github.com/blitq/InvestorCalendar/edit/main/tickers.json" target="_blank">✏️ Edit tickers on GitHub</a>
-      <a class="btn-secondary" href="https://github.com/blitq/InvestorCalendar/actions/workflows/update-data.yml" target="_blank">⟳ Trigger data refresh</a>
+      <a class="btn-primary" href="https://github.com/blitq/InvestorCalendar/edit/main/tickers.json" target="_blank">Edit tickers on GitHub</a>
+      <a class="btn-secondary" href="https://github.com/blitq/InvestorCalendar/actions/workflows/update-data.yml" target="_blank">Trigger data refresh</a>
     </div>
   </div>
 
@@ -93,7 +93,7 @@ async function load() {
     renderCalendar(events);
 
     const dateStr = generated ? new Date(generated).toLocaleString() : 'today';
-    document.getElementById('subtitle').textContent = `${events.length} events · updated ${dateStr}`;
+    document.getElementById('subtitle').textContent = events.length + ' events - updated ' + dateStr;
   } catch (e) {
     document.getElementById('subtitle').textContent = 'Failed to load events';
     document.getElementById('tickerList').innerHTML = '<li style="color:#c00">Error loading data</li>';
