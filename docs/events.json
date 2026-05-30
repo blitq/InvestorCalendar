@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-29T19:45:28.871750+00:00",
+  "generated_at": "2026-05-30T08:14:34.046846+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -48,16 +48,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2024-05-15",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.75"
       }
     },
     {
@@ -179,19 +169,6 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2024-07-30",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "2.94",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "AAPL",
       "type": "earnings",
       "date": "2024-08-01",
@@ -245,16 +222,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2024-08-15",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.75"
       }
     },
     {
@@ -356,26 +323,13 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2024-10-30",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "3.11",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "AAPL",
       "type": "earnings",
       "date": "2024-10-31",
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.6",
+        "eps_estimate": "0.95",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -415,16 +369,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2024-11-21",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.83"
       }
     },
     {
@@ -480,26 +424,13 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2025-01-29",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "3.12",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "AAPL",
       "type": "earnings",
       "date": "2025-01-30",
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -549,16 +480,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2025-02-20",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.83"
       }
     },
     {
@@ -683,26 +604,13 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2025-04-30",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "3.22",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "AAPL",
       "type": "earnings",
       "date": "2025-05-01",
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.63",
+        "eps_estimate": "1.62",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -765,16 +673,6 @@
       "market": "Germany (Xetra)",
       "details": {
         "amount": "2.35"
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2025-05-15",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.83"
       }
     },
     {
@@ -869,20 +767,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.38",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2025-07-30",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "3.38",
+        "eps_estimate": "1.42",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -955,16 +840,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2025-08-21",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.83"
       }
     },
     {
@@ -1066,19 +941,6 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2025-10-29",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "3.66",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "AAPL",
       "type": "earnings",
       "date": "2025-10-30",
@@ -1128,16 +990,6 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2025-11-20",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.91"
-      }
-    },
-    {
       "ticker": "PZU.WA",
       "type": "earnings",
       "date": "2025-11-20",
@@ -1171,19 +1023,6 @@
       "market": "Netherlands (Euronext)",
       "details": {
         "eps_estimate": "7.55",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2026-01-28",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "3.92",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1259,16 +1098,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2026-02-19",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.91"
       }
     },
     {
@@ -1406,19 +1235,6 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2026-04-29",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "4.06",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "AAPL",
       "type": "earnings",
       "date": "2026-04-30",
@@ -1491,16 +1307,6 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2026-05-21",
-      "title": "Microsoft Corporation \u2014 Ex-Dividend",
-      "market": "US",
-      "details": {
-        "dividend_rate": ""
-      }
-    },
-    {
       "ticker": "KGH.WA",
       "type": "dividend",
       "date": "2026-06-24",
@@ -1544,19 +1350,6 @@
       "market": "France (Euronext)",
       "details": {
         "eps_estimate": "1.45",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2026-07-29",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "4.24",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1644,7 +1437,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "0.71",
+        "eps_estimate": "0.8",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
