@@ -1,101 +1,6 @@
 {
-  "generated_at": "2026-05-31T08:33:23.192021+00:00",
+  "generated_at": "2026-06-01T11:06:30.701360+00:00",
   "events": [
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2024-05-02",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.5",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "PKO.WA",
-      "type": "earnings",
-      "date": "2024-05-08",
-      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "1.53",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2024-05-10",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.25"
-      }
-    },
-    {
-      "ticker": "KGH.WA",
-      "type": "earnings",
-      "date": "2024-05-15",
-      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "1.86",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2024-05-15",
-      "title": "Microsoft Corporation \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.75"
-      }
-    },
-    {
-      "ticker": "SAP.DE",
-      "type": "dividend",
-      "date": "2024-05-16",
-      "title": "SAP SE \u2014 Dividend",
-      "market": "Germany (Xetra)",
-      "details": {
-        "amount": "2.2"
-      }
-    },
-    {
-      "ticker": "PZU.WA",
-      "type": "earnings",
-      "date": "2024-05-20",
-      "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "1.42",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "CDR.WA",
-      "type": "earnings",
-      "date": "2024-05-28",
-      "title": "CD Projekt S.A. \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "0.76",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
     {
       "ticker": "CDR.WA",
       "type": "dividend",
@@ -499,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -702,7 +607,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.62",
+        "eps_estimate": "1.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -869,7 +774,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.42",
+        "eps_estimate": "1.38",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1255,7 +1160,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.77",
+        "eps_estimate": "2.61",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1503,11 +1408,11 @@
     {
       "ticker": "CDR.WA",
       "type": "earnings",
-      "date": "2026-05-28",
+      "date": "2026-05-27",
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "1.26",
+        "eps_estimate": "1.06",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
