@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-01T11:06:30.701360+00:00",
+  "generated_at": "2026-06-02T10:00:25.180822+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -437,7 +437,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.68",
+        "eps_estimate": "2.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -774,7 +774,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.38",
+        "eps_estimate": "1.42",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1160,7 +1160,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.61",
+        "eps_estimate": "2.77",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
