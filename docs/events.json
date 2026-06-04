@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-03T10:31:03.885369+00:00",
+  "generated_at": "2026-06-04T09:41:23.987860+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -280,7 +280,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.6",
+        "eps_estimate": "0.95",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -404,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -607,7 +607,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.63",
+        "eps_estimate": "1.62",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
