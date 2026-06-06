@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-05T09:26:35.334001+00:00",
+  "generated_at": "2026-06-06T08:22:19.637113+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -437,7 +437,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.68",
+        "eps_estimate": "2.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1160,7 +1160,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.77",
+        "eps_estimate": "2.61",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1209,7 +1209,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "0.86",
+        "eps_estimate": "1.16",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1435,7 +1435,7 @@
       "title": "ASML Holding N.V. \u2014 Earnings",
       "market": "Netherlands (Euronext)",
       "details": {
-        "eps_estimate": "6.86",
+        "eps_estimate": "6.85",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
