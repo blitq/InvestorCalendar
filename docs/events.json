@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-07T08:43:11.307155+00:00",
+  "generated_at": "2026-06-08T10:14:29.435608+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -280,7 +280,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "0.95",
+        "eps_estimate": "1.6",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -437,7 +437,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.68",
+        "eps_estimate": "2.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -738,7 +738,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.38",
+        "eps_estimate": "1.45",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -774,7 +774,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.38",
+        "eps_estimate": "1.42",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -928,7 +928,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.4",
+        "eps_estimate": "1.5",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1160,7 +1160,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.61",
+        "eps_estimate": "2.77",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1209,7 +1209,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "0.86",
+        "eps_estimate": "1.16",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
