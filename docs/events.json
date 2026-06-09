@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-08T10:14:29.435608+00:00",
+  "generated_at": "2026-06-09T08:57:29.088468+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -404,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -437,7 +437,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.63",
+        "eps_estimate": "2.68",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -607,7 +607,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.62",
+        "eps_estimate": "1.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1209,7 +1209,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "1.16",
+        "eps_estimate": "0.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
