@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-11T10:02:21.161262+00:00",
+  "generated_at": "2026-06-12T09:54:24.602486+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -1399,10 +1399,10 @@
       "ticker": "MSFT",
       "type": "dividend",
       "date": "2026-05-21",
-      "title": "Microsoft Corporation \u2014 Ex-Dividend",
+      "title": "Microsoft Corporation \u2014 Dividend",
       "market": "US",
       "details": {
-        "dividend_rate": ""
+        "amount": "0.91"
       }
     },
     {
@@ -1448,7 +1448,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.77",
+        "eps_estimate": "1.78",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1540,6 +1540,16 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "type": "dividend",
+      "date": "2026-08-20",
+      "title": "Microsoft Corporation \u2014 Ex-Dividend",
+      "market": "US",
+      "details": {
+        "dividend_rate": ""
       }
     },
     {
