@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-14T09:00:00.907658+00:00",
+  "generated_at": "2026-06-15T11:42:09.656020+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -738,7 +738,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.45",
+        "eps_estimate": "1.38",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -774,7 +774,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.42",
+        "eps_estimate": "1.38",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -928,7 +928,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.5",
+        "eps_estimate": "1.4",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1160,7 +1160,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.77",
+        "eps_estimate": "2.61",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1209,7 +1209,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "0.86",
+        "eps_estimate": "1.16",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
