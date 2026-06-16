@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T11:42:09.656020+00:00",
+  "generated_at": "2026-06-16T10:51:17.259326+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -280,7 +280,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.6",
+        "eps_estimate": "0.95",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -404,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -437,7 +437,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.68",
+        "eps_estimate": "2.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -607,7 +607,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "1.63",
+        "eps_estimate": "1.62",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -738,7 +738,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.38",
+        "eps_estimate": "1.45",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -928,7 +928,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.4",
+        "eps_estimate": "1.5",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1209,7 +1209,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "1.16",
+        "eps_estimate": "0.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1287,7 +1287,7 @@
     {
       "ticker": "AIR.PA",
       "type": "earnings",
-      "date": "2026-04-27",
+      "date": "2026-04-28",
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
@@ -1408,7 +1408,7 @@
     {
       "ticker": "CDR.WA",
       "type": "earnings",
-      "date": "2026-05-27",
+      "date": "2026-05-28",
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
