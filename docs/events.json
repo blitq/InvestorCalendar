@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-16T10:51:17.259326+00:00",
+  "generated_at": "2026-06-17T10:23:28.018525+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -404,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1255,10 +1255,10 @@
       "ticker": "AIR.PA",
       "type": "dividend",
       "date": "2026-04-21",
-      "title": "Airbus SE \u2014 Ex-Dividend",
+      "title": "Airbus SE \u2014 Dividend",
       "market": "France (Euronext)",
       "details": {
-        "dividend_rate": ""
+        "amount": "3.2"
       }
     },
     {
@@ -1419,16 +1419,6 @@
       }
     },
     {
-      "ticker": "KGH.WA",
-      "type": "dividend",
-      "date": "2026-06-24",
-      "title": "KGHM Polska Miedz S.A. \u2014 Ex-Dividend",
-      "market": "Poland (WSE)",
-      "details": {
-        "dividend_rate": ""
-      }
-    },
-    {
       "ticker": "ASML.AS",
       "type": "earnings",
       "date": "2026-07-15",
@@ -1576,16 +1566,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "PZU.WA",
-      "type": "dividend",
-      "date": "2026-09-16",
-      "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Ex-Dividend",
-      "market": "Poland (WSE)",
-      "details": {
-        "dividend_rate": ""
       }
     }
   ]
