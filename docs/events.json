@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-17T10:23:28.018525+00:00",
+  "generated_at": "2026-06-18T10:03:06.498441+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -404,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
