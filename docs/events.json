@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-23T08:55:50.815471+00:00",
+  "generated_at": "2026-06-24T08:51:21.157441+00:00",
   "events": [
     {
       "ticker": "CDR.WA",
@@ -404,7 +404,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1448,7 +1448,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.78",
+        "eps_estimate": "1.75",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
