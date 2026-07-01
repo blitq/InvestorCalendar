@@ -1,26 +1,6 @@
 {
-  "generated_at": "2026-06-30T08:53:42.477300+00:00",
+  "generated_at": "2026-07-01T09:26:14.526234+00:00",
   "events": [
-    {
-      "ticker": "CDR.WA",
-      "type": "dividend",
-      "date": "2024-06-20",
-      "title": "CD Projekt S.A. \u2014 Dividend",
-      "market": "Poland (WSE)",
-      "details": {
-        "amount": "1.0"
-      }
-    },
-    {
-      "ticker": "KGH.WA",
-      "type": "dividend",
-      "date": "2024-06-27",
-      "title": "KGHM Polska Miedz S.A. \u2014 Dividend",
-      "market": "Poland (WSE)",
-      "details": {
-        "amount": "3.0"
-      }
-    },
     {
       "ticker": "ASML.AS",
       "type": "earnings",
