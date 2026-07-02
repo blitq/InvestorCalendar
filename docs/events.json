@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-01T09:26:14.526234+00:00",
+  "generated_at": "2026-07-02T08:39:31.814893+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1415,7 +1415,7 @@
       "title": "ASML Holding N.V. \u2014 Earnings",
       "market": "Netherlands (Euronext)",
       "details": {
-        "eps_estimate": "6.85",
+        "eps_estimate": "6.88",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1516,7 +1516,7 @@
       "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "12.44",
+        "eps_estimate": "11.61",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
