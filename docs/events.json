@@ -1,19 +1,6 @@
 {
-  "generated_at": "2026-07-07T09:20:43.316702+00:00",
+  "generated_at": "2026-07-08T08:05:34.862132+00:00",
   "events": [
-    {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2024-07-17",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "3.69",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
     {
       "ticker": "SAP.DE",
       "type": "earnings",
@@ -41,29 +28,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2024-07-29",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.52"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2024-07-30",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "0.61",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2024-07-30",
@@ -71,19 +35,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "2.94",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2024-08-01",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -107,16 +58,6 @@
       "market": "Poland (WSE)",
       "details": {
         "amount": "2.59"
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2024-08-12",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.25"
       }
     },
     {
@@ -179,19 +120,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2024-10-15",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "4.86",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2024-10-21",
@@ -218,29 +146,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2024-10-29",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.52"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2024-10-30",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "1.01",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2024-10-30",
@@ -248,19 +153,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "3.11",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2024-10-31",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "0.95",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -277,16 +169,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2024-11-08",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.25"
       }
     },
     {
@@ -352,19 +234,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2025-01-29",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "6.73",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2025-01-29",
@@ -372,52 +241,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "3.12",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2025-01-30",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "2.35",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2025-02-10",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.25"
-      }
-    },
-    {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2025-02-10",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.52"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2025-02-20",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "2.63",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -509,19 +332,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2025-04-16",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "5.79",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2025-04-21",
@@ -529,39 +339,6 @@
       "market": "Germany (Xetra)",
       "details": {
         "eps_estimate": "1.29",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "dividend",
-      "date": "2025-04-22",
-      "title": "Airbus SE \u2014 Dividend",
-      "market": "France (Euronext)",
-      "details": {
-        "amount": "3.0"
-      }
-    },
-    {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2025-04-25",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.84"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2025-04-30",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "0.55",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -581,19 +358,6 @@
       }
     },
     {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2025-05-01",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.62",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "LLOY.L",
       "type": "earnings",
       "date": "2025-05-01",
@@ -604,16 +368,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2025-05-12",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.26"
       }
     },
     {
@@ -699,19 +453,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2025-07-16",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "5.25",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2025-07-22",
@@ -738,29 +479,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2025-07-28",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.6"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2025-07-30",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "1.38",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2025-07-30",
@@ -768,19 +486,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "3.38",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2025-07-31",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.43",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -804,16 +509,6 @@
       "market": "Poland (WSE)",
       "details": {
         "amount": "5.48"
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2025-08-11",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.26"
       }
     },
     {
@@ -889,19 +584,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2025-10-15",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "5.37",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2025-10-22",
@@ -928,29 +610,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2025-10-28",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.6"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2025-10-29",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "1.63",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2025-10-29",
@@ -958,19 +617,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "3.66",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2025-10-30",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.77",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -987,16 +633,6 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2025-11-10",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.26"
       }
     },
     {
@@ -1049,19 +685,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2026-01-27",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "7.55",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2026-01-28",
@@ -1069,19 +692,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "3.92",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2026-01-29",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "2.67",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1108,39 +718,6 @@
       "market": "Germany (Xetra)",
       "details": {
         "eps_estimate": "1.51",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2026-02-09",
-      "title": "Apple Inc. \u2014 Dividend",
-      "market": "US",
-      "details": {
-        "amount": "0.26"
-      }
-    },
-    {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2026-02-09",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.6"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2026-02-18",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "2.61",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1219,29 +796,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2026-04-14",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "6.62",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "dividend",
-      "date": "2026-04-21",
-      "title": "Airbus SE \u2014 Ex-Dividend",
-      "market": "France (Euronext)",
-      "details": {
-        "dividend_rate": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2026-04-23",
@@ -1249,29 +803,6 @@
       "market": "Germany (Xetra)",
       "details": {
         "eps_estimate": "1.66",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2026-04-24",
-      "title": "ASML Holding N.V. \u2014 Ex-Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "dividend_rate": ""
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2026-04-28",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "0.42",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1304,34 +835,11 @@
       }
     },
     {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2026-04-30",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.94",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "dividend",
       "date": "2026-05-06",
       "title": "SAP SE \u2014 Ex-Dividend",
       "market": "Germany (Xetra)",
-      "details": {
-        "dividend_rate": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "dividend",
-      "date": "2026-05-11",
-      "title": "Apple Inc. \u2014 Ex-Dividend",
-      "market": "US",
       "details": {
         "dividend_rate": ""
       }
@@ -1409,19 +917,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2026-07-15",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "6.88",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2026-07-23",
@@ -1435,19 +930,6 @@
       }
     },
     {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2026-07-29",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "1.45",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "MSFT",
       "type": "earnings",
       "date": "2026-07-29",
@@ -1455,19 +937,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "4.24",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2026-07-30",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.89",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
