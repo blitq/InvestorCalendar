@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-09T09:17:57.790566+00:00",
+  "generated_at": "2026-07-10T08:57:49.408040+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1441,7 +1441,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.45",
+        "eps_estimate": "1.73",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1480,7 +1480,7 @@
       "title": "Lloyds Banking Group plc \u2014 Earnings",
       "market": "UK (LSE)",
       "details": {
-        "eps_estimate": "0.03",
+        "eps_estimate": "0.02",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
