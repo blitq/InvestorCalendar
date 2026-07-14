@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T08:43:58.098110+00:00",
+  "generated_at": "2026-07-14T07:44:54.005734+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1415,7 +1415,7 @@
       "title": "ASML Holding N.V. \u2014 Earnings",
       "market": "Netherlands (Euronext)",
       "details": {
-        "eps_estimate": "6.88",
+        "eps_estimate": "6.9",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1548,7 +1548,7 @@
     {
       "ticker": "CDR.WA",
       "type": "earnings",
-      "date": "2026-08-27",
+      "date": "2026-09-02",
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
