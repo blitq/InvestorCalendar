@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-15T07:48:00.839517+00:00",
+  "generated_at": "2026-07-16T07:52:43.735064+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -384,7 +384,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1297,7 +1297,7 @@
       "title": "Microsoft Corporation \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "4.06",
+        "eps_estimate": "4.07",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1411,7 +1411,7 @@
     {
       "ticker": "ASML.AS",
       "type": "earnings",
-      "date": "2026-07-15",
+      "date": "2026-07-13",
       "title": "ASML Holding N.V. \u2014 Earnings",
       "market": "Netherlands (Euronext)",
       "details": {
@@ -1441,7 +1441,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.73",
+        "eps_estimate": "1.82",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1503,7 +1503,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.14",
+        "eps_estimate": "2.05",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
