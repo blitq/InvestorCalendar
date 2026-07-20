@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-19T07:56:00.272186+00:00",
+  "generated_at": "2026-07-20T08:35:40.100798+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -384,7 +384,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1503,7 +1503,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.05",
+        "eps_estimate": "2.14",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
