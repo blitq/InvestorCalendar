@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-21T08:04:49.899889+00:00",
+  "generated_at": "2026-07-22T08:05:50.860989+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -384,7 +384,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1258,10 +1258,10 @@
       "ticker": "ASML.AS",
       "type": "dividend",
       "date": "2026-04-24",
-      "title": "ASML Holding N.V. \u2014 Ex-Dividend",
+      "title": "ASML Holding N.V. \u2014 Dividend",
       "market": "Netherlands (Euronext)",
       "details": {
-        "dividend_rate": ""
+        "amount": "2.7"
       }
     },
     {
@@ -1435,6 +1435,16 @@
       }
     },
     {
+      "ticker": "ASML.AS",
+      "type": "dividend",
+      "date": "2026-07-27",
+      "title": "ASML Holding N.V. \u2014 Ex-Dividend",
+      "market": "Netherlands (Euronext)",
+      "details": {
+        "dividend_rate": ""
+      }
+    },
+    {
       "ticker": "AIR.PA",
       "type": "earnings",
       "date": "2026-07-29",
@@ -1503,7 +1513,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.05",
+        "eps_estimate": "2.14",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
