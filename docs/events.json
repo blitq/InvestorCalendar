@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-22T08:05:50.860989+00:00",
+  "generated_at": "2026-07-23T08:08:11.860307+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -384,7 +384,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
