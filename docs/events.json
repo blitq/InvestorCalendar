@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-23T08:08:11.860307+00:00",
+  "generated_at": "2026-07-24T08:04:41.859040+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -384,7 +384,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1424,7 +1424,7 @@
     {
       "ticker": "SAP.DE",
       "type": "earnings",
-      "date": "2026-07-23",
+      "date": "2026-07-22",
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
