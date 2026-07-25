@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-24T08:04:41.859040+00:00",
+  "generated_at": "2026-07-25T07:48:20.200767+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1586,6 +1586,19 @@
       "market": "Netherlands (Euronext)",
       "details": {
         "eps_estimate": "10.58",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "SAP.DE",
+      "type": "earnings",
+      "date": "2026-10-21",
+      "title": "SAP SE \u2014 Earnings",
+      "market": "Germany (Xetra)",
+      "details": {
+        "eps_estimate": "1.83",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
