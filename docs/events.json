@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-26T08:04:56.869963+00:00",
+  "generated_at": "2026-07-27T09:24:51.449051+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1526,7 +1526,7 @@
       "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "11.81",
+        "eps_estimate": "9.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1598,7 +1598,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.83",
+        "eps_estimate": "1.84",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
