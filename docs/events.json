@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-29T08:16:00.494135+00:00",
+  "generated_at": "2026-07-30T08:04:17.383836+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -326,6 +326,19 @@
       }
     },
     {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2024-11-24",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.54",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2025-01-28",
@@ -371,7 +384,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -441,6 +454,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "1.88",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2025-03-25",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.7",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -650,6 +676,29 @@
       }
     },
     {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2025-05-28",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.77",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "dividend",
+      "date": "2025-06-27",
+      "title": "CD Projekt S.A. \u2014 Ex-Dividend",
+      "market": "Poland (WSE)",
+      "details": {
+        "dividend_rate": ""
+      }
+    },
+    {
       "ticker": "ASML.AS",
       "type": "earnings",
       "date": "2025-07-16",
@@ -817,6 +866,19 @@
       }
     },
     {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2025-08-28",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.84",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "PZU.WA",
       "type": "dividend",
       "date": "2025-09-24",
@@ -974,6 +1036,19 @@
       }
     },
     {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2025-11-26",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.72",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "ASML.AS",
       "type": "earnings",
       "date": "2026-01-27",
@@ -1102,6 +1177,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "2.14",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-03-18",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1298,13 +1386,26 @@
       }
     },
     {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-05-28",
+      "title": "CD Projekt S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "1.06",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "KGH.WA",
       "type": "dividend",
       "date": "2026-06-24",
-      "title": "KGHM Polska Miedz S.A. \u2014 Ex-Dividend",
+      "title": "KGHM Polska Miedz S.A. \u2014 Dividend",
       "market": "Poland (WSE)",
       "details": {
-        "dividend_rate": ""
+        "amount": "1.5"
       }
     },
     {
@@ -1346,7 +1447,7 @@
     {
       "ticker": "AIR.PA",
       "type": "earnings",
-      "date": "2026-07-29",
+      "date": "2026-07-28",
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
@@ -1455,13 +1556,16 @@
       }
     },
     {
-      "ticker": "PZU.WA",
-      "type": "dividend",
-      "date": "2026-09-16",
-      "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Ex-Dividend",
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-09-02",
+      "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "dividend_rate": ""
+        "eps_estimate": "0.8",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
       }
     },
     {
