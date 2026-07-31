@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-30T08:04:17.383836+00:00",
+  "generated_at": "2026-07-31T08:30:29.135237+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1402,10 +1402,10 @@
       "ticker": "KGH.WA",
       "type": "dividend",
       "date": "2026-06-24",
-      "title": "KGHM Polska Miedz S.A. \u2014 Dividend",
+      "title": "KGHM Polska Miedz S.A. \u2014 Ex-Dividend",
       "market": "Poland (WSE)",
       "details": {
-        "amount": "1.5"
+        "dividend_rate": ""
       }
     },
     {
@@ -1490,7 +1490,7 @@
       "title": "Lloyds Banking Group plc \u2014 Earnings",
       "market": "UK (LSE)",
       "details": {
-        "eps_estimate": "0.02",
+        "eps_estimate": "0.03",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1513,7 +1513,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.14",
+        "eps_estimate": "2.07",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1569,6 +1569,16 @@
       }
     },
     {
+      "ticker": "PZU.WA",
+      "type": "dividend",
+      "date": "2026-09-16",
+      "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Ex-Dividend",
+      "market": "Poland (WSE)",
+      "details": {
+        "dividend_rate": ""
+      }
+    },
+    {
       "ticker": "ASML.AS",
       "type": "earnings",
       "date": "2026-10-14",
@@ -1588,7 +1598,33 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "1.84",
+        "eps_estimate": "1.83",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "AIR.PA",
+      "type": "earnings",
+      "date": "2026-10-28",
+      "title": "Airbus SE \u2014 Earnings",
+      "market": "France (Euronext)",
+      "details": {
+        "eps_estimate": "1.66",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "type": "earnings",
+      "date": "2026-10-28",
+      "title": "Microsoft Corporation \u2014 Earnings",
+      "market": "US",
+      "details": {
+        "eps_estimate": "4.67",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
