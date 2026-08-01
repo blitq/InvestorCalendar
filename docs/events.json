@@ -1,81 +1,6 @@
 {
-  "generated_at": "2026-07-31T08:30:29.135237+00:00",
+  "generated_at": "2026-08-01T08:00:06.488416+00:00",
   "events": [
-    {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2024-07-17",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "3.69",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "SAP.DE",
-      "type": "earnings",
-      "date": "2024-07-22",
-      "title": "SAP SE \u2014 Earnings",
-      "market": "Germany (Xetra)",
-      "details": {
-        "eps_estimate": "1.08",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "LLOY.L",
-      "type": "earnings",
-      "date": "2024-07-25",
-      "title": "Lloyds Banking Group plc \u2014 Earnings",
-      "market": "UK (LSE)",
-      "details": {
-        "eps_estimate": "0.01",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "ASML.AS",
-      "type": "dividend",
-      "date": "2024-07-29",
-      "title": "ASML Holding N.V. \u2014 Dividend",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "amount": "1.52"
-      }
-    },
-    {
-      "ticker": "AIR.PA",
-      "type": "earnings",
-      "date": "2024-07-30",
-      "title": "Airbus SE \u2014 Earnings",
-      "market": "France (Euronext)",
-      "details": {
-        "eps_estimate": "0.61",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "MSFT",
-      "type": "earnings",
-      "date": "2024-07-30",
-      "title": "Microsoft Corporation \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "2.94",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
     {
       "ticker": "AAPL",
       "type": "earnings",
@@ -384,7 +309,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1212,10 +1137,10 @@
       "ticker": "LLOY.L",
       "type": "dividend",
       "date": "2026-04-09",
-      "title": "Lloyds Banking Group plc \u2014 Ex-Dividend",
+      "title": "Lloyds Banking Group plc \u2014 Dividend",
       "market": "UK (LSE)",
       "details": {
-        "dividend_rate": ""
+        "amount": "2.43"
       }
     },
     {
@@ -1330,10 +1255,10 @@
       "ticker": "AAPL",
       "type": "dividend",
       "date": "2026-05-11",
-      "title": "Apple Inc. \u2014 Ex-Dividend",
+      "title": "Apple Inc. \u2014 Dividend",
       "market": "US",
       "details": {
-        "dividend_rate": ""
+        "amount": "0.27"
       }
     },
     {
@@ -1507,6 +1432,26 @@
       }
     },
     {
+      "ticker": "LLOY.L",
+      "type": "dividend",
+      "date": "2026-08-06",
+      "title": "Lloyds Banking Group plc \u2014 Ex-Dividend",
+      "market": "UK (LSE)",
+      "details": {
+        "dividend_rate": ""
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "type": "dividend",
+      "date": "2026-08-10",
+      "title": "Apple Inc. \u2014 Ex-Dividend",
+      "market": "US",
+      "details": {
+        "dividend_rate": ""
+      }
+    },
+    {
       "ticker": "PKO.WA",
       "type": "earnings",
       "date": "2026-08-13",
@@ -1625,6 +1570,32 @@
       "market": "US",
       "details": {
         "eps_estimate": "4.67",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "type": "earnings",
+      "date": "2026-10-29",
+      "title": "Apple Inc. \u2014 Earnings",
+      "market": "US",
+      "details": {
+        "eps_estimate": "2.01",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "LLOY.L",
+      "type": "earnings",
+      "date": "2026-10-29",
+      "title": "Lloyds Banking Group plc \u2014 Earnings",
+      "market": "UK (LSE)",
+      "details": {
+        "eps_estimate": "0.03",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
