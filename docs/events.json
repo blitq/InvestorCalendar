@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01T08:00:06.488416+00:00",
+  "generated_at": "2026-08-02T08:01:57.995318+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1556,7 +1556,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.66",
+        "eps_estimate": "1.74",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1569,7 +1569,7 @@
       "title": "Microsoft Corporation \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "4.67",
+        "eps_estimate": "4.7",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1582,7 +1582,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.01",
+        "eps_estimate": "1.98",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
