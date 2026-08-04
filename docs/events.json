@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-03T08:58:41.296312+00:00",
+  "generated_at": "2026-08-04T08:14:59.822337+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1458,7 +1458,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.07",
+        "eps_estimate": "2.1",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1569,7 +1569,7 @@
       "title": "Microsoft Corporation \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "4.7",
+        "eps_estimate": "4.71",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
