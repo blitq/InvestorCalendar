@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-05T08:13:15.211336+00:00",
+  "generated_at": "2026-08-06T08:12:27.217499+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -309,7 +309,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
