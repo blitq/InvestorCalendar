@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-12T07:04:39.119036+00:00",
+  "generated_at": "2026-08-13T07:08:52.086976+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1449,19 +1449,6 @@
       "market": "US",
       "details": {
         "dividend_rate": ""
-      }
-    },
-    {
-      "ticker": "PKO.WA",
-      "type": "earnings",
-      "date": "2026-08-13",
-      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "2.1",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
       }
     },
     {
