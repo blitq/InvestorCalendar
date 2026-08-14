@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-13T07:08:52.086976+00:00",
+  "generated_at": "2026-08-14T07:05:10.816126+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1452,6 +1452,19 @@
       }
     },
     {
+      "ticker": "PKO.WA",
+      "type": "earnings",
+      "date": "2026-08-12",
+      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "2.1",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "KGH.WA",
       "type": "earnings",
       "date": "2026-08-19",
@@ -1583,6 +1596,19 @@
       "market": "UK (LSE)",
       "details": {
         "eps_estimate": "0.03",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "PKO.WA",
+      "type": "earnings",
+      "date": "2026-11-05",
+      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "2.31",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
