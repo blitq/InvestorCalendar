@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-20T06:24:13.388884+00:00",
+  "generated_at": "2026-08-21T06:24:31.506838+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1317,7 +1317,7 @@
       "title": "CD Projekt S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "1.06",
+        "eps_estimate": "1.26",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1465,19 +1465,22 @@
       }
     },
     {
-      "ticker": "MSFT",
-      "type": "dividend",
-      "date": "2026-08-20",
-      "title": "Microsoft Corporation \u2014 Ex-Dividend",
-      "market": "US",
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2026-08-18",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
       "details": {
-        "dividend_rate": ""
+        "eps_estimate": "9.86",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
       }
     },
     {
       "ticker": "PZU.WA",
       "type": "earnings",
-      "date": "2026-08-20",
+      "date": "2026-08-19",
       "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
@@ -1485,6 +1488,16 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "type": "dividend",
+      "date": "2026-08-20",
+      "title": "Microsoft Corporation \u2014 Ex-Dividend",
+      "market": "US",
+      "details": {
+        "dividend_rate": ""
       }
     },
     {
@@ -1595,7 +1608,20 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.31",
+        "eps_estimate": "2.33",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2026-11-18",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "11.36",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
