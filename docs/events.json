@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-21T06:24:31.506838+00:00",
+  "generated_at": "2026-08-22T06:19:05.091156+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1622,6 +1622,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "11.36",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "PZU.WA",
+      "type": "earnings",
+      "date": "2026-11-19",
+      "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "1.69",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
