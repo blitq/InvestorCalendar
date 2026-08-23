@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-22T06:19:05.091156+00:00",
+  "generated_at": "2026-08-23T06:20:49.667700+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -1340,7 +1340,7 @@
       "title": "ASML Holding N.V. \u2014 Earnings",
       "market": "Netherlands (Euronext)",
       "details": {
-        "eps_estimate": "6.9",
+        "eps_estimate": "6.95",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1569,7 +1569,7 @@
       "title": "Microsoft Corporation \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "4.71",
+        "eps_estimate": "4.72",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1621,7 +1621,7 @@
       "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "11.36",
+        "eps_estimate": "11.43",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
