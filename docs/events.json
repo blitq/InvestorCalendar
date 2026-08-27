@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T06:26:46.275964+00:00",
+  "generated_at": "2026-08-27T16:59:46.063777+00:00",
   "events": [
     {
       "ticker": "AAPL",
@@ -254,7 +254,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2024-11-24",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.54",
@@ -388,7 +388,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2025-03-25",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.7",
@@ -604,7 +604,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2025-05-28",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.77",
@@ -617,7 +617,7 @@
       "ticker": "CDR.WA",
       "type": "dividend",
       "date": "2025-06-27",
-      "title": "CD Projekt S.A. \u2014 Ex-Dividend",
+      "title": "CD Projekt Red S.A. \u2014 Ex-Dividend",
       "market": "Poland (WSE)",
       "details": {
         "dividend_rate": ""
@@ -794,7 +794,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2025-08-28",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.84",
@@ -964,7 +964,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2025-11-26",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.72",
@@ -1111,7 +1111,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2026-03-18",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.86",
@@ -1314,7 +1314,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2026-05-28",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "1.26",
@@ -1504,7 +1504,7 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2026-09-02",
-      "title": "CD Projekt S.A. \u2014 Earnings",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "0.8",
@@ -1556,7 +1556,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.74",
+        "eps_estimate": "1.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
