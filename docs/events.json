@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-02T10:06:02.831426+00:00",
+  "generated_at": "2026-09-03T10:17:08.824372+00:00",
   "events": [
     {
       "ticker": "PZU.WA",
@@ -217,7 +217,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1409,19 +1409,6 @@
       }
     },
     {
-      "ticker": "CDR.WA",
-      "type": "earnings",
-      "date": "2026-09-02",
-      "title": "CD Projekt Red S.A. \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "0.8",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "PZU.WA",
       "type": "dividend",
       "date": "2026-09-16",
@@ -1516,7 +1503,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.33",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1543,6 +1530,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "1.69",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-11-24",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.72",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
