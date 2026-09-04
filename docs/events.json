@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-03T10:17:08.824372+00:00",
+  "generated_at": "2026-09-04T10:05:20.449876+00:00",
   "events": [
     {
       "ticker": "PZU.WA",
@@ -217,7 +217,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1333,10 +1333,10 @@
       "ticker": "PKO.WA",
       "type": "dividend",
       "date": "2026-08-04",
-      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Ex-Dividend",
+      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Dividend",
       "market": "Poland (WSE)",
       "details": {
-        "dividend_rate": ""
+        "amount": "6.14"
       }
     },
     {
@@ -1402,10 +1402,36 @@
       "ticker": "MSFT",
       "type": "dividend",
       "date": "2026-08-20",
-      "title": "Microsoft Corporation \u2014 Ex-Dividend",
+      "title": "Microsoft Corporation \u2014 Dividend",
       "market": "US",
       "details": {
-        "dividend_rate": ""
+        "amount": "0.91"
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-09-01",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.8",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-09-02",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.8",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
       }
     },
     {
@@ -1503,7 +1529,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.33",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
