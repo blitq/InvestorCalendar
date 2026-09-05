@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-04T10:05:20.449876+00:00",
+  "generated_at": "2026-09-05T09:35:17.439667+00:00",
   "events": [
     {
       "ticker": "PZU.WA",
@@ -217,7 +217,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1333,10 +1333,10 @@
       "ticker": "PKO.WA",
       "type": "dividend",
       "date": "2026-08-04",
-      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Dividend",
+      "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Ex-Dividend",
       "market": "Poland (WSE)",
       "details": {
-        "amount": "6.14"
+        "dividend_rate": ""
       }
     },
     {
@@ -1402,29 +1402,16 @@
       "ticker": "MSFT",
       "type": "dividend",
       "date": "2026-08-20",
-      "title": "Microsoft Corporation \u2014 Dividend",
+      "title": "Microsoft Corporation \u2014 Ex-Dividend",
       "market": "US",
       "details": {
-        "amount": "0.91"
+        "dividend_rate": ""
       }
     },
     {
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2026-09-01",
-      "title": "CD Projekt Red S.A. \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "0.8",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "CDR.WA",
-      "type": "earnings",
-      "date": "2026-09-02",
       "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
@@ -1529,7 +1516,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.33",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1568,7 +1555,7 @@
       "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "0.72",
+        "eps_estimate": "1.23",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
