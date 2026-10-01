@@ -1,16 +1,6 @@
 {
-  "generated_at": "2026-09-30T11:30:00.087770+00:00",
+  "generated_at": "2026-10-01T11:58:24.616577+00:00",
   "events": [
-    {
-      "ticker": "PZU.WA",
-      "type": "dividend",
-      "date": "2024-09-16",
-      "title": "Powszechny Zaklad Ubezpieczen SA \u2014 Dividend",
-      "market": "Poland (WSE)",
-      "details": {
-        "amount": "4.34"
-      }
-    },
     {
       "ticker": "ASML.AS",
       "type": "earnings",
@@ -217,7 +207,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1422,6 +1412,19 @@
       }
     },
     {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-09-02",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.8",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "PZU.WA",
       "type": "dividend",
       "date": "2026-09-16",
@@ -1438,7 +1441,7 @@
       "title": "ASML Holding N.V. \u2014 Earnings",
       "market": "Netherlands (Euronext)",
       "details": {
-        "eps_estimate": "10.58",
+        "eps_estimate": "10.65",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1516,7 +1519,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.33",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
