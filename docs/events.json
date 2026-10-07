@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T12:20:53.687295+00:00",
+  "generated_at": "2026-10-07T12:12:55.818383+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -207,7 +207,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.35",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1412,19 +1412,6 @@
       }
     },
     {
-      "ticker": "CDR.WA",
-      "type": "earnings",
-      "date": "2026-09-02",
-      "title": "CD Projekt Red S.A. \u2014 Earnings",
-      "market": "Poland (WSE)",
-      "details": {
-        "eps_estimate": "0.8",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "PZU.WA",
       "type": "dividend",
       "date": "2026-09-16",
@@ -1487,19 +1474,6 @@
       }
     },
     {
-      "ticker": "AAPL",
-      "type": "earnings",
-      "date": "2026-10-29",
-      "title": "Apple Inc. \u2014 Earnings",
-      "market": "US",
-      "details": {
-        "eps_estimate": "1.98",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "LLOY.L",
       "type": "earnings",
       "date": "2026-10-29",
@@ -1513,13 +1487,26 @@
       }
     },
     {
+      "ticker": "AAPL",
+      "type": "earnings",
+      "date": "2026-11-02",
+      "title": "Apple Inc. \u2014 Earnings",
+      "market": "US",
+      "details": {
+        "eps_estimate": "1.98",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "PKO.WA",
       "type": "earnings",
       "date": "2026-11-05",
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.33",
+        "eps_estimate": "2.34",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
