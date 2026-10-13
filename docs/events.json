@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T13:44:57.085879+00:00",
+  "generated_at": "2026-10-13T13:04:59.704516+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -110,6 +110,19 @@
       "market": "US",
       "details": {
         "amount": "0.25"
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2024-11-13",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "3.3",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
       }
     },
     {
@@ -283,6 +296,19 @@
       }
     },
     {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2025-03-26",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "4.43",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "PZU.WA",
       "type": "earnings",
       "date": "2025-03-26",
@@ -421,6 +447,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "2.19",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2025-05-14",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "3.85",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -614,6 +653,19 @@
       }
     },
     {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2025-08-19",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "3.2",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "MSFT",
       "type": "dividend",
       "date": "2025-08-21",
@@ -768,6 +820,19 @@
       "market": "US",
       "details": {
         "amount": "0.26"
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2025-11-13",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "5.57",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
       }
     },
     {
@@ -954,6 +1019,19 @@
       }
     },
     {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2026-03-24",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "4.97",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "LLOY.L",
       "type": "dividend",
       "date": "2026-04-09",
@@ -1082,6 +1160,19 @@
       }
     },
     {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2026-05-13",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "10.86",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "PKO.WA",
       "type": "earnings",
       "date": "2026-05-13",
@@ -1128,6 +1219,16 @@
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "dividend",
+      "date": "2026-06-24",
+      "title": "KGHM Polska Miedz S.A. \u2014 Ex-Dividend",
+      "market": "Poland (WSE)",
+      "details": {
+        "dividend_rate": ""
       }
     },
     {
@@ -1256,6 +1357,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "2.1",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2026-08-18",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "9.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1393,6 +1507,19 @@
       "market": "Poland (WSE)",
       "details": {
         "eps_estimate": "2.34",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "KGH.WA",
+      "type": "earnings",
+      "date": "2026-11-18",
+      "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "10.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
