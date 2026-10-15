@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T10:46:10.381974+00:00",
+  "generated_at": "2026-10-15T10:29:04.832183+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1435,19 +1435,6 @@
       }
     },
     {
-      "ticker": "ASML.AS",
-      "type": "earnings",
-      "date": "2026-10-14",
-      "title": "ASML Holding N.V. \u2014 Earnings",
-      "market": "Netherlands (Euronext)",
-      "details": {
-        "eps_estimate": "10.76",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
       "ticker": "SAP.DE",
       "type": "earnings",
       "date": "2026-10-21",
@@ -1467,7 +1454,7 @@
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "1.77",
+        "eps_estimate": "1.74",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
