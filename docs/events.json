@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-16T10:16:44.520104+00:00",
+  "generated_at": "2026-10-17T09:50:32.923029+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1261,10 +1261,10 @@
       "ticker": "ASML.AS",
       "type": "dividend",
       "date": "2026-07-27",
-      "title": "ASML Holding N.V. \u2014 Ex-Dividend",
+      "title": "ASML Holding N.V. \u2014 Dividend",
       "market": "Netherlands (Euronext)",
       "details": {
-        "dividend_rate": ""
+        "amount": "1.88"
       }
     },
     {
@@ -1461,6 +1461,16 @@
       }
     },
     {
+      "ticker": "ASML.AS",
+      "type": "dividend",
+      "date": "2026-10-26",
+      "title": "ASML Holding N.V. \u2014 Ex-Dividend",
+      "market": "Netherlands (Euronext)",
+      "details": {
+        "dividend_rate": ""
+      }
+    },
+    {
       "ticker": "AIR.PA",
       "type": "earnings",
       "date": "2026-10-28",
@@ -1532,7 +1542,7 @@
       "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "10.86",
+        "eps_estimate": "8.73",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
