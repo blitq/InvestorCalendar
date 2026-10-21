@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T10:33:00.001121+00:00",
+  "generated_at": "2026-10-21T10:45:10.151526+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -207,7 +207,7 @@
       "title": "Apple Inc. \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.35",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1402,6 +1402,19 @@
       "ticker": "CDR.WA",
       "type": "earnings",
       "date": "2026-09-01",
+      "title": "CD Projekt Red S.A. \u2014 Earnings",
+      "market": "Poland (WSE)",
+      "details": {
+        "eps_estimate": "0.8",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
+      "ticker": "CDR.WA",
+      "type": "earnings",
+      "date": "2026-09-02",
       "title": "CD Projekt Red S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
