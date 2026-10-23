@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-22T10:46:40.267509+00:00",
+  "generated_at": "2026-10-23T10:38:10.970902+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1529,7 +1529,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.34",
+        "eps_estimate": "2.28",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1604,7 +1604,7 @@
       "title": "SAP SE \u2014 Earnings",
       "market": "Germany (Xetra)",
       "details": {
-        "eps_estimate": "2.03",
+        "eps_estimate": "1.98",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
