@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T09:56:13.226477+00:00",
+  "generated_at": "2026-10-25T10:18:34.946207+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1529,7 +1529,7 @@
       "title": "KGHM Polska Miedz S.A. \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "8.73",
+        "eps_estimate": "7.75",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
