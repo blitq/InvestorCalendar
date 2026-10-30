@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T11:54:07.014668+00:00",
+  "generated_at": "2026-10-30T11:47:46.104236+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1491,19 +1491,6 @@
       "market": "US",
       "details": {
         "eps_estimate": "4.72",
-        "eps_actual": "",
-        "revenue_estimate": "",
-        "revenue_actual": ""
-      }
-    },
-    {
-      "ticker": "LLOY.L",
-      "type": "earnings",
-      "date": "2026-10-29",
-      "title": "Lloyds Banking Group plc \u2014 Earnings",
-      "market": "UK (LSE)",
-      "details": {
-        "eps_estimate": "0.03",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
