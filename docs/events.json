@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-30T11:47:46.104236+00:00",
+  "generated_at": "2026-10-31T11:20:53.371002+00:00",
   "events": [
     {
       "ticker": "ASML.AS",
@@ -1529,7 +1529,7 @@
       "title": "Powszechna Kasa Oszczednosci Bank Polski Sp\u00f3lka Akcyjna \u2014 Earnings",
       "market": "Poland (WSE)",
       "details": {
-        "eps_estimate": "2.28",
+        "eps_estimate": "2.29",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1604,7 +1604,7 @@
       "title": "Microsoft Corporation \u2014 Earnings",
       "market": "US",
       "details": {
-        "eps_estimate": "4.82",
+        "eps_estimate": "4.86",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
@@ -1624,13 +1624,26 @@
       }
     },
     {
+      "ticker": "LLOY.L",
+      "type": "earnings",
+      "date": "2027-02-04",
+      "title": "Lloyds Banking Group plc \u2014 Earnings",
+      "market": "UK (LSE)",
+      "details": {
+        "eps_estimate": "0.03",
+        "eps_actual": "",
+        "revenue_estimate": "",
+        "revenue_actual": ""
+      }
+    },
+    {
       "ticker": "AIR.PA",
       "type": "earnings",
       "date": "2027-02-18",
       "title": "Airbus SE \u2014 Earnings",
       "market": "France (Euronext)",
       "details": {
-        "eps_estimate": "2.94",
+        "eps_estimate": "2.96",
         "eps_actual": "",
         "revenue_estimate": "",
         "revenue_actual": ""
