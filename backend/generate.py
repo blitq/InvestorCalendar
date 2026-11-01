@@ -71,10 +71,25 @@ def step_prices(tickers, benchmarks, start):
             files[sym] = fname
             print(f"{len(hist['dates'])} days, {quote['currency']}")
         except Exception as e:
-            # keep yesterday's data rather than dropping the ticker
-            if os.path.exists(os.path.join(DATA_DIR, fname)):
+            # Yahoo failed: try Stooq for prices, keep dividends/splits from yesterday's file
+            try:
+                from stooq import fetch_history
+                hist = fetch_history(sym, start)
+                old = load_json(os.path.join(DATA_DIR, fname), {})
+                hist.update({"ticker": sym, "currency": old.get("currency") or (quotes.get(sym) or {}).get("currency", "USD"),
+                             "dividends": old.get("dividends", []), "splits": old.get("splits", [])})
+                write_json(os.path.join(DATA_DIR, fname), hist)
                 files[sym] = fname
-            print(f"FAILED ({e}); keeping previous data" if sym in files else f"FAILED ({e})")
+                q = dict(quotes.get(sym) or {"ticker": sym, "name": sym, "currency": hist["currency"]})
+                q.update({"price": hist["close"][-1], "prev_close": hist["close"][-2] if len(hist["close"]) > 1 else None,
+                          "last_date": hist["dates"][-1], "source": "stooq"})
+                quotes[sym] = q
+                print(f"Yahoo failed ({e}); {len(hist['dates'])} days from Stooq")
+            except Exception as e2:
+                # keep yesterday's data rather than dropping the ticker
+                if os.path.exists(os.path.join(DATA_DIR, fname)):
+                    files[sym] = fname
+                print(f"FAILED ({e}; Stooq: {e2}); keeping previous data" if sym in files else f"FAILED ({e}; Stooq: {e2})")
         time.sleep(0.3)
     # drop quotes of tickers no longer tracked
     quotes = {k: v for k, v in quotes.items() if k in symbols}
@@ -199,7 +214,11 @@ def main(argv=None):
         print("Events")
         step_events(tickers, quotes, args.days)
 
+    # tickers whose latest price is more than a week old (delisted, renamed or both sources failing)
+    week_ago = (date.today() - timedelta(days=7)).isoformat()
+    stale = {t: q.get("last_date") for t, q in quotes.items() if q.get("last_date") and q["last_date"] < week_ago}
     meta.update({
+        "stale": stale,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "tickers": tickers,
         "isins": {i: isins[i] for i in wanted_isins if isins.get(i)},

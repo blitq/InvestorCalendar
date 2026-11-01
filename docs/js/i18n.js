@@ -210,6 +210,8 @@ const PATTERNS = [
   [/^per share, ([A-Z]{3})$/, 'na akcję, $1'], [/^About (.+)$/, 'O spółce: $1'], [/^(\d+) y$/, '$1 lat'],
   [/^PIT-38 (\d{4}) — estimate$/, 'PIT-38 $1 — szacunek'],
   [/^(.+) change$/, 'zmiana $1'], [/^(\d+) payments$/, '$1 wypłat'], [/^Transactions \((\d+)\)$/, 'Transakcje ($1)'],
+  [/^Old prices for (.+) — the ticker may be delisted or renamed \(use “Change ticker…” in its details\) or set a manual price\.$/, 'Stare ceny dla $1 — spółka mogła zostać wycofana lub zmienić ticker (użyj „Zmień ticker…” w szczegółach) albo ustaw cenę ręcznie.'],
+  [/^No market data for (.+)\. Add them to tickers\.json \(Settings → Market data\) or set a manual price\.$/, 'Brak danych rynkowych dla $1. Dodaj je do tickers.json (Ustawienia → Dane rynkowe) lub ustaw cenę ręcznie.'],
   [/^Sync error: (.+)$/, 'Błąd synchronizacji: $1'], [/^Synced (.+)$/, 'Zsynchronizowano $1'], [/^(\d+) transactions ready/, (m) => m.replace(/^(\d+) transactions ready/, '$1 transakcji gotowych')],
 ];
 
