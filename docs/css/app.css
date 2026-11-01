@@ -269,3 +269,4 @@ tr.current td { background: var(--accent-soft); }
   .card, .kpi { box-shadow: none; border-color: #ccc; break-inside: avoid; }
   .alert { border-color: #ccc; background: #fff; }
 }
+.report-title { margin: 4px 0 14px; } .report-title .small { font-weight: 400; margin-left: 8px; }

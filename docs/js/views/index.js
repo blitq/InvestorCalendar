@@ -10,3 +10,4 @@ export { taxes } from './taxes.js';
 export { watchlist } from './watchlist.js';
 export { settings } from './settings.js';
 export { goals } from './goals.js';
+export { report } from './report.js';

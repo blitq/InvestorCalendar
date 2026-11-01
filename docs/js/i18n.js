@@ -162,6 +162,7 @@ const PL = {
   'held flat until the next update': 'stała do następnej aktualizacji', 'New value (total)': 'Nowa wartość (łącznie)', 'deposits only': 'tylko lokaty',
   'Anything without a market price: a flat, a term deposit, a crypto wallet, gold, a loan you gave… You update its value by hand; deposits can grow at a fixed rate.': 'Wszystko bez ceny rynkowej: mieszkanie, lokata, portfel krypto, złoto, udzielona pożyczka… Wartość aktualizujesz ręcznie; lokaty mogą rosnąć według stałego oprocentowania.',
   'Paid with new money — also record a deposit (this portfolio tracks cash)': 'Zapłacone nowymi środkami — zapisz też wpłatę (ten portfel śledzi gotówkę)',
+  'Report': 'Raport', 'Value at start': 'Wartość na początku', 'Value at end': 'Wartość na końcu', 'Best and worst': 'Najlepsze i najgorsze', 'No changes.': 'Brak zmian.', 'No dividends in this period.': 'Brak dywidend w tym okresie.',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',
@@ -201,6 +202,7 @@ const PATTERNS = [
   [/^(\d+)% winners$/, '$1% zyskownych'], [/^(\d+) d$/, '$1 dni'],
   [/^per share, ([A-Z]{3})$/, 'na akcję, $1'], [/^About (.+)$/, 'O spółce: $1'], [/^(\d+) y$/, '$1 lat'],
   [/^PIT-38 (\d{4}) — estimate$/, 'PIT-38 $1 — szacunek'],
+  [/^(.+) change$/, 'zmiana $1'], [/^(\d+) payments$/, '$1 wypłat'], [/^Transactions \((\d+)\)$/, 'Transakcje ($1)'],
   [/^Sync error: (.+)$/, 'Błąd synchronizacji: $1'], [/^Synced (.+)$/, 'Zsynchronizowano $1'], [/^(\d+) transactions ready/, (m) => m.replace(/^(\d+) transactions ready/, '$1 transakcji gotowych')],
 ];
 

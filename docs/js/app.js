@@ -15,6 +15,7 @@ const ROUTES = [
   ['analysis', 'Analysis', '◔'],
   ['rebalance', 'Rebalance', '⚖'],
   ['goals', 'Goals', '⚑'],
+  ['report', 'Report', '☰'],
   ['calendar', 'Calendar', '▦'],
   ['taxes', 'Taxes (PIT-38)', '§'],
   ['watchlist', 'Watchlist', '☆'],
