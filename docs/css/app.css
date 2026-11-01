@@ -208,3 +208,42 @@ td.empty { text-align: center; color: var(--muted); padding: 24px; }
   .card-head { flex-wrap: wrap; }
   .hero { padding: 20px; }
 }
+
+/* master chart */
+.master .card-head h3 { font-size: 1.05rem; }
+.master-box { height: 440px; user-select: none; touch-action: pan-y; }
+.zoom-sel { position: absolute; background: var(--accent-soft); border: 1px solid var(--accent-soft2); pointer-events: none; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.chip { --c: var(--accent); display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); background: var(--card); color: var(--muted); border-radius: 99px; padding: 4px 11px; font: inherit; font-size: 0.8rem; cursor: pointer; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--c); }
+.chip.on { color: var(--text); border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, var(--card)); }
+.chip.on i { background: var(--c); }
+.chip:disabled { opacity: 0.4; cursor: not-allowed; }
+.chip[data-s="value"] { --c: var(--accent); }
+.chip[data-s="invested"] { --c: var(--muted); }
+.chip[data-s="profit"] { --c: #10b981; }
+.chip[data-s="return"] { --c: #8b5cf6; }
+.chip[data-s="drawdown"] { --c: var(--neg); }
+.chip[data-s="dividends"], .chip[data-s="divMarks"] { --c: #0d9488; }
+.chip[data-s="flows"] { --c: #64748b; }
+.chip[data-s="trades"] { --c: var(--pos); }
+.chip[data-s="events"] { --c: #3b82f6; }
+.opts { margin-bottom: 10px; gap: 12px; }
+.opts label { display: inline-flex; align-items: center; gap: 6px; }
+.btn.sm-btn { padding: 4px 10px; font-size: 0.8rem; }
+.dates input { width: 140px; }
+.dropdown { position: relative; }
+.dropdown summary { list-style: none; }
+.dropdown summary::-webkit-details-marker { display: none; }
+.dd-body { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; flex-direction: column; gap: 6px; min-width: 190px; max-height: 300px; overflow-y: auto; }
+.hint { margin-top: 6px; }
+.summary { display: grid; grid-template-columns: repeat(7, auto); gap: 8px 18px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.summary div { display: flex; flex-direction: column; font-variant-numeric: tabular-nums; }
+.alloc-inner { align-items: center; }
+@media (max-width: 1100px) { .summary { grid-template-columns: repeat(4, auto); } }
+@media (max-width: 760px) {
+  .master-box { height: 320px; }
+  .summary { grid-template-columns: 1fr 1fr; }
+  .dates input { width: 128px; }
+}
+.opts select { max-width: 200px; }

@@ -6,6 +6,7 @@ import {
 import { buildMarket, loadEvents, loadHistories, loadNbp } from './data.js';
 import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from './importers.js';
 import { store } from './store.js';
+import { masterChart } from './masterchart.js';
 import {
   $, $$, esc, money, num, qty, pct, cls, fmtDate, kpi, toast, download, readFile, table, chart, cssVar, PALETTE, downsample,
 } from './ui.js';
@@ -73,22 +74,11 @@ export async function dashboard(el, ctx) {
     <div class="card-head"><h3>Returns by period</h3></div>
     <div class="periods" id="periods"></div>
   </div>
+  <div id="masterHost"></div>
   <div class="grid-2-1">
-    <div class="card">
-      <div class="card-head"><h3>Portfolio value</h3><div class="seg" id="valRange"></div></div>
-      <div class="chart-box"><canvas id="valueChart"></canvas></div>
-    </div>
     <div class="card">
       <div class="card-head"><h3>Allocation</h3><a href="#/analysis" class="link">details →</a></div>
-      <div class="chart-box small"><canvas id="allocChart"></canvas></div>
-      <div id="allocLegend" class="legend-list"></div>
-    </div>
-  </div>
-  <div class="grid-2-1">
-    <div class="card">
-      <div class="card-head"><h3>Performance vs benchmark</h3>
-        <div class="row gap"><select id="benchSel" class="sm"></select><div class="seg" id="perfRange"></div></div></div>
-      <div class="chart-box"><canvas id="perfChart"></canvas></div>
+      <div class="grid-2 alloc-inner"><div class="chart-box small"><canvas id="allocChart"></canvas></div><div id="allocLegend" class="legend-list"></div></div>
     </div>
     <div class="card">
       <div class="card-head"><h3>Today's movers</h3></div>
@@ -106,50 +96,9 @@ export async function dashboard(el, ctx) {
     return `<div class="period"><div class="p-label">${label}</div><div class="p-val ${cls(p?.twr)}">${pct(p?.twr)}</div><div class="p-sub ${cls(p?.profit)}">${money(p?.profit, base, { sign: true, compact: true })}</div></div>`;
   }).join('');
 
-  // value chart
-  segmented($('#valRange'), RANGES, '1Y', (rg) => drawValue(rg));
-  function drawValue(rg) {
-    const from = rangeStart(rg, r.series.dates[0], today);
-    const s0 = Math.max(0, r.series.dates.findIndex((d) => d >= from));
-    const n = r.series.dates.length - s0;
-    const idx = downsample(n, 400).map((i) => i + s0);
-    chart($('#valueChart'), {
-      type: 'line',
-      data: {
-        labels: idx.map((i) => r.series.dates[i]),
-        datasets: [
-          { label: 'Value', data: idx.map((i) => r.series.value[i]), borderColor: cssVar('--accent'), backgroundColor: cssVar('--accent-soft'), fill: true, pointRadius: 0, borderWidth: 2, tension: 0.1 },
-          { label: 'Net invested', data: idx.map((i) => r.series.invested[i]), borderColor: cssVar('--muted'), borderDash: [4, 4], pointRadius: 0, borderWidth: 1.5, stepped: true },
-        ],
-      },
-      options: lineOpts(base),
-    });
-  }
-
   // allocation
   const alloc = groupBy([...r.holdings, ...(t.cashValue > 0 ? [{ ticker: 'Cash', value: t.cashValue }] : [])], (h) => h.ticker);
   doughnut($('#allocChart'), $('#allocLegend'), alloc.slice(0, 8).concat(alloc.length > 8 ? [{ label: 'Other', value: alloc.slice(8).reduce((s, a) => s + a.value, 0), weight: alloc.slice(8).reduce((s, a) => s + a.weight, 0) }] : []), base);
-
-  // performance vs benchmark
-  const benchSel = $('#benchSel');
-  const benches = ctx.benchmarks.filter((b) => market.prices[b]?.length);
-  benchSel.innerHTML = '<option value="">— none —</option>' + benches.map((b) => `<option value="${esc(b)}" ${b === ctx.settings.benchmark ? 'selected' : ''}>${esc(ctx.meta.benchmarks[b] || b)}</option>`).join('');
-  if (!ctx.settings.benchmark && benches.length) benchSel.value = benches[0];
-  let perfRange = 'Max';
-  benchSel.addEventListener('change', () => { ctx.settings.benchmark = benchSel.value; drawPerf(perfRange); });
-  segmented($('#perfRange'), RANGES, 'Max', (rg) => { perfRange = rg; drawPerf(rg); });
-  function drawPerf(rg) {
-    const from = rangeStart(rg, r.series.dates[0], today);
-    const s0 = Math.max(0, r.series.dates.findIndex((d) => d >= from));
-    const idx = downsample(r.series.dates.length - s0, 400).map((i) => i + s0);
-    const datasets = [{ label: 'Portfolio', data: idx.map((i) => (r.series.twr[i] / r.series.twr[s0] - 1) * 100), borderColor: cssVar('--accent'), pointRadius: 0, borderWidth: 2 }];
-    if (benchSel.value) {
-      const b = benchmarkSeries(r.series, market, benchSel.value, base);
-      const b0 = b.index.slice(s0).find((v) => v !== null);
-      datasets.push({ label: ctx.meta.benchmarks[benchSel.value] || benchSel.value, data: idx.map((i) => (b.index[i] !== null && b0 ? (b.index[i] / b0 - 1) * 100 : null)), borderColor: PALETTE[2], pointRadius: 0, borderWidth: 1.5 });
-    }
-    chart($('#perfChart'), { type: 'line', data: { labels: idx.map((i) => r.series.dates[i]), datasets }, options: lineOpts('%') });
-  }
 
   // movers
   const movers = [...r.holdings].filter((h) => h.prevClose).sort((a, b) => Math.abs(b.dayChangePct) - Math.abs(a.dayChangePct)).slice(0, 5);
@@ -159,6 +108,7 @@ export async function dashboard(el, ctx) {
   // upcoming
   const held = new Set(r.holdings.map((h) => h.ticker));
   const { events } = await loadEvents();
+  await masterChart($('#masterHost'), ctx, events);
   const until = addDays(today, 30);
   const up = events.filter((e) => held.has(e.ticker) && e.date >= today && e.date <= until).slice(0, 8);
   $('#upcoming').innerHTML = up.length ? up.map((e) => `<div class="mini-row"><span><span class="tag ${e.type}">${e.type}</span> <b>${esc(e.ticker)}</b></span><span class="muted">${fmtDate(e.date)}</span></div>`).join('') : '<div class="muted">Nothing in the next 30 days.</div>';

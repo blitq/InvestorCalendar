@@ -18,7 +18,8 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 
 | Area | What you get |
 |---|---|
-| Dashboard | value, total profit, today's change, TWR, XIRR, returns for 1D…Max, value vs net invested chart, benchmark comparison, movers, upcoming events |
+| Dashboard | value, total profit, today's change, TWR, XIRR, returns for 1D…Max, allocation, movers, upcoming events |
+| Master chart | one chart with toggleable value, net invested, profit, return (TWR / XIRR / profit ÷ invested), drawdown, benchmarks (% change or "same money"), dividend and deposit bars, buy/sell/dividend/event markers; ranges 1M…Max or custom dates, drag-to-zoom (mouse and touch), log scale, daily/weekly/monthly points, filter by asset, crosshair tooltip, summary for the window, PNG/CSV export; settings are remembered |
 | Holdings | positions with avg price, FIFO lots, unrealized/realized P&L, dividends, total return; per-stock chart with buy/sell markers and fundamentals |
 | Transactions | buy, sell, dividend, deposit, withdrawal, fee, interest, tax; CSV import with auto column detection (EN/PL headers, EU number/date formats, duplicate skipping), CSV export |
 | Dividends | received (recorded or estimated from market data), next-12-month forecast, monthly/yearly charts, yield and yield on cost |
