@@ -32,6 +32,7 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Treasury bonds | Polish retail bonds OTS, ROR, DOR, TOS, COI, ROS, EDO, ROD: value with accrued interest, inflation-linked rates (CPI two months before each period + margin, editable per period), capitalisation or yearly/monthly interest payouts, early-redemption value after fee and 19% tax, maturity tracking |
 | Accounts | portfolio types Regular / IKE / IKZE / OIPE; yearly contribution limits with progress and remaining amount, IKZE PIT deduction estimate; tax-free accounts excluded from PIT-38 |
 | Goals | financial independence (monthly income at a safe withdrawal rate), dividend-income or amount goals; projection in today's money, time to goal, monthly contribution needed |
+| Languages | English and Polish (follows the browser, switchable in Settings); numbers and dates in the chosen locale |
 | Alerts & sharing | price alerts on the watchlist (dashboard banner + browser notification), read-only share link with weights and returns only, installable app (PWA) that works offline |
 | Sync & backup | optional sync between devices through a private GitHub Gist (end-to-end encrypted with a passphrase, merges by transaction, deletions propagate), JSON backup, backup reminder |
 | Other | multiple portfolios, any base currency, split handling, manual prices for assets without data, dark mode, mobile layout |

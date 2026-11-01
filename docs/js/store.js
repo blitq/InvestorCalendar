@@ -15,7 +15,7 @@ const DEFAULT_STATE = () => ({
     manualPrices: {},   // ticker -> { price, currency }
     watchlist: [],
     symbolMap: {},      // symbol in a broker file -> Yahoo ticker (remembered between imports)
-    lang: 'en',
+    lang: '',           // '' = follow the browser language
   },
 });
 

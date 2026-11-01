@@ -2,6 +2,7 @@
 // benchmarks, dividends, cash flows and trade/event markers.
 import { computePortfolio, addDays } from './engine.js';
 import { buildMasterData } from './masterdata.js';
+import { t as tr, locale } from './i18n.js';
 import { $, $$, esc, money, num, pct, cls, fmtDate, chart, cssVar, PALETTE, download, toast } from './ui.js';
 
 const KEY = 'scrabfree_master';
@@ -149,14 +150,14 @@ export async function masterChart(el, ctx, events = []) {
     const ds = [];
     const line = (o) => ds.push({ type: 'line', pointRadius: 0, pointHoverRadius: 3, borderWidth: 2, tension: 0.1, spanGaps: true, ...o });
     const accent = cssVar('--accent');
-    if (st.on.value) line({ label: 'Value', data: d.value, yAxisID: 'y', fmt: 'money', borderColor: accent, backgroundColor: cssVar('--accent-soft'), fill: st.log ? false : 'origin', order: 1 });
-    if (st.on.invested) line({ label: 'Net invested', data: d.invested, yAxisID: 'y', fmt: 'money', borderColor: cssVar('--muted'), borderDash: [5, 4], borderWidth: 1.5, stepped: true, tension: 0, order: 2 });
-    if (st.on.profit && !st.log) line({ label: 'Profit', data: d.profit, yAxisID: 'y', fmt: 'money', borderColor: PALETTE[1], order: 2 });
+    if (st.on.value) line({ label: tr('Value'), data: d.value, yAxisID: 'y', fmt: 'money', borderColor: accent, backgroundColor: cssVar('--accent-soft'), fill: st.log ? false : 'origin', order: 1 });
+    if (st.on.invested) line({ label: tr('Net invested'), data: d.invested, yAxisID: 'y', fmt: 'money', borderColor: cssVar('--muted'), borderDash: [5, 4], borderWidth: 1.5, stepped: true, tension: 0, order: 2 });
+    if (st.on.profit && !st.log) line({ label: tr('Profit'), data: d.profit, yAxisID: 'y', fmt: 'money', borderColor: PALETTE[1], order: 2 });
     if (st.on.return) {
       const m = { twr: ['Return (TWR)', d.twr], mwr: ['Return (XIRR p.a.)', d.mwr], simple: ['Profit ÷ invested', d.simple] }[st.returnMode];
       line({ label: m[0], data: m[1], yAxisID: 'yPct', fmt: 'pct', borderColor: PALETTE[4], order: 2 });
     }
-    if (st.on.drawdown) line({ label: 'Drawdown', data: d.drawdown, yAxisID: 'yPct', fmt: 'pct', borderColor: cssVar('--neg'), backgroundColor: 'rgba(239,68,68,0.12)', fill: 'origin', borderWidth: 1, order: 3 });
+    if (st.on.drawdown) line({ label: tr('Drawdown'), data: d.drawdown, yAxisID: 'yPct', fmt: 'pct', borderColor: cssVar('--neg'), backgroundColor: 'rgba(239,68,68,0.12)', fill: 'origin', borderWidth: 1, order: 3 });
     st.benches.forEach((b) => {
       const color = BENCH_COLORS[benchList.indexOf(b) % BENCH_COLORS.length];
       const label = ctx.meta.benchmarks[b] || b;

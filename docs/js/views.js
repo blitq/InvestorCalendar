@@ -6,6 +6,7 @@ import {
 import { buildMarket, loadEvents, loadHistories, loadNbp } from './data.js';
 import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from './importers.js';
 import { store } from './store.js';
+import { t as tr, locale, getLang } from './i18n.js';
 import { masterChart } from './masterchart.js';
 import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from './bonds.js';
 import { loadCpi } from './data.js';
@@ -107,7 +108,7 @@ export async function dashboard(el, ctx) {
 
   // allocation
   const alloc = groupBy([...r.holdings, ...(t.cashValue > 0 ? [{ ticker: 'Cash', value: t.cashValue }] : [])], (h) => h.ticker);
-  doughnut($('#allocChart'), $('#allocLegend'), alloc.slice(0, 8).concat(alloc.length > 8 ? [{ label: 'Other', value: alloc.slice(8).reduce((s, a) => s + a.value, 0), weight: alloc.slice(8).reduce((s, a) => s + a.weight, 0) }] : []), base);
+  doughnut($('#allocChart'), $('#allocLegend'), alloc.slice(0, 8).concat(alloc.length > 8 ? [{ label: tr('Other'), value: alloc.slice(8).reduce((s, a) => s + a.value, 0), weight: alloc.slice(8).reduce((s, a) => s + a.weight, 0) }] : []), base);
 
   // movers
   const movers = [...r.holdings].filter((h) => h.prevClose).sort((a, b) => Math.abs(b.dayChangePct) - Math.abs(a.dayChangePct)).slice(0, 5);
@@ -263,22 +264,22 @@ export async function holdings(el, ctx) {
   <div class="card"><div class="card-head"><h3>Closed positions</h3></div><div id="cTable"></div></div>`;
 
   table($('#hTable', el), r.holdings, [
-    { key: 'ticker', label: 'Asset', render: (h) => `<b>${esc(h.ticker)}</b>${h.stalePrice ? ' <span class="tag warn" title="no market data">manual</span>' : ''}<div class="muted small">${esc(short(h.name, 30))}</div>` },
-    { key: 'qty', label: 'Shares', cls: 'num', render: (h) => qty(h.qty) },
-    { key: 'avgPrice', label: 'Avg price', cls: 'num', render: (h) => money(h.avgPrice, h.currency) },
-    { key: 'price', label: 'Price', cls: 'num', render: (h) => `${money(h.price, h.currency)}<div class="small ${cls(h.dayChangePct)}">${pct(h.dayChangePct)}</div>` },
+    { key: 'ticker', label: tr('Asset'), render: (h) => `<b>${esc(h.ticker)}</b>${h.stalePrice ? ' <span class="tag warn" title="no market data">manual</span>' : ''}<div class="muted small">${esc(short(h.name, 30))}</div>` },
+    { key: 'qty', label: tr('Shares'), cls: 'num', render: (h) => qty(h.qty) },
+    { key: 'avgPrice', label: tr('Avg price'), cls: 'num', render: (h) => money(h.avgPrice, h.currency) },
+    { key: 'price', label: tr('Price'), cls: 'num', render: (h) => `${money(h.price, h.currency)}<div class="small ${cls(h.dayChangePct)}">${pct(h.dayChangePct)}</div>` },
     { key: 'value', label: `Value (${base})`, cls: 'num', render: (h) => money(h.value, base) },
-    { key: 'weight', label: 'Weight', cls: 'num', render: (h) => `${pct(h.weight, { sign: false, digits: 1 })}<div class="bar"><i style="width:${(h.weight * 100).toFixed(1)}%"></i></div>` },
-    { key: 'unrealized', label: 'Unrealized', cls: 'num', render: (h) => `<span class="${cls(h.unrealized)}">${money(h.unrealized, base, { sign: true })}</span><div class="small ${cls(h.unrealized)}">${pct(h.unrealizedPct)}</div>` },
-    { key: 'dividends', label: 'Dividends', cls: 'num', render: (h) => money(h.dividends, base) },
-    { key: 'totalReturn', label: 'Total return', cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
+    { key: 'weight', label: tr('Weight'), cls: 'num', render: (h) => `${pct(h.weight, { sign: false, digits: 1 })}<div class="bar"><i style="width:${(h.weight * 100).toFixed(1)}%"></i></div>` },
+    { key: 'unrealized', label: tr('Unrealized'), cls: 'num', render: (h) => `<span class="${cls(h.unrealized)}">${money(h.unrealized, base, { sign: true })}</span><div class="small ${cls(h.unrealized)}">${pct(h.unrealizedPct)}</div>` },
+    { key: 'dividends', label: tr('Dividends'), cls: 'num', render: (h) => money(h.dividends, base) },
+    { key: 'totalReturn', label: tr('Total return'), cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
   ], { sortKey: 'value', onRowClick: (h) => holdingModal(h, ctx) });
 
   table($('#cTable', el), r.closed, [
-    { key: 'ticker', label: 'Asset', render: (h) => `<b>${esc(h.ticker)}</b> <span class="muted small">${esc(short(h.name, 30))}</span>` },
-    { key: 'realized', label: 'Realized', cls: 'num', render: (h) => `<span class="${cls(h.realized)}">${money(h.realized, base, { sign: true })}</span>` },
-    { key: 'dividends', label: 'Dividends', cls: 'num', render: (h) => money(h.dividends, base) },
-    { key: 'totalReturn', label: 'Total', cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
+    { key: 'ticker', label: tr('Asset'), render: (h) => `<b>${esc(h.ticker)}</b> <span class="muted small">${esc(short(h.name, 30))}</span>` },
+    { key: 'realized', label: tr('Realized'), cls: 'num', render: (h) => `<span class="${cls(h.realized)}">${money(h.realized, base, { sign: true })}</span>` },
+    { key: 'dividends', label: tr('Dividends'), cls: 'num', render: (h) => money(h.dividends, base) },
+    { key: 'totalReturn', label: tr('Total'), cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
   ], { sortKey: 'totalReturn', onRowClick: (h) => holdingModal(h, ctx), empty: 'No closed positions.' });
 }
 
@@ -332,19 +333,19 @@ function holdingModal(h, ctx) {
       type: 'line',
       data: { labels, datasets: [
         { label: h.ticker, data: idx.map((i) => s.values[i]), borderColor: cssVar('--accent'), pointRadius: 0, borderWidth: 1.8 },
-        { label: 'Buy', data: marks('BUY'), showLine: false, pointRadius: 5, pointBackgroundColor: cssVar('--pos'), borderColor: cssVar('--pos') },
-        { label: 'Sell', data: marks('SELL'), showLine: false, pointRadius: 5, pointBackgroundColor: cssVar('--neg'), borderColor: cssVar('--neg') },
+        { label: tr('Buy'), data: marks('BUY'), showLine: false, pointRadius: 5, pointBackgroundColor: cssVar('--pos'), borderColor: cssVar('--pos') },
+        { label: tr('Sell'), data: marks('SELL'), showLine: false, pointRadius: 5, pointBackgroundColor: cssVar('--neg'), borderColor: cssVar('--neg') },
       ] },
       options: lineOpts(h.currency),
     });
   });
   if (h.lots.length) {
     table($('#lotsT', el), h.lots, [
-      { key: 'date', label: 'Bought', render: (l) => fmtDate(l.date) },
-      { key: 'portfolioId', label: 'Portfolio', render: (l) => esc(ctx.portfolioName(l.portfolioId)) },
-      { key: 'qty', label: 'Shares', cls: 'num', render: (l) => qty(l.qty) },
-      { key: 'price', label: 'Price', cls: 'num', render: (l) => money(l.price, l.currency) },
-      { key: 'gain', label: 'Gain', cls: 'num', sort: (l) => h.price / l.price, render: (l) => `<span class="${cls(h.price - l.price)}">${pct(h.price / l.price - 1)}</span>` },
+      { key: 'date', label: tr('Bought'), render: (l) => fmtDate(l.date) },
+      { key: 'portfolioId', label: tr('Portfolio'), render: (l) => esc(ctx.portfolioName(l.portfolioId)) },
+      { key: 'qty', label: tr('Shares'), cls: 'num', render: (l) => qty(l.qty) },
+      { key: 'price', label: tr('Price'), cls: 'num', render: (l) => money(l.price, l.currency) },
+      { key: 'gain', label: tr('Gain'), cls: 'num', sort: (l) => h.price / l.price, render: (l) => `<span class="${cls(h.price - l.price)}">${pct(h.price / l.price - 1)}</span>` },
     ], { sortKey: 'date', sortDir: 1 });
   }
   txTable($('#txT', el), txs, ctx, { compact: true });
@@ -354,15 +355,15 @@ function holdingModal(h, ctx) {
 
 function txTable(el, txs, ctx, { compact = false } = {}) {
   const cols = [
-    { key: 'date', label: 'Date', render: (t) => fmtDate(t.date) },
-    ...(compact || ctx.state.portfolios.length < 2 ? [] : [{ key: 'portfolioId', label: 'Portfolio', render: (t) => esc(ctx.portfolioName(t.portfolioId)) }]),
-    { key: 'type', label: 'Type', render: (t) => `<span class="tag ${t.type.toLowerCase()}">${t.type}</span>` },
-    { key: 'ticker', label: 'Ticker', render: (t) => `<b>${esc(t.ticker || '')}</b>` },
-    { key: 'quantity', label: 'Qty', cls: 'num', render: (t) => (t.quantity ? qty(t.quantity) : '') },
-    { key: 'price', label: 'Price', cls: 'num', render: (t) => (t.price ? money(t.price, t.currency) : '') },
-    { key: 'total', label: 'Total', cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') },
-    { key: 'fee', label: 'Fee / tax', cls: 'num', sort: (t) => (t.fee || t.tax || 0), render: (t) => (t.fee || t.tax ? money(t.fee || t.tax, t.currency) : '') },
-    ...(compact ? [] : [{ key: 'note', label: 'Note', render: (t) => `<span class="muted small">${esc(short(t.note || '', 30))}</span>` },
+    { key: 'date', label: tr('Date'), render: (t) => fmtDate(t.date) },
+    ...(compact || ctx.state.portfolios.length < 2 ? [] : [{ key: 'portfolioId', label: tr('Portfolio'), render: (t) => esc(ctx.portfolioName(t.portfolioId)) }]),
+    { key: 'type', label: tr('Type'), render: (t) => `<span class="tag ${t.type.toLowerCase()}">${t.type}</span>` },
+    { key: 'ticker', label: tr('Ticker'), render: (t) => `<b>${esc(t.ticker || '')}</b>` },
+    { key: 'quantity', label: tr('Qty'), cls: 'num', render: (t) => (t.quantity ? qty(t.quantity) : '') },
+    { key: 'price', label: tr('Price'), cls: 'num', render: (t) => (t.price ? money(t.price, t.currency) : '') },
+    { key: 'total', label: tr('Total'), cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') },
+    { key: 'fee', label: tr('Fee / tax'), cls: 'num', sort: (t) => (t.fee || t.tax || 0), render: (t) => (t.fee || t.tax ? money(t.fee || t.tax, t.currency) : '') },
+    ...(compact ? [] : [{ key: 'note', label: tr('Note'), render: (t) => `<span class="muted small">${esc(short(t.note || '', 30))}</span>` },
       { key: 'actions', label: '', render: (t) => `<button class="icon-btn" data-edit="${esc(t.id)}" title="Edit">✎</button><button class="icon-btn" data-del="${esc(t.id)}" title="Delete">🗑</button>` }]),
   ];
   table(el, txs, cols, { sortKey: 'date', empty: 'No transactions match.' });
@@ -806,15 +807,15 @@ export async function dividends(el, ctx) {
   chart($('#divMonthly'), {
     type: 'bar',
     data: { labels: months.map((m) => fmtDate(m + '-01', { month: 'short', year: '2-digit' })), datasets: [
-      { label: 'Received', data: months.map((m) => rec[m] || null), backgroundColor: cssVar('--pos') },
-      { label: 'Forecast', data: months.map((m) => fc[m] || null), backgroundColor: cssVar('--accent-soft2'), borderColor: cssVar('--accent'), borderWidth: 1 },
+      { label: tr('Received'), data: months.map((m) => rec[m] || null), backgroundColor: cssVar('--pos') },
+      { label: tr('Forecast'), data: months.map((m) => fc[m] || null), backgroundColor: cssVar('--accent-soft2'), borderColor: cssVar('--accent'), borderWidth: 1 },
     ] },
     options: barOpts(base, true),
   });
   const byYear = {};
   for (const d of r.dividends) byYear[d.date.slice(0, 4)] = (byYear[d.date.slice(0, 4)] || 0) + d.netBase;
   const ys = Object.keys(byYear).sort();
-  chart($('#divYearly'), { type: 'bar', data: { labels: ys, datasets: [{ label: 'Net dividends', data: ys.map((y) => byYear[y]), backgroundColor: cssVar('--pos') }] }, options: barOpts(base) });
+  chart($('#divYearly'), { type: 'bar', data: { labels: ys, datasets: [{ label: tr('Net dividends'), data: ys.map((y) => byYear[y]), backgroundColor: cssVar('--pos') }] }, options: barOpts(base) });
 
   $('#fcList').innerHTML = forecast.filter((f) => f.date > today).slice(0, 30).map((f) => `<div class="mini-row"><span><b>${esc(f.ticker)}</b> <span class="muted small">${fmtDate(f.date)}</span></span><span>${money(f.amountBase, base)} <span class="muted small">${num(f.dps, 4)} ${f.currency}/sh</span></span></div>`).join('') || '<div class="muted">No dividend payers in the portfolio.</div>';
 
@@ -826,20 +827,20 @@ export async function dividends(el, ctx) {
   }
   for (const f of forecast) rows.get(f.ticker).fwd += f.amountBase;
   table($('#divByTicker'), [...rows.values()].filter((x) => x.received || x.fwd), [
-    { key: 'ticker', label: 'Company', render: (x) => `<b>${esc(x.ticker)}</b> <span class="muted small">${esc(short(x.name, 28))}</span>` },
-    { key: 'received', label: 'Received (all)', cls: 'num', render: (x) => money(x.received, base) },
-    { key: 'ttm', label: 'Last 12m', cls: 'num', render: (x) => money(x.ttm, base) },
-    { key: 'fwd', label: 'Next 12m', cls: 'num', render: (x) => money(x.fwd, base) },
-    { key: 'yield', label: 'Yield', cls: 'num', sort: (x) => (x.value ? x.fwd / x.value : 0), render: (x) => pct(x.value ? x.fwd / x.value : 0, { sign: false }) },
-    { key: 'yoc', label: 'Yield on cost', cls: 'num', sort: (x) => (x.cost ? x.fwd / x.cost : 0), render: (x) => pct(x.cost ? x.fwd / x.cost : 0, { sign: false }) },
+    { key: 'ticker', label: tr('Company'), render: (x) => `<b>${esc(x.ticker)}</b> <span class="muted small">${esc(short(x.name, 28))}</span>` },
+    { key: 'received', label: tr('Received (all)'), cls: 'num', render: (x) => money(x.received, base) },
+    { key: 'ttm', label: tr('Last 12m'), cls: 'num', render: (x) => money(x.ttm, base) },
+    { key: 'fwd', label: tr('Next 12m'), cls: 'num', render: (x) => money(x.fwd, base) },
+    { key: 'yield', label: tr('Yield'), cls: 'num', sort: (x) => (x.value ? x.fwd / x.value : 0), render: (x) => pct(x.value ? x.fwd / x.value : 0, { sign: false }) },
+    { key: 'yoc', label: tr('Yield on cost'), cls: 'num', sort: (x) => (x.cost ? x.fwd / x.cost : 0), render: (x) => pct(x.cost ? x.fwd / x.cost : 0, { sign: false }) },
   ], { sortKey: 'fwd', empty: 'No dividends yet.' });
 
   const allPays = [...r.dividends].reverse();
   const drawPays = (limit) => table($('#divList'), allPays.slice(0, limit), [
-    { key: 'date', label: 'Date', render: (d) => fmtDate(d.date) },
-    { key: 'ticker', label: 'Ticker', render: (d) => `<b>${esc(d.ticker || '')}</b>${d.estimated ? ' <span class="tag warn">est.</span>' : ''}` },
-    { key: 'gross', label: 'Gross', cls: 'num', render: (d) => money(d.gross, d.currency) },
-    { key: 'tax', label: 'Tax', cls: 'num', render: (d) => money(d.tax, d.currency) },
+    { key: 'date', label: tr('Date'), render: (d) => fmtDate(d.date) },
+    { key: 'ticker', label: tr('Ticker'), render: (d) => `<b>${esc(d.ticker || '')}</b>${d.estimated ? ' <span class="tag warn">est.</span>' : ''}` },
+    { key: 'gross', label: tr('Gross'), cls: 'num', render: (d) => money(d.gross, d.currency) },
+    { key: 'tax', label: tr('Tax'), cls: 'num', render: (d) => money(d.tax, d.currency) },
     { key: 'netBase', label: `Net (${base})`, cls: 'num', render: (d) => money(d.netBase, base) },
   ], { sortKey: 'date', empty: 'No dividends yet.' });
   drawPays(25);
@@ -926,9 +927,9 @@ export async function analysis(el, ctx) {
     const b = benchmarkSeries(r.series, market, sel.value, base);
     const idx = downsample(dates.length, 400);
     chart($('#simChart'), { type: 'line', data: { labels: idx.map((i) => dates[i]), datasets: [
-      { label: 'Your portfolio', data: idx.map((i) => value[i]), borderColor: cssVar('--accent'), pointRadius: 0, borderWidth: 2 },
+      { label: tr('Your portfolio'), data: idx.map((i) => value[i]), borderColor: cssVar('--accent'), pointRadius: 0, borderWidth: 2 },
       { label: ctx.meta.benchmarks[sel.value] || sel.value, data: idx.map((i) => b.simulated[i]), borderColor: PALETTE[2], pointRadius: 0, borderWidth: 1.5 },
-      { label: 'Net invested', data: idx.map((i) => r.series.invested[i]), borderColor: cssVar('--muted'), borderDash: [4, 4], pointRadius: 0, borderWidth: 1, stepped: true },
+      { label: tr('Net invested'), data: idx.map((i) => r.series.invested[i]), borderColor: cssVar('--muted'), borderDash: [4, 4], pointRadius: 0, borderWidth: 1, stepped: true },
     ] }, options: lineOpts(base) });
   };
   sel.addEventListener('change', drawSim);
@@ -950,10 +951,10 @@ export async function analysis(el, ctx) {
     yrows.push(row);
   }
   table($('#yearT'), yrows, [
-    { key: 'year', label: 'Year' },
-    { key: 'endValue', label: 'End value', cls: 'num', render: (x) => money(x.endValue, base) },
-    { key: 'profit', label: 'Profit', cls: 'num', render: (x) => `<span class="${cls(x.profit)}">${money(x.profit, base, { sign: true })}</span>` },
-    { key: 'twr', label: 'Return', cls: 'num', render: (x) => `<b class="${cls(x.twr)}">${pct(x.twr)}</b>` },
+    { key: 'year', label: tr('Year') },
+    { key: 'endValue', label: tr('End value'), cls: 'num', render: (x) => money(x.endValue, base) },
+    { key: 'profit', label: tr('Profit'), cls: 'num', render: (x) => `<span class="${cls(x.profit)}">${money(x.profit, base, { sign: true })}</span>` },
+    { key: 'twr', label: tr('Return'), cls: 'num', render: (x) => `<b class="${cls(x.twr)}">${pct(x.twr)}</b>` },
     ...benches.map((bt) => ({ key: bt, label: ctx.meta.benchmarks[bt] || bt, cls: 'num', render: (x) => `<span class="${cls(x[bt])}">${pct(x[bt])}</span>` })),
   ], { sortKey: 'year' });
 
@@ -1026,13 +1027,13 @@ export async function rebalance(el, ctx) {
     const totalHeld = r.holdings.reduce((s2, h) => s2 + h.value, 0);
     const list = rows.map((x) => ({ ...x, name: quotes[x.key]?.name || x.key, curW: totalHeld ? x.value / totalHeld : 0, p: byKey[x.key] }));
     table($('#rbTable'), list, [
-      { key: 'key', label: 'Asset', render: (x) => `<b>${esc(x.key)}</b><div class="muted small">${esc(short(x.name, 26))}</div>` },
+      { key: 'key', label: tr('Asset'), render: (x) => `<b>${esc(x.key)}</b><div class="muted small">${esc(short(x.name, 26))}</div>` },
       { key: 'value', label: `Value (${base})`, cls: 'num', render: (x) => money(x.value, base) },
-      { key: 'curW', label: 'Now', cls: 'num', render: (x) => pct(x.curW, { sign: false, digits: 1 }) },
-      { key: 'target', label: 'Target %', cls: 'num', sort: (x) => +targets[x.key] || 0, render: (x) => `<input type="number" min="0" max="100" step="0.1" class="sm tgt" data-k="${esc(x.key)}" value="${targets[x.key] ?? ''}">` },
-      { key: 'drift', label: 'Drift', cls: 'num', sort: (x) => x.p?.drift ?? 0, render: (x) => (x.p ? `<span class="${Math.abs(x.p.drift) > 0.05 ? 'neg' : 'muted'}">${num(x.p.drift * 100, 1, { sign: true })} pp</span>` : '') },
-      { key: 'amount', label: 'Trade', cls: 'num', sort: (x) => x.p?.amount ?? 0, render: (x) => (x.p && Math.abs(x.p.amount) > 0.005 ? `<span class="${x.p.amount > 0 ? 'pos' : 'neg'}">${x.p.amount > 0 ? 'Buy' : 'Sell'} ${x.p.shares !== null ? `${qty(Math.abs(x.p.shares))} sh · ` : ''}${money(Math.abs(x.p.amount), base)}</span>` : (x.p ? '—' : '')) },
-      { key: 'after', label: 'After', cls: 'num', sort: (x) => x.p?.after ?? 0, render: (x) => (x.p ? pct(x.p.after, { sign: false, digits: 1 }) : '') },
+      { key: 'curW', label: tr('Now'), cls: 'num', render: (x) => pct(x.curW, { sign: false, digits: 1 }) },
+      { key: 'target', label: tr('Target %'), cls: 'num', sort: (x) => +targets[x.key] || 0, render: (x) => `<input type="number" min="0" max="100" step="0.1" class="sm tgt" data-k="${esc(x.key)}" value="${targets[x.key] ?? ''}">` },
+      { key: 'drift', label: tr('Drift'), cls: 'num', sort: (x) => x.p?.drift ?? 0, render: (x) => (x.p ? `<span class="${Math.abs(x.p.drift) > 0.05 ? 'neg' : 'muted'}">${num(x.p.drift * 100, 1, { sign: true })} pp</span>` : '') },
+      { key: 'amount', label: tr('Trade'), cls: 'num', sort: (x) => x.p?.amount ?? 0, render: (x) => (x.p && Math.abs(x.p.amount) > 0.005 ? `<span class="${x.p.amount > 0 ? 'pos' : 'neg'}">${x.p.amount > 0 ? 'Buy' : 'Sell'} ${x.p.shares !== null ? `${qty(Math.abs(x.p.shares))} sh · ` : ''}${money(Math.abs(x.p.amount), base)}</span>` : (x.p ? '—' : '')) },
+      { key: 'after', label: tr('After'), cls: 'num', sort: (x) => x.p?.after ?? 0, render: (x) => (x.p ? pct(x.p.after, { sign: false, digits: 1 }) : '') },
     ], { sortKey: 'value', empty: 'No positions.' });
     $$('.tgt', el).forEach((inp) => inp.addEventListener('change', () => {
       if (inp.value === '') delete targets[inp.dataset.k]; else targets[inp.dataset.k] = Math.max(0, +inp.value);
@@ -1092,7 +1093,8 @@ export async function calendar(el, ctx) {
     if (cal) cal.destroy();
     if (!window.FullCalendar) { $('#cal').innerHTML = '<p class="muted">Calendar library failed to load.</p>'; return; }
     cal = new window.FullCalendar.Calendar($('#cal'), {
-      initialView: 'dayGridMonth', height: 'auto', firstDay: 1,
+      initialView: 'dayGridMonth', height: 'auto', firstDay: 1, locale: getLang() === 'pl' ? 'pl' : 'en',
+      buttonText: getLang() === 'pl' ? { today: 'dziś', month: 'miesiąc', list: 'lista' } : undefined,
       headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listMonth' },
       events: ev.map((e, i) => ({ id: String(i), title: e.ticker, start: e.date, allDay: true, classNames: ['ev-' + e.type], extendedProps: e })),
       eventClick: (info) => {
@@ -1153,36 +1155,36 @@ export async function taxes(el, ctx) {
   <div class="card"><div class="card-head"><h3>Dividends (${y.dividends.length})</h3></div><div id="taxDivs"></div></div>`;
   $('#yearSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-y]'); if (b) { history.replaceState(null, '', `#/taxes?y=${b.dataset.y}`); taxes(el, ctx); } });
   table($('#taxCountries'), y.countries, [
-    { key: 'country', label: 'Country' },
-    { key: 'income', label: 'Gains', cls: 'num', render: (c) => `<span class="${cls(c.income)}">${P(c.income)}</span>` },
-    { key: 'divGross', label: 'Dividends', cls: 'num', render: (c) => P(c.divGross) },
-    { key: 'divWithheld', label: 'Tax abroad', cls: 'num', render: (c) => P(c.divWithheld) },
-    { key: 'divToPay', label: 'To pay in PL', cls: 'num', render: (c) => P(c.divToPay) },
+    { key: 'country', label: tr('Country') },
+    { key: 'income', label: tr('Gains'), cls: 'num', render: (c) => `<span class="${cls(c.income)}">${P(c.income)}</span>` },
+    { key: 'divGross', label: tr('Dividends'), cls: 'num', render: (c) => P(c.divGross) },
+    { key: 'divWithheld', label: tr('Tax abroad'), cls: 'num', render: (c) => P(c.divWithheld) },
+    { key: 'divToPay', label: tr('To pay in PL'), cls: 'num', render: (c) => P(c.divToPay) },
   ], { sortKey: 'country', sortDir: 1, empty: 'Nothing this year.' });
   const usable = tax.losses.filter((l) => l.remaining > 0.5 && +l.expires >= +y.year);
   table($('#taxLosses'), usable, [
-    { key: 'year', label: 'Loss year' },
-    { key: 'original', label: 'Loss', cls: 'num', render: (l) => P(l.original) },
-    { key: 'remaining', label: 'Still deductible', cls: 'num', render: (l) => P(l.remaining) },
-    { key: 'expires', label: 'Usable until' },
+    { key: 'year', label: tr('Loss year') },
+    { key: 'original', label: tr('Loss'), cls: 'num', render: (l) => P(l.original) },
+    { key: 'remaining', label: tr('Still deductible'), cls: 'num', render: (l) => P(l.remaining) },
+    { key: 'expires', label: tr('Usable until') },
   ], { sortKey: 'year', sortDir: 1, empty: st.taxCarryForward === false ? 'Carry-forward is switched off in Settings.' : 'No unused losses.' });
   table($('#taxTrades'), y.trades, [
-    { key: 'date', label: 'Sold', render: (t) => fmtDate(t.date) },
-    { key: 'ticker', label: 'Ticker', render: (t) => `<b>${esc(t.ticker)}</b>` },
-    { key: 'qty', label: 'Qty', cls: 'num', render: (t) => qty(t.qty) },
-    { key: 'rate', label: 'NBP rate', cls: 'num', render: (t) => (t.currency === 'PLN' ? '—' : `${num(t.rate, 4)} ${t.currency}`) },
-    { key: 'buys', label: 'Bought (FIFO)', render: (t) => `<span class="small muted">${t.buys.map((b) => `${qty(b.qty)} @ ${num(b.price, 4)} on ${b.date}${t.currency !== 'PLN' ? ` (×${num(b.rate, 4)})` : ''}`).join('<br>')}</span>` },
-    { key: 'proceeds', label: 'Revenue', cls: 'num', render: (t) => P(t.proceeds) },
-    { key: 'costs', label: 'Costs', cls: 'num', render: (t) => P(t.costs) },
-    { key: 'income', label: 'Income', cls: 'num', render: (t) => `<span class="${cls(t.income)}">${P(t.income)}</span>` },
+    { key: 'date', label: tr('Sold'), render: (t) => fmtDate(t.date) },
+    { key: 'ticker', label: tr('Ticker'), render: (t) => `<b>${esc(t.ticker)}</b>` },
+    { key: 'qty', label: tr('Qty'), cls: 'num', render: (t) => qty(t.qty) },
+    { key: 'rate', label: tr('NBP rate'), cls: 'num', render: (t) => (t.currency === 'PLN' ? '—' : `${num(t.rate, 4)} ${t.currency}`) },
+    { key: 'buys', label: tr('Bought (FIFO)'), render: (t) => `<span class="small muted">${t.buys.map((b) => `${qty(b.qty)} @ ${num(b.price, 4)} on ${b.date}${t.currency !== 'PLN' ? ` (×${num(b.rate, 4)})` : ''}`).join('<br>')}</span>` },
+    { key: 'proceeds', label: tr('Revenue'), cls: 'num', render: (t) => P(t.proceeds) },
+    { key: 'costs', label: tr('Costs'), cls: 'num', render: (t) => P(t.costs) },
+    { key: 'income', label: tr('Income'), cls: 'num', render: (t) => `<span class="${cls(t.income)}">${P(t.income)}</span>` },
   ], { sortKey: 'date', sortDir: 1, empty: 'No sales this year.' });
   table($('#taxDivs'), y.dividends, [
-    { key: 'date', label: 'Date', render: (d) => fmtDate(d.date) },
-    { key: 'ticker', label: 'Ticker', render: (d) => `<b>${esc(d.ticker || '')}</b>${d.domestic ? ' <span class="tag">PL — taxed at source</span>' : ''}` },
-    { key: 'rate', label: 'NBP rate', cls: 'num', render: (d) => (d.domestic ? '—' : `${num(d.rate, 4)} ${d.currency}`) },
-    { key: 'gross', label: 'Gross', cls: 'num', render: (d) => P(d.gross) },
-    { key: 'withheld', label: 'Withheld', cls: 'num', render: (d) => P(d.withheld) },
-    { key: 'toPay', label: 'To pay in PL', cls: 'num', render: (d) => P(d.toPay) },
+    { key: 'date', label: tr('Date'), render: (d) => fmtDate(d.date) },
+    { key: 'ticker', label: tr('Ticker'), render: (d) => `<b>${esc(d.ticker || '')}</b>${d.domestic ? ' <span class="tag">PL — taxed at source</span>' : ''}` },
+    { key: 'rate', label: tr('NBP rate'), cls: 'num', render: (d) => (d.domestic ? '—' : `${num(d.rate, 4)} ${d.currency}`) },
+    { key: 'gross', label: tr('Gross'), cls: 'num', render: (d) => P(d.gross) },
+    { key: 'withheld', label: tr('Withheld'), cls: 'num', render: (d) => P(d.withheld) },
+    { key: 'toPay', label: tr('To pay in PL'), cls: 'num', render: (d) => P(d.toPay) },
   ], { sortKey: 'date', sortDir: 1, empty: 'No recorded dividends this year (estimated dividends are not used for tax).' });
 }
 
@@ -1211,16 +1213,16 @@ export async function watchlist(el, ctx) {
     <p class="muted small">Tickers in <code>tickers.json</code> get daily prices and events. Tickers you add here are saved in your browser; to get their data add them to <code>tickers.json</code> too (<a href="#/settings">Settings → Market data</a>).</p>
     <div id="wlT"></div></div>`;
   table($('#wlT'), rows, [
-    { key: 'ticker', label: 'Ticker', render: (x) => `<b>${esc(x.ticker)}</b>${x.held ? ' <span class="tag">held</span>' : ''}${x.noData ? ' <span class="tag warn">no data</span>' : ''}<div class="muted small">${esc(short(x.name, 28))}</div>` },
-    { key: 'price', label: 'Price', cls: 'num', render: (x) => money(x.price, x.currency) },
-    { key: 'day', label: 'Day', cls: 'num', render: (x) => `<span class="${cls(x.day)}">${pct(x.day)}</span>` },
-    { key: 'm1', label: '1M', cls: 'num', render: (x) => `<span class="${cls(x.m1)}">${pct(x.m1)}</span>` },
-    { key: 'y1', label: '1Y', cls: 'num', render: (x) => `<span class="${cls(x.y1)}">${pct(x.y1)}</span>` },
-    { key: 'range', label: '52w range', sort: (x) => (x.hi > x.lo ? (x.price - x.lo) / (x.hi - x.lo) : 0), render: (x) => (x.hi > x.lo ? `<div class="range"><i style="left:${Math.max(0, Math.min(100, ((x.price - x.lo) / (x.hi - x.lo)) * 100)).toFixed(0)}%"></i></div><div class="small muted">${num(x.lo)} – ${num(x.hi)}</div>` : '—') },
-    { key: 'pe', label: 'P/E', cls: 'num', render: (x) => (x.pe ? num(x.pe, 1) : '—') },
-    { key: 'yield', label: 'Div. yield', cls: 'num', render: (x) => (x.yield ? pct(x.yield, { sign: false }) : '—') },
-    { key: 'next', label: 'Next event', sort: (x) => x.next?.date || '9999', render: (x) => (x.next ? `<span class="tag ${x.next.type}">${x.next.type}</span> <span class="small">${fmtDate(x.next.date, { month: 'short', day: 'numeric' })}</span>` : '') },
-    { key: 'alert', label: 'Alert', sort: (x) => (settings.alerts || []).filter((a) => a.ticker === x.ticker).length, render: (x) => `${(settings.alerts || []).filter((a) => a.ticker === x.ticker).map((a) => `<span class="tag ${a.op === 'above' ? 'buy' : 'sell'}">${a.op === 'above' ? '≥' : '≤'} ${num(a.price, 4)} <button class="icon-btn tiny" data-rmalert="${esc(a.id)}" title="Remove alert">✕</button></span>`).join(' ')}
+    { key: 'ticker', label: tr('Ticker'), render: (x) => `<b>${esc(x.ticker)}</b>${x.held ? ' <span class="tag">held</span>' : ''}${x.noData ? ' <span class="tag warn">no data</span>' : ''}<div class="muted small">${esc(short(x.name, 28))}</div>` },
+    { key: 'price', label: tr('Price'), cls: 'num', render: (x) => money(x.price, x.currency) },
+    { key: 'day', label: tr('Day'), cls: 'num', render: (x) => `<span class="${cls(x.day)}">${pct(x.day)}</span>` },
+    { key: 'm1', label: tr('1M'), cls: 'num', render: (x) => `<span class="${cls(x.m1)}">${pct(x.m1)}</span>` },
+    { key: 'y1', label: tr('1Y'), cls: 'num', render: (x) => `<span class="${cls(x.y1)}">${pct(x.y1)}</span>` },
+    { key: 'range', label: tr('52w range'), sort: (x) => (x.hi > x.lo ? (x.price - x.lo) / (x.hi - x.lo) : 0), render: (x) => (x.hi > x.lo ? `<div class="range"><i style="left:${Math.max(0, Math.min(100, ((x.price - x.lo) / (x.hi - x.lo)) * 100)).toFixed(0)}%"></i></div><div class="small muted">${num(x.lo)} – ${num(x.hi)}</div>` : '—') },
+    { key: 'pe', label: tr('P/E'), cls: 'num', render: (x) => (x.pe ? num(x.pe, 1) : '—') },
+    { key: 'yield', label: tr('Div. yield'), cls: 'num', render: (x) => (x.yield ? pct(x.yield, { sign: false }) : '—') },
+    { key: 'next', label: tr('Next event'), sort: (x) => x.next?.date || '9999', render: (x) => (x.next ? `<span class="tag ${x.next.type}">${x.next.type}</span> <span class="small">${fmtDate(x.next.date, { month: 'short', day: 'numeric' })}</span>` : '') },
+    { key: 'alert', label: tr('Alert'), sort: (x) => (settings.alerts || []).filter((a) => a.ticker === x.ticker).length, render: (x) => `${(settings.alerts || []).filter((a) => a.ticker === x.ticker).map((a) => `<span class="tag ${a.op === 'above' ? 'buy' : 'sell'}">${a.op === 'above' ? '≥' : '≤'} ${num(a.price, 4)} <button class="icon-btn tiny" data-rmalert="${esc(a.id)}" title="Remove alert">✕</button></span>`).join(' ')}
       <button class="icon-btn" data-alert="${esc(x.ticker)}" data-px="${x.price ?? ''}" title="Add price alert">🔔</button>` },
     { key: 'rm', label: '', render: (x) => (x.userAdded ? `<button class="icon-btn" data-rm="${esc(x.ticker)}" title="Remove">✕</button>` : '') },
   ], { sortKey: 'ticker', sortDir: 1 });
@@ -1263,6 +1265,7 @@ export async function settings(el, ctx) {
     <div class="card">
       <h3>General</h3>
       <div class="form">
+        <label>Language<select id="sLang"><option value="">Auto (browser)</option><option value="en">English</option><option value="pl">Polski</option></select></label>
         <label>Base currency<select id="sBase">${['USD', ...Object.keys(ctx.fx)].sort().map((c) => `<option ${c === ctx.base ? 'selected' : ''}>${c}</option>`).join('')}</select></label>
         <label class="check full"><input type="checkbox" id="sAuto" ${st.autoDividends ? 'checked' : ''}> Estimate dividends from market data for tickers without recorded dividends</label>
       </div>
@@ -1294,7 +1297,7 @@ export async function settings(el, ctx) {
   </div>
   <div class="card">
     <h3>Market data</h3>
-    <p class="muted small">Prices, FX and events come from Yahoo Finance and NBP via a GitHub Action that runs daily and commits JSON into <code>docs/data</code>.
+    <p class="muted small">Prices, FX and events come from Yahoo Finance and NBP via a GitHub Action that runs on weekdays and publishes them with the site.
       Last update: <b>${ctx.meta.generated_at ? new Date(ctx.meta.generated_at).toLocaleString() : 'never'}</b>. Tracked: ${(ctx.meta.tickers || []).length} tickers.</p>
     ${needsAdding.length ? `<div class="alert">These tickers need market data: <b>${needsAdding.map(esc).join(', ')}</b>. Replace <code>tickers.json</code> with the list below, then run the workflow.</div>` : '<p class="pos">All your tickers are tracked. ✓</p>'}
     <textarea readonly rows="4" id="tjson">${esc(JSON.stringify(wanted, null, 4))}</textarea>
@@ -1321,6 +1324,8 @@ export async function settings(el, ctx) {
   </div>`;
 
   $('#sBase').addEventListener('change', (e) => store.setSettings({ baseCurrency: e.target.value }));
+  $('#sLang').value = st.lang || '';
+  $('#sLang').addEventListener('change', (e) => { store.setSettingsQuiet({ lang: e.target.value }); location.reload(); });
   const limits = (kind, y) => st.limits?.[kind]?.[y] ?? DEFAULT_LIMITS[kind][y] ?? '';
   const showLim = () => { const y = $('#limYear').value; $('#limIKE').value = limits('IKE', y); $('#limIKZE').value = limits('IKZE', y); };
   $('#limYear').addEventListener('change', showLim); showLim();
@@ -1425,7 +1430,7 @@ export async function goals(el, ctx) {
     $('#gk').innerHTML = [
       kpi('Target', money(goal, base, { digits: 0 }), v.kind === 'fire' ? `${money(v.income, base, { digits: 0 })}/month at ${num(v.swr, 1)}%` : v.kind === 'dividends' ? `at ${pct(yieldUsed, { sign: false })} dividend yield${divYield ? ' (yours)' : ''}` : ''),
       kpi('Progress', pct(Math.min(1, v.start / goal), { sign: false, digits: 1 }), `${money(v.start, base, { digits: 0 })} of ${money(goal, base, { compact: true })}`),
-      kpi('Reached in', months === null ? 'not within 80 y' : months === 0 ? 'already there 🎉' : `${Math.floor(months / 12)} y ${months % 12} m`, eta && months ? eta.toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : ''),
+      kpi('Reached in', months === null ? 'not within 80 y' : months === 0 ? 'already there 🎉' : `${Math.floor(months / 12)} y ${months % 12} m`, eta && months ? eta.toLocaleDateString(locale(), { year: 'numeric', month: 'short' }) : ''),
       kpi(`Needed monthly for ${v.years} y`, money(need, base, { digits: 0 }), need > v.monthly ? `${money(need - v.monthly, base, { digits: 0 })} more than now` : 'you are on track'),
       kpi(`Value in ${v.years} y`, money(proj[proj.length - 1].real, base, { compact: true }), `nominal ${money(proj[proj.length - 1].value, base, { compact: true })}`),
     ].join('');
@@ -1433,9 +1438,9 @@ export async function goals(el, ctx) {
     chart($('#goalChart'), {
       type: 'line',
       data: { labels: proj.map((p) => String(y0 + p.year)), datasets: [
-        { label: 'Projected value (today’s money)', data: proj.map((p) => p.real), borderColor: cssVar('--accent'), backgroundColor: cssVar('--accent-soft'), fill: true, pointRadius: 0, borderWidth: 2 },
-        { label: 'Contributed', data: proj.map((p) => p.contributed), borderColor: cssVar('--muted'), borderDash: [4, 4], pointRadius: 0, borderWidth: 1.5 },
-        { label: 'Goal', data: proj.map(() => goal), borderColor: cssVar('--pos'), pointRadius: 0, borderWidth: 1.5 },
+        { label: tr('Projected value (today’s money)'), data: proj.map((p) => p.real), borderColor: cssVar('--accent'), backgroundColor: cssVar('--accent-soft'), fill: true, pointRadius: 0, borderWidth: 2 },
+        { label: tr('Contributed'), data: proj.map((p) => p.contributed), borderColor: cssVar('--muted'), borderDash: [4, 4], pointRadius: 0, borderWidth: 1.5 },
+        { label: tr('Goal'), data: proj.map(() => goal), borderColor: cssVar('--pos'), pointRadius: 0, borderWidth: 1.5 },
       ] },
       options: { ...lineOpts(base), scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } }, y: { ticks: { callback: (x) => money(x, base, { compact: true }) } } } },
     });

@@ -1,4 +1,5 @@
 // Small DOM / formatting / chart helpers shared by all views.
+import { locale } from './i18n.js';
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -9,8 +10,8 @@ export function esc(s) {
 
 const nfCache = new Map();
 function nf(opts) {
-  const k = JSON.stringify(opts);
-  if (!nfCache.has(k)) nfCache.set(k, new Intl.NumberFormat(undefined, opts));
+  const k = (locale() || '') + JSON.stringify(opts);
+  if (!nfCache.has(k)) nfCache.set(k, new Intl.NumberFormat(locale(), opts));
   return nfCache.get(k);
 }
 
@@ -44,7 +45,7 @@ export const cls = (v) => (v > 1e-9 ? 'pos' : v < -1e-9 ? 'neg' : '');
 
 export function fmtDate(iso, opts = { year: 'numeric', month: 'short', day: 'numeric' }) {
   if (!iso) return '—';
-  return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, opts);
+  return new Date(iso + 'T00:00:00').toLocaleDateString(locale(), opts);
 }
 
 export function html(strings, ...vals) {

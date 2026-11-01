@@ -5,6 +5,7 @@ import { store } from './store.js';
 import { $, $$, esc, destroyCharts } from './ui.js';
 import * as views from './views.js';
 import { startAutoSync } from './sync.js';
+import { setLang, startTranslation } from './i18n.js';
 
 const ROUTES = [
   ['dashboard', 'Dashboard', '◧'],
@@ -108,6 +109,9 @@ export async function render() {
 }
 
 function init() {
+  const pref = store.get().settings.lang;
+  setLang(pref || ((navigator.language || '').toLowerCase().startsWith('pl') ? 'pl' : 'en'));
+  startTranslation(document.body);
   $('#pfSelect').addEventListener('change', (e) => setSelected(e.target.value));
   $('#ccySelect').addEventListener('change', (e) => store.setSettings({ baseCurrency: e.target.value }));
   $('#menuBtn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
