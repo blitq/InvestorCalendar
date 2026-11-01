@@ -1,0 +1,10 @@
+{
+    "history_start": "2016-01-01",
+    "benchmarks": {
+        "^GSPC": "S&P 500",
+        "EUNL.DE": "MSCI World (iShares EUNL)",
+        "ETFBW20TR.WA": "WIG20TR (Beta ETF)"
+    },
+    "extra_currencies": ["PLN", "EUR", "GBP", "CHF"],
+    "nbp_currencies": ["USD", "EUR", "GBP", "CHF", "CAD", "JPY", "SEK", "NOK", "DKK", "HKD", "AUD"]
+}

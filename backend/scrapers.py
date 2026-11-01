@@ -36,7 +36,7 @@ def stock_from_stooq(symbol, exchange="gpw"):
     name_el = soup.select_one("h1")
     name = name_el.get_text(strip=True) if name_el else symbol
 
-    div_table = soup.find("table", id_="dividends")
+    div_table = soup.find("table", id="dividends")
     if div_table:
         rows = div_table.find_all("tr")[1:]
         for row in rows:
