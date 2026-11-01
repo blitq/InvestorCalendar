@@ -271,3 +271,21 @@ test('rebalancePlan: buy-only splits new cash by deficit, full mode sells', asyn
   assert.equal(n.items.find((i) => i.key === 'C'), undefined);
   close(n.items.find((i) => i.key === 'D').amount, 400);
 });
+
+test('tradeStats: win rate, profit factor, by year', async () => {
+  const { tradeStats } = await import('../docs/js/engine.js');
+  const s = tradeStats([
+    { date: '2024-01-05', ticker: 'A', gain: 100, costBase: 1000, holdingDays: 10 },
+    { date: '2024-02-05', ticker: 'B', gain: -50, costBase: 500, holdingDays: 30 },
+    { date: '2025-03-05', ticker: 'C', gain: 300, costBase: 1000, holdingDays: 400 },
+  ]);
+  assert.equal(s.count, 3);
+  close(s.winRate, 2 / 3);
+  close(s.profitFactor, 8);
+  close(s.avgWinPct, 0.2);
+  close(s.avgLossPct, -0.1);
+  close(s.avgHoldingDays, 440 / 3);
+  assert.equal(s.best.ticker, 'C'); assert.equal(s.worst.ticker, 'B');
+  assert.deepEqual(s.byYear.map((y) => [y.year, y.trades, y.gain]), [['2025', 1, 300], ['2024', 2, 50]]);
+  assert.equal(tradeStats([]).winRate, null);
+});

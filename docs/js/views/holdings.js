@@ -1,5 +1,5 @@
 // holdings page — split from the former views.js
-import { todayISO, trailingYield, Series, TAX_FREE_TYPES } from '../engine.js';
+import { todayISO, trailingYield, Series, TAX_FREE_TYPES, tradeStats } from '../engine.js';
 import { store } from '../store.js';
 import { t as tr } from '../i18n.js';
 import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from '../bonds.js';
@@ -25,7 +25,9 @@ export async function holdings(el, ctx) {
   </div>
   <div class="card"><div class="card-head"><h3>Open positions</h3><span class="muted">click a row for details</span></div><div id="hTable"></div></div>
   ${Object.keys(r.cash).length ? `<div class="card"><div class="card-head"><h3>Cash</h3></div>${Object.entries(r.cash).map(([c, v]) => `<div class="mini-row"><span>${c}</span><span>${money(v, c)}</span></div>`).join('')}</div>` : ''}
-  <div class="card"><div class="card-head"><h3>Closed positions</h3></div><div id="cTable"></div></div>`;
+  <div class="card"><div class="card-head"><h3>Closed positions</h3></div><div id="cTable"></div></div>
+  <div class="card"><div class="card-head"><h3>Closed trades</h3><span class="muted small">every sale, matched FIFO</span></div>
+    <div class="kpis compact" id="tsKpis"></div><div class="grid-2"><div id="tsYears"></div><div id="tsList"></div></div></div>`;
 
   table($('#hTable', el), r.holdings, [
     { key: 'ticker', label: tr('Asset'), render: (h) => `<b>${esc(h.ticker)}</b>${h.stalePrice ? ' <span class="tag warn" title="no market data">manual</span>' : ''}<div class="muted small">${esc(short(h.name, 30))}</div>` },
@@ -45,6 +47,25 @@ export async function holdings(el, ctx) {
     { key: 'dividends', label: tr('Dividends'), cls: 'num', render: (h) => money(h.dividends, base) },
     { key: 'totalReturn', label: tr('Total'), cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
   ], { sortKey: 'totalReturn', onRowClick: (h) => holdingModal(h, ctx), empty: 'No closed positions.' });
+
+  const ts = tradeStats(r.trades);
+  $('#tsKpis', el).innerHTML = ts.count ? [
+    kpi('Trades', String(ts.count), `${pct(ts.winRate, { sign: false, digits: 0 })} winners`),
+    kpi('Realized', `<span class="${cls(ts.total)}">${money(ts.total, base, { sign: true })}</span>`),
+    kpi('Average winner', `<span class="pos">${pct(ts.avgWinPct)}</span>`), kpi('Average loser', `<span class="neg">${pct(ts.avgLossPct)}</span>`),
+    kpi('Profit factor', ts.profitFactor === Infinity ? '∞' : num(ts.profitFactor, 2), 'gains ÷ losses'),
+    kpi('Average holding', `${num(ts.avgHoldingDays, 0)} d`),
+  ].join('') : '<p class="muted">No sales yet.</p>';
+  table($('#tsYears', el), ts.byYear, [
+    { key: 'year', label: 'Year' }, { key: 'trades', label: 'Trades', cls: 'num' },
+    { key: 'wins', label: 'Winners', cls: 'num', render: (y) => pct(y.wins / y.trades, { sign: false, digits: 0 }) },
+    { key: 'gain', label: 'Realized', cls: 'num', render: (y) => `<span class="${cls(y.gain)}">${money(y.gain, base, { sign: true })}</span>` },
+  ], { sortKey: 'year', empty: '—' });
+  table($('#tsList', el), ts.list, [
+    { key: 'date', label: 'Sold', render: (t) => fmtDate(t.date) }, { key: 'ticker', label: 'Ticker', render: (t) => `<b>${esc(t.ticker)}</b>` },
+    { key: 'holdingDays', label: 'Held', cls: 'num', render: (t) => `${t.holdingDays} d` },
+    { key: 'gain', label: 'Gain', cls: 'num', render: (t) => `<span class="${cls(t.gain)}">${money(t.gain, base, { sign: true })}</span><div class="small ${cls(t.pct)}">${pct(t.pct)}</div>` },
+  ], { sortKey: 'date', empty: '—' });
 }
 
 export function holdingModal(h, ctx) {

@@ -860,3 +860,31 @@ export function contributions(transactions, market, opts = {}) {
   }
   return out.sort((a, b) => b.profit - a.profit);
 }
+
+// ---------------------------------------------------------------- trade statistics
+
+/** Statistics over realised trades (each SELL is one closed trade). */
+export function tradeStats(trades) {
+  const list = trades.map((t) => ({ ...t, pct: t.costBase > EPS ? t.gain / t.costBase : 0 }));
+  const wins = list.filter((t) => t.gain > 0), losses = list.filter((t) => t.gain < 0);
+  const sum = (a, f) => a.reduce((s, x) => s + f(x), 0);
+  const grossWin = sum(wins, (t) => t.gain), grossLoss = -sum(losses, (t) => t.gain);
+  const byYear = {};
+  for (const t of list) {
+    const y = (byYear[t.date.slice(0, 4)] ??= { year: t.date.slice(0, 4), trades: 0, wins: 0, gain: 0 });
+    y.trades++; y.gain += t.gain; if (t.gain > 0) y.wins++;
+  }
+  return {
+    count: list.length,
+    winRate: list.length ? wins.length / list.length : null,
+    avgWinPct: wins.length ? sum(wins, (t) => t.pct) / wins.length : null,
+    avgLossPct: losses.length ? sum(losses, (t) => t.pct) / losses.length : null,
+    profitFactor: grossLoss > EPS ? grossWin / grossLoss : (grossWin > 0 ? Infinity : null),
+    total: grossWin - grossLoss,
+    avgHoldingDays: list.length ? sum(list, (t) => t.holdingDays) / list.length : null,
+    best: [...list].sort((a, b) => b.gain - a.gain)[0] || null,
+    worst: [...list].sort((a, b) => a.gain - b.gain)[0] || null,
+    byYear: Object.values(byYear).sort((a, b) => b.year.localeCompare(a.year)),
+    list,
+  };
+}
