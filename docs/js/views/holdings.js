@@ -1,0 +1,330 @@
+// holdings page — split from the former views.js
+import { todayISO, trailingYield, Series, TAX_FREE_TYPES, tradeStats, dividendGrowth } from '../engine.js';
+import { store } from '../store.js';
+import { t as tr } from '../i18n.js';
+import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from '../bonds.js';
+import { loadCpi } from '../data.js';
+import { ASSET_KINDS, customTicker } from '../customassets.js';
+import { $, $$, esc, money, num, qty, pct, cls, fmtDate, kpi, toast, table, chart, cssVar, downsample } from '../ui.js';
+import { RANGES, emptyState, lineOpts, modal, rangeStart, segmented, short, warningsBlock } from './common.js';
+import { txTable } from './transactions.js';
+
+
+export async function holdings(el, ctx) {
+  const { result: r, base } = ctx;
+  if (!ctx.txs.length) return emptyState(el, ctx);
+  const t = r.totals;
+  el.innerHTML = `
+  ${warningsBlock(ctx)}
+  <div class="kpis">
+    ${kpi('Market value', money(t.holdingsValue, base))}
+    ${kpi('Cost basis', money(t.costBasis, base))}
+    ${kpi('Unrealized', `<span class="${cls(t.unrealized)}">${money(t.unrealized, base, { sign: true })}</span>`, pct(t.costBasis ? t.unrealized / t.costBasis : 0), cls(t.unrealized))}
+    ${kpi('Realized', `<span class="${cls(t.realized)}">${money(t.realized, base, { sign: true })}</span>`)}
+    ${kpi('Dividends', money(t.dividends, base))}
+    ${kpi('Fees paid', money(t.fees, base))}
+  </div>
+  <div class="card"><div class="card-head"><h3>Open positions</h3><span class="muted">click a row for details</span></div><div id="hTable"></div></div>
+  ${Object.keys(r.cash).length ? `<div class="card"><div class="card-head"><h3>Cash</h3></div>${Object.entries(r.cash).map(([c, v]) => `<div class="mini-row"><span>${c}</span><span>${money(v, c)}</span></div>`).join('')}</div>` : ''}
+  <div class="card"><div class="card-head"><h3>Closed positions</h3></div><div id="cTable"></div></div>
+  <div class="card"><div class="card-head"><h3>Closed trades</h3><span class="muted small">every sale, matched FIFO</span></div>
+    <div class="kpis compact" id="tsKpis"></div><div class="grid-2"><div id="tsYears"></div><div id="tsList"></div></div></div>`;
+
+  table($('#hTable', el), r.holdings, [
+    { key: 'ticker', label: tr('Asset'), render: (h) => `<b>${esc(h.ticker)}</b>${h.stalePrice ? ' <span class="tag warn" title="no market data">manual</span>' : ''}<div class="muted small">${esc(short(h.name, 30))}</div>` },
+    { key: 'qty', label: tr('Shares'), cls: 'num', render: (h) => qty(h.qty) },
+    { key: 'avgPrice', label: tr('Avg price'), cls: 'num', render: (h) => money(h.avgPrice, h.currency) },
+    { key: 'price', label: tr('Price'), cls: 'num', render: (h) => `${money(h.price, h.currency)}<div class="small ${cls(h.dayChangePct)}">${pct(h.dayChangePct)}</div>` },
+    { key: 'value', label: `Value (${base})`, cls: 'num', render: (h) => money(h.value, base) },
+    { key: 'weight', label: tr('Weight'), cls: 'num', render: (h) => `${pct(h.weight, { sign: false, digits: 1 })}<div class="bar"><i style="width:${(h.weight * 100).toFixed(1)}%"></i></div>` },
+    { key: 'unrealized', label: tr('Unrealized'), cls: 'num', render: (h) => `<span class="${cls(h.unrealized)}">${money(h.unrealized, base, { sign: true })}</span><div class="small ${cls(h.unrealized)}">${pct(h.unrealizedPct)}</div>` },
+    { key: 'dividends', label: tr('Dividends'), cls: 'num', render: (h) => money(h.dividends, base) },
+    { key: 'totalReturn', label: tr('Total return'), cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
+  ], { sortKey: 'value', onRowClick: (h) => holdingModal(h, ctx) });
+
+  table($('#cTable', el), r.closed, [
+    { key: 'ticker', label: tr('Asset'), render: (h) => `<b>${esc(h.ticker)}</b> <span class="muted small">${esc(short(h.name, 30))}</span>` },
+    { key: 'realized', label: tr('Realized'), cls: 'num', render: (h) => `<span class="${cls(h.realized)}">${money(h.realized, base, { sign: true })}</span>` },
+    { key: 'dividends', label: tr('Dividends'), cls: 'num', render: (h) => money(h.dividends, base) },
+    { key: 'totalReturn', label: tr('Total'), cls: 'num', render: (h) => `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>` },
+  ], { sortKey: 'totalReturn', onRowClick: (h) => holdingModal(h, ctx), empty: 'No closed positions.' });
+
+  const ts = tradeStats(r.trades);
+  $('#tsKpis', el).innerHTML = ts.count ? [
+    kpi('Trades', String(ts.count), `${pct(ts.winRate, { sign: false, digits: 0 })} winners`),
+    kpi('Realized', `<span class="${cls(ts.total)}">${money(ts.total, base, { sign: true })}</span>`),
+    kpi('Average winner', `<span class="pos">${pct(ts.avgWinPct)}</span>`), kpi('Average loser', `<span class="neg">${pct(ts.avgLossPct)}</span>`),
+    kpi('Profit factor', ts.profitFactor === Infinity ? '∞' : num(ts.profitFactor, 2), 'gains ÷ losses'),
+    kpi('Average holding', `${num(ts.avgHoldingDays, 0)} d`),
+  ].join('') : '<p class="muted">No sales yet.</p>';
+  table($('#tsYears', el), ts.byYear, [
+    { key: 'year', label: 'Year' }, { key: 'trades', label: 'Trades', cls: 'num' },
+    { key: 'wins', label: 'Winners', cls: 'num', render: (y) => pct(y.wins / y.trades, { sign: false, digits: 0 }) },
+    { key: 'gain', label: 'Realized', cls: 'num', render: (y) => `<span class="${cls(y.gain)}">${money(y.gain, base, { sign: true })}</span>` },
+  ], { sortKey: 'year', empty: '—' });
+  table($('#tsList', el), ts.list, [
+    { key: 'date', label: 'Sold', render: (t) => fmtDate(t.date) }, { key: 'ticker', label: 'Ticker', render: (t) => `<b>${esc(t.ticker)}</b>` },
+    { key: 'holdingDays', label: 'Held', cls: 'num', render: (t) => `${t.holdingDays} d` },
+    { key: 'gain', label: 'Gain', cls: 'num', render: (t) => `<span class="${cls(t.gain)}">${money(t.gain, base, { sign: true })}</span><div class="small ${cls(t.pct)}">${pct(t.pct)}</div>` },
+  ], { sortKey: 'date', empty: '—' });
+}
+
+export function holdingModal(h, ctx) {
+  if (ctx.settings.bonds?.[h.ticker]) return bondModal(h, ctx);
+  if (ctx.settings.customAssets?.[h.ticker]) return customModal(h, ctx);
+  const { market, base } = ctx;
+  const q = ctx.quotes[h.ticker] || {};
+  const ty = trailingYield(market, h.ticker);
+  const txs = ctx.txs.filter((t) => t.ticker === h.ticker).sort((a, b) => b.date.localeCompare(a.date));
+  const { el } = modal(`${esc(h.ticker)} <span class="muted">${esc(h.name)}</span>`, `
+    <div class="kpis compact">
+      ${kpi('Price', money(h.price, h.currency), pct(h.dayChangePct), cls(h.dayChangePct))}
+      ${kpi('Position', money(h.value, base), `${qty(h.qty)} sh · avg ${money(h.avgPrice, h.currency)}`)}
+      ${kpi('Total return', `<span class="${cls(h.totalReturn)}">${money(h.totalReturn, base, { sign: true })}</span>`, `unrealized ${pct(h.unrealizedPct)}`)}
+      ${kpi('Dividend yield', pct(ty.yield, { sign: false }), `TTM ${money(ty.dps, h.currency)}/sh`)}
+    </div>
+    <div class="facts">${[
+      ['Sector', q.sector], ['Industry', q.industry], ['Country', q.country], ['Market', q.market], ['P/E', q.pe && num(q.pe, 1)],
+      ['Fwd P/E', q.forward_pe && num(q.forward_pe, 1)], ['Market cap', q.market_cap && money(q.market_cap, h.currency, { compact: true })],
+      ['52w range', q.low_52w ? `${num(q.low_52w)} – ${num(q.high_52w)}` : null], ['Beta', q.beta && num(q.beta, 2)],
+      ['P/B', q.price_to_book && num(q.price_to_book, 2)], ['Profit margin', q.profit_margin && pct(q.profit_margin, { sign: false, digits: 1 })],
+      ['ROE', q.roe && pct(q.roe, { sign: false, digits: 1 })], ['Revenue growth', q.revenue_growth && pct(q.revenue_growth, { digits: 1 })],
+      ['Earnings growth', q.earnings_growth && pct(q.earnings_growth, { digits: 1 })], ['Debt / equity', q.debt_to_equity && num(q.debt_to_equity / 100, 2)],
+      ['Payout ratio', q.payout_ratio && pct(q.payout_ratio, { sign: false, digits: 0 })], ['5y avg yield', q.five_year_avg_yield && `${num(q.five_year_avg_yield, 2)}%`],
+      ['Analyst target', q.target_price && `${money(q.target_price, h.currency)} (${pct(q.target_price / h.price - 1, { digits: 0 })})`],
+      ['Rating', q.recommendation && `${q.recommendation.replace(/_/g, ' ')}${q.analysts ? ` · ${q.analysts} analysts` : ''}`], ['Employees', q.employees && num(q.employees, 0)],
+    ].filter(([, v]) => v).map(([k, v]) => `<div><span class="muted">${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
+    ${q.summary ? `<details class="summary-box"><summary class="small muted">About ${esc(h.name)}</summary><p class="small">${esc(q.summary)}${q.summary.length >= 700 ? '…' : ''}</p>${q.website ? `<a class="small" href="${esc(q.website)}" target="_blank" rel="noopener">${esc(q.website.replace(/^https?:\/\//, ''))}</a>` : ''}</details>` : ''}
+    <div class="card-head"><h3>Price</h3><div class="seg" id="hRange"></div></div>
+    <div class="chart-box"><canvas id="hChart"></canvas></div>
+    <div id="divHist"></div>
+    ${h.lots.length ? `<h3 class="mt">Open lots (FIFO)</h3><div id="lotsT"></div>` : ''}
+    <h3 class="mt">Transactions</h3><div id="txT"></div>
+    <h3 class="mt">My notes</h3><textarea id="posNote" rows="3" class="note-box" placeholder="Why you bought it, target price, when you would sell…">${esc(ctx.settings.notes?.[h.ticker] || '')}</textarea>
+    <div class="row gap mt"><button class="btn sm-btn" id="renameTk" title="Ticker changed, merger, or wrong symbol: rewrite all transactions">Change ticker…</button></div>`, { wide: true });
+  $('#posNote', el).addEventListener('input', (e) => store.setSettingsQuiet({ notes: { ...(store.get().settings.notes || {}), [h.ticker]: e.target.value } }));
+  $('#renameTk', el).addEventListener('click', () => {
+    const to = (prompt(`New ticker for ${h.ticker} (Yahoo symbol). All transactions with ${h.ticker} will be updated.`, '') || '').trim().toUpperCase();
+    if (!to || to === h.ticker) return;
+    const n = store.renameTickers({ [h.ticker]: to });
+    store.setSettings({ symbolMap: { ...(ctx.settings.symbolMap || {}), [h.ticker]: to } });
+    toast(`${n} transactions moved to ${to}`);
+    document.querySelector('.modal-bg')?.remove();
+  });
+
+  const g = dividendGrowth(market.dividends(h.ticker), ctx.result.today);
+  if (g.annual.length) {
+    $('#divHist', el).innerHTML = `<div class="card-head mt"><h3>Dividend history</h3><span class="muted small">per share, ${esc(h.currency)}</span></div>
+      <div class="kpis compact">${kpi('Growth 1y', pct(g.cagr1))}${kpi('Growth 3y', pct(g.cagr3), 'per year')}${kpi('Growth 5y', pct(g.cagr5), 'per year')}${kpi('Raised in a row', `${g.streak} y`)}</div>
+      <div class="chart-box small"><canvas id="dhChart"></canvas></div>`;
+    chart($('#dhChart', el), {
+      type: 'bar',
+      data: { labels: g.annual.map((a) => a.year), datasets: [{ label: tr('Dividend'), data: g.annual.map((a) => a.dps), backgroundColor: g.annual.map((a) => (a.partial ? 'rgba(13,148,136,0.3)' : 'rgba(13,148,136,0.75)')), borderRadius: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${money(c.parsed.y, h.currency, { digits: 4 })}${g.annual[c.dataIndex].partial ? ' (so far)' : ''}` } } },
+        scales: { x: { grid: { display: false } }, y: { ticks: { callback: (v) => num(v, 2) } } } },
+    });
+  }
+  const s = market.prices[h.ticker] || new Series();
+  segmented($('#hRange', el), RANGES, '1Y', (rg) => {
+    const from = rangeStart(rg, txs.length ? txs[txs.length - 1].date : s.dates[0]);
+    const s0 = Math.max(0, s.dates.findIndex((d) => d >= from));
+    const idx = downsample(s.length - s0, 400).map((i) => i + s0);
+    const labels = idx.map((i) => s.dates[i]);
+    const marks = (type) => labels.map((d, k) => {
+      const next = labels[k + 1] || '9999';
+      const hit = txs.find((t) => t.type === type && t.date >= d && t.date < next);
+      return hit ? hit.price : null;
+    });
+    chart($('#hChart', el), {
+      type: 'line',
+      data: { labels, datasets: [
+        { label: h.ticker, data: idx.map((i) => s.values[i]), borderColor: cssVar('--accent'), pointRadius: 0, borderWidth: 1.8 },
+        { label: tr('Buy'), data: marks('BUY'), showLine: false, pointRadius: 5, pointBackgroundColor: cssVar('--pos'), borderColor: cssVar('--pos') },
+        { label: tr('Sell'), data: marks('SELL'), showLine: false, pointRadius: 5, pointBackgroundColor: cssVar('--neg'), borderColor: cssVar('--neg') },
+      ] },
+      options: lineOpts(h.currency),
+    });
+  });
+  if (h.lots.length) {
+    table($('#lotsT', el), h.lots, [
+      { key: 'date', label: tr('Bought'), render: (l) => fmtDate(l.date) },
+      { key: 'portfolioId', label: tr('Portfolio'), render: (l) => esc(ctx.portfolioName(l.portfolioId)) },
+      { key: 'qty', label: tr('Shares'), cls: 'num', render: (l) => qty(l.qty) },
+      { key: 'price', label: tr('Price'), cls: 'num', render: (l) => money(l.price, l.currency) },
+      { key: 'gain', label: tr('Gain'), cls: 'num', sort: (l) => h.price / l.price, render: (l) => `<span class="${cls(h.price - l.price)}">${pct(h.price / l.price - 1)}</span>` },
+    ], { sortKey: 'date', sortDir: 1 });
+  }
+  txTable($('#txT', el), txs, ctx, { compact: true });
+}
+
+export function bondForm(ctx, existing = null) {
+  const s = ctx.state;
+  const pid = ctx.selected !== 'all' ? ctx.selected : s.portfolios[0].id;
+  const b = existing || { type: 'EDO', purchaseDate: todayISO(), firstRate: '', margin: '' };
+  const { el, close } = modal(existing ? 'Edit bond terms' : 'Add treasury bonds', `
+    <p class="muted small">Polish retail treasury bonds (obligacje skarbowe). Enter the terms of your series from
+      <a href="https://www.obligacjeskarbowe.pl/" target="_blank" rel="noopener">obligacjeskarbowe.pl</a> or your bond account:
+      first-year rate and, for inflation-linked bonds, the margin. Later rates follow inflation automatically and can be corrected per period.</p>
+    <form id="bf" class="form">
+      <label>Type<select name="type" ${existing ? 'disabled' : ''}>${Object.entries(BOND_TYPES).map(([k, d]) => `<option value="${k}" ${k === b.type ? 'selected' : ''}>${k} — ${d.label}</option>`).join('')}</select></label>
+      <label>Purchase date<input type="date" name="purchaseDate" value="${b.purchaseDate}" max="${todayISO()}" required ${existing ? 'disabled' : ''}></label>
+      <label>First-year rate (%)<input type="number" step="0.01" min="0" name="firstRate" value="${b.firstRate}" required placeholder="e.g. 6.55"></label>
+      <label data-margin>Margin above inflation (%)<input type="number" step="0.01" min="0" name="margin" value="${b.margin}" placeholder="EDO 2.00 · COI 1.50 · ROS 2.00 · ROD 2.50"></label>
+      ${existing ? '' : `<label>Number of bonds (100 PLN each)<input type="number" min="1" step="1" name="qty" required></label>
+      <label>Price per bond<input type="number" step="0.01" min="0" name="price" value="100"><span class="muted small">99.90 when rolling over (zamiana)</span></label>
+      <label>Portfolio<select name="portfolioId">${s.portfolios.map((p) => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>`}
+      ${existing ? '' : depositCheckbox()}
+      <label>Early redemption fee per bond (PLN)<input type="number" step="0.01" min="0" name="fee" value="${b.fee ?? ''}" placeholder="default for the type"></label>
+      <div class="full muted small" id="bfHint"></div>
+      <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${existing ? 'Save' : 'Add bonds'}</button></div>
+    </form>`);
+  const f = $('#bf', el);
+  const sync = () => {
+    const type = f.type.value, d = f.purchaseDate.value || todayISO();
+    $('[data-margin]', f).hidden = BOND_TYPES[type].kind !== 'cpi' && BOND_TYPES[type].kind !== 'ref';
+    f.fee.placeholder = `default ${num(BOND_TYPES[type].fee, 2)} PLN`;
+    $('#bfHint', f).textContent = `Series ${seriesCode(type, d)} · matures ${fmtDate(addMonths(d, BOND_TYPES[type].months))}`;
+  };
+  f.addEventListener('input', sync); sync();
+  if (!existing) syncDepositBox(f, ctx);
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const type = f.type.value, purchaseDate = f.purchaseDate.value;
+    const ticker = existing?.ticker || bondTicker(type, purchaseDate);
+    const terms = { type, purchaseDate, firstRate: +f.firstRate.value, margin: f.margin.value === '' ? 0 : +f.margin.value, overrides: existing?.overrides || {} };
+    if (f.fee.value !== '') terms.fee = +f.fee.value;
+    store.setSettings({ bonds: { ...(ctx.settings.bonds || {}), [ticker]: terms } });
+    if (!existing) {
+      if (f.dep.checked) store.upsertTransaction({ portfolioId: f.portfolioId.value, date: purchaseDate, type: 'DEPOSIT', amount: +f.qty.value * (+f.price.value || 100), currency: 'PLN', note: `funds for ${type} bonds` });
+      store.upsertTransaction({ portfolioId: f.portfolioId.value, date: purchaseDate, type: 'BUY', ticker, quantity: +f.qty.value, price: +f.price.value || 100, fee: 0, currency: 'PLN', note: `${type} treasury bonds` });
+      toast(`Added ${f.qty.value} × ${seriesCode(type, purchaseDate)}`);
+    } else toast('Bond terms saved');
+    close();
+  });
+}
+
+export async function bondModal(h, ctx) {
+  const terms = { ...ctx.settings.bonds[h.ticker], ticker: h.ticker };
+  const cpi = await loadCpi();
+  const periods = bondSchedule(terms, cpi);
+  const today = ctx.result.today;
+  const taxFree = h.portfolios.every((pid) => TAX_FREE_TYPES.has(ctx.state.portfolios.find((p) => p.id === pid)?.type));
+  const red = bondRedemption(terms, periods, today, { taxFree });
+  const v = bondValueOn(terms, periods, today);
+  const def = BOND_TYPES[terms.type];
+  const { el, close } = modal(`${esc(seriesCode(terms.type, terms.purchaseDate))} <span class="muted">${esc(def.label)}</span>`, `
+    <div class="kpis compact">
+      ${kpi('Value', money(h.value, 'PLN'), `${qty(h.qty)} bonds × ${money(v.value, 'PLN')}`)}
+      ${kpi('Interest earned', money(h.qty * (v.value - 100) + h.qty * v.paid, 'PLN'), def.payout ? `paid out ${money(h.qty * v.paid, 'PLN')}` : 'capitalised')}
+      ${kpi(red.matured ? 'At maturity' : 'If redeemed today', money(h.qty * red.net, 'PLN'), `fee ${money(h.qty * red.fee, 'PLN')} · tax ${money(h.qty * red.tax, 'PLN')}${taxFree ? ' (IKE/IKZE: no tax)' : ''}`)}
+      ${kpi('Matures', fmtDate(periods[periods.length - 1].end), red.matured ? 'matured — record the payout' : `${Math.ceil((Date.parse(periods[periods.length - 1].end) - Date.parse(today)) / 864e5 / 30.4)} months left`)}
+    </div>
+    <p class="muted small">${cpi.source ? `Inflation: ${esc(cpi.source)}. ` : ''}Type the official rate into any period to override the estimate.</p>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>From</th><th>To</th><th class="num">Rate %</th><th>Basis</th><th class="num">Value at end</th></tr></thead><tbody>
+    ${periods.map((p) => `<tr class="${today >= p.start && today < p.end ? 'current' : ''}"><td>${p.idx + 1}</td><td>${fmtDate(p.start)}</td><td>${fmtDate(p.end)}</td>
+      <td class="num"><input type="number" step="0.01" class="sm tgt" data-ov="${p.idx}" value="${p.rate.toFixed(2)}" ${p.idx === 0 ? 'disabled' : ''}></td>
+      <td class="small muted">${esc(p.source)}${p.cpi !== undefined ? ` (${num(p.cpi, 1)}% + ${num(terms.margin, 2)}%)` : ''}</td>
+      <td class="num">${money(bondValueOn(terms, periods, p.end).value, 'PLN')}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="row gap wrap mt"><button class="btn" id="bEdit">Edit terms</button><button class="btn" id="bRedeem">Record redemption…</button></div>`, { wide: true });
+  $$('[data-ov]', el).forEach((inp) => inp.addEventListener('change', () => {
+    const ov = { ...(terms.overrides || {}) };
+    const k = +inp.dataset.ov;
+    if (inp.value === '') delete ov[k]; else ov[k] = +inp.value;
+    const { ticker, ...rest } = terms;
+    store.setSettings({ bonds: { ...ctx.settings.bonds, [h.ticker]: { ...rest, overrides: ov } } });
+    toast('Rate saved'); close();
+  }));
+  $('#bEdit', el).addEventListener('click', () => { close(); bondForm(ctx, terms); });
+  $('#bRedeem', el).addEventListener('click', () => {
+    const d = prompt('Redemption date (YYYY-MM-DD)', red.matured ? periods[periods.length - 1].end : today);
+    if (!d) return;
+    const r = bondRedemption(terms, periods, d, { taxFree });
+    const pid = h.portfolios[0];
+    store.upsertTransaction({ portfolioId: pid, date: d, type: 'SELL', ticker: h.ticker, quantity: h.qty, price: Math.round(r.gross * 100) / 100, fee: Math.round(h.qty * r.fee * 100) / 100, currency: 'PLN', note: 'bond redemption' });
+    if (r.tax) store.upsertTransaction({ portfolioId: pid, date: d, type: 'TAX', ticker: h.ticker, amount: Math.round(h.qty * r.tax * 100) / 100, currency: 'PLN', note: '19% tax on bond interest' });
+    toast('Redemption recorded'); close();
+  });
+}
+
+
+// ---------------------------------------------------------------- custom assets
+
+export function customForm(ctx) {
+  const s = ctx.state;
+  const pid = ctx.selected !== 'all' ? ctx.selected : s.portfolios[0].id;
+  const { el, close } = modal('Add other asset', `
+    <p class="muted small">Anything without a market price: a flat, a term deposit, a crypto wallet, gold, a loan you gave… You update its value by hand; deposits can grow at a fixed rate.</p>
+    <form id="cf" class="form">
+      <label>Name<input name="name" required placeholder="e.g. Flat in Kraków, Deposit 6M"></label>
+      <label>Kind<select name="kind">${Object.entries(ASSET_KINDS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
+      <label>Purchase date<input type="date" name="date" value="${todayISO()}" max="${todayISO()}" required></label>
+      <label>Amount paid (total)<input type="number" step="any" min="0" name="cost" required></label>
+      <label>Current value (optional)<input type="number" step="any" min="0" name="now" placeholder="same as paid"></label>
+      <label>Currency<input name="currency" maxlength="3" value="${esc(ctx.base)}" style="text-transform:uppercase" required></label>
+      <label data-rate>Interest rate (% a year)<input type="number" step="0.01" name="rate" placeholder="deposits only"></label>
+      <label>Portfolio<select name="portfolioId">${s.portfolios.map((p) => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>
+      ${depositCheckbox()}
+      <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">Add asset</button></div>
+    </form>`);
+  const f = $('#cf', el);
+  syncDepositBox(f, ctx);
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const all = ctx.settings.customAssets || {};
+    const ticker = customTicker(f.name.value, all);
+    const date = f.date.value, cost = +f.cost.value, now = f.now.value === '' ? null : +f.now.value;
+    const valuations = [[date, cost]];
+    if (now !== null && now !== cost) valuations.push([todayISO(), now]);
+    store.setSettings({ customAssets: { ...all, [ticker]: { name: f.name.value.trim(), kind: f.kind.value, currency: f.currency.value.toUpperCase(), rate: f.rate.value === '' ? 0 : +f.rate.value, valuations } } });
+    if (f.dep.checked) store.upsertTransaction({ portfolioId: f.portfolioId.value, date, type: 'DEPOSIT', amount: cost, currency: f.currency.value.toUpperCase(), note: `funds for ${f.name.value.trim()}` });
+    store.upsertTransaction({ portfolioId: f.portfolioId.value, date, type: 'BUY', ticker, quantity: 1, price: cost, fee: 0, currency: f.currency.value.toUpperCase(), note: f.name.value.trim() });
+    toast(`Added ${f.name.value}`);
+    close();
+  });
+}
+
+function customModal(h, ctx) {
+  const a = ctx.settings.customAssets[h.ticker];
+  const save = (patch) => store.setSettings({ customAssets: { ...ctx.settings.customAssets, [h.ticker]: { ...a, ...patch } } });
+  const vals = [...a.valuations].sort((x, y) => y[0].localeCompare(x[0]));
+  const { el, close } = modal(`${esc(a.name)} <span class="muted">${esc(ASSET_KINDS[a.kind] || '')}</span>`, `
+    <div class="kpis compact">
+      ${kpi('Value', money(h.value, ctx.base), h.currency !== ctx.base ? money(h.qty * h.price, h.currency) : '')}
+      ${kpi('Gain', `<span class="${cls(h.unrealized)}">${money(h.unrealized, ctx.base, { sign: true })}</span>`, pct(h.unrealizedPct))}
+      ${kpi('Last valuation', fmtDate(vals[0][0]), a.rate ? `+${num(a.rate, 2)}% a year since then` : 'held flat until the next update')}
+    </div>
+    <form id="cvf" class="row gap wrap"><input type="date" name="d" value="${todayISO()}" max="${todayISO()}" class="sm" required>
+      <input type="number" step="any" min="0" name="v" placeholder="New value (total)" class="sm" required><button class="btn">Update value</button></form>
+    <form id="crf" class="row gap wrap mt"><label class="muted small">Interest rate (% a year) <input type="number" step="0.01" name="r" value="${a.rate || ''}" class="sm" style="width:90px"></label><button class="btn sm-btn">Save rate</button></form>
+    <h3 class="mt">Valuations</h3>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th class="num">Value</th><th></th></tr></thead><tbody>
+      ${vals.map(([d, v]) => `<tr><td>${fmtDate(d)}</td><td class="num">${money(v * h.qty, h.currency)}</td><td>${vals.length > 1 ? `<button class="icon-btn" data-rmv="${d}" title="Remove">✕</button>` : ''}</td></tr>`).join('')}
+    </tbody></table></div>`, { wide: true });
+  $('#cvf', el).addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = e.target.d.value, v = +e.target.v.value / (h.qty || 1);
+    save({ valuations: [...a.valuations.filter(([x]) => x !== d), [d, v]] });
+    toast('Value updated'); close();
+  });
+  $('#crf', el).addEventListener('submit', (e) => { e.preventDefault(); save({ rate: +e.target.r.value || 0 }); toast('Rate saved'); close(); });
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rmv]');
+    if (b) { save({ valuations: a.valuations.filter(([x]) => x !== b.dataset.rmv) }); close(); }
+  });
+}
+
+
+// Portfolios that track cash (have deposits) need the money to come from somewhere.
+function depositCheckbox() {
+  return `<label class="check full" data-depbox><input type="checkbox" name="dep"> Paid with new money — also record a deposit (this portfolio tracks cash)</label>`;
+}
+function syncDepositBox(f, ctx) {
+  const upd = () => {
+    const tracksCash = ctx.state.transactions.some((t) => t.portfolioId === f.portfolioId.value && (t.type === 'DEPOSIT' || t.type === 'WITHDRAWAL'));
+    $('[data-depbox]', f).hidden = !tracksCash;
+    f.dep.checked = tracksCash;
+  };
+  f.portfolioId.addEventListener('change', upd);
+  upd();
+}

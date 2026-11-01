@@ -1,0 +1,282 @@
+{
+ "version": 1,
+ "portfolios": [
+  {
+   "id": "main",
+   "name": "Main (broker)",
+   "type": "regular"
+  },
+  {
+   "id": "ike",
+   "name": "IKE",
+   "type": "IKE"
+  }
+ ],
+ "transactions": [
+  {
+   "portfolioId": "main",
+   "date": "2021-02-01",
+   "type": "DEPOSIT",
+   "amount": 40000,
+   "currency": "PLN",
+   "id": "demo1"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-02-01",
+   "type": "DEPOSIT",
+   "amount": 5000,
+   "currency": "USD",
+   "note": "USD sub-account",
+   "id": "demo2"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-02-01",
+   "type": "DEPOSIT",
+   "amount": 4000,
+   "currency": "EUR",
+   "note": "EUR sub-account",
+   "id": "demo3"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-02-03",
+   "type": "BUY",
+   "ticker": "PKO.WA",
+   "quantity": 300,
+   "price": 28.91,
+   "fee": 25.15,
+   "currency": "PLN",
+   "id": "demo4"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-02-03",
+   "type": "BUY",
+   "ticker": "KGH.WA",
+   "quantity": 40,
+   "price": 182.25,
+   "fee": 21.14,
+   "currency": "PLN",
+   "id": "demo5"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-03-10",
+   "type": "BUY",
+   "ticker": "CDR.WA",
+   "quantity": 25,
+   "price": 210.2,
+   "fee": 15.24,
+   "currency": "PLN",
+   "id": "demo6"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-04-12",
+   "type": "BUY",
+   "ticker": "PZU.WA",
+   "quantity": 250,
+   "price": 33.26,
+   "fee": 24.11,
+   "currency": "PLN",
+   "id": "demo7"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-02-05",
+   "type": "BUY",
+   "ticker": "AAPL",
+   "quantity": 15,
+   "price": 136.76,
+   "fee": 0,
+   "currency": "USD",
+   "id": "demo8"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-06-14",
+   "type": "BUY",
+   "ticker": "MSFT",
+   "quantity": 6,
+   "price": 259.89,
+   "fee": 0,
+   "currency": "USD",
+   "id": "demo9"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2021-05-04",
+   "type": "BUY",
+   "ticker": "ASML.AS",
+   "quantity": 4,
+   "price": 514.0,
+   "fee": 0,
+   "currency": "EUR",
+   "id": "demo10"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2022-09-01",
+   "type": "DEPOSIT",
+   "amount": 15000,
+   "currency": "PLN",
+   "id": "demo11"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2022-09-05",
+   "type": "BUY",
+   "ticker": "PKO.WA",
+   "quantity": 200,
+   "price": 22.84,
+   "fee": 13.25,
+   "currency": "PLN",
+   "id": "demo12"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2023-11-20",
+   "type": "SELL",
+   "ticker": "CDR.WA",
+   "quantity": 25,
+   "price": 113.85,
+   "fee": 8.25,
+   "currency": "PLN",
+   "id": "demo13"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2024-03-18",
+   "type": "SELL",
+   "ticker": "KGH.WA",
+   "quantity": 20,
+   "price": 117.95,
+   "fee": 4.5,
+   "currency": "PLN",
+   "id": "demo14"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2024-02-15",
+   "type": "DIVIDEND",
+   "ticker": "AAPL",
+   "amount": 3.6,
+   "tax": 0.54,
+   "currency": "USD",
+   "id": "demo15"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2024-05-16",
+   "type": "DIVIDEND",
+   "ticker": "AAPL",
+   "amount": 3.75,
+   "tax": 0.56,
+   "currency": "USD",
+   "id": "demo16"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2024-08-15",
+   "type": "DIVIDEND",
+   "ticker": "AAPL",
+   "amount": 3.75,
+   "tax": 0.56,
+   "currency": "USD",
+   "id": "demo17"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2024-11-14",
+   "type": "DIVIDEND",
+   "ticker": "AAPL",
+   "amount": 3.75,
+   "tax": 0.56,
+   "currency": "USD",
+   "id": "demo18"
+  },
+  {
+   "portfolioId": "main",
+   "date": "2025-03-03",
+   "type": "WITHDRAWAL",
+   "amount": 5000,
+   "currency": "PLN",
+   "id": "demo19"
+  },
+  {
+   "portfolioId": "ike",
+   "date": "2022-01-10",
+   "type": "BUY",
+   "ticker": "SAP.DE",
+   "quantity": 10,
+   "price": 120.74,
+   "fee": 1.21,
+   "currency": "EUR",
+   "id": "demo20"
+  },
+  {
+   "portfolioId": "ike",
+   "date": "2022-06-20",
+   "type": "BUY",
+   "ticker": "AIR.PA",
+   "quantity": 12,
+   "price": 96.98,
+   "fee": 1.16,
+   "currency": "EUR",
+   "id": "demo21"
+  },
+  {
+   "portfolioId": "ike",
+   "date": "2023-03-15",
+   "type": "BUY",
+   "ticker": "LLOY.L",
+   "quantity": 3000,
+   "price": 0.46,
+   "fee": 1.38,
+   "currency": "GBP",
+   "id": "demo22"
+  },
+  {
+   "portfolioId": "ike",
+   "date": "2024-01-08",
+   "type": "BUY",
+   "ticker": "SAP.DE",
+   "quantity": 5,
+   "price": 138.78,
+   "fee": 0.69,
+   "currency": "EUR",
+   "id": "demo23"
+  },
+  {
+   "portfolioId": "ike",
+   "date": "2025-02-10",
+   "type": "BUY",
+   "ticker": "ASML.AS",
+   "quantity": 2,
+   "price": 717.0,
+   "fee": 1.43,
+   "currency": "EUR",
+   "id": "demo24"
+  },
+  {
+   "portfolioId": "ike",
+   "date": "2025-06-02",
+   "type": "SELL",
+   "ticker": "AIR.PA",
+   "quantity": 6,
+   "price": 162.58,
+   "fee": 2,
+   "currency": "EUR",
+   "id": "demo25"
+  }
+ ],
+ "settings": {
+  "baseCurrency": "PLN",
+  "autoDividends": true,
+  "benchmark": "",
+  "manualPrices": {},
+  "watchlist": []
+ }
+}
