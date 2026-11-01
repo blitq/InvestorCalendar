@@ -270,3 +270,4 @@ tr.current td { background: var(--accent-soft); }
   .alert { border-color: #ccc; background: #fff; }
 }
 .report-title { margin: 4px 0 14px; } .report-title .small { font-weight: 400; margin-left: 8px; }
+.note-box { font-family: inherit; font-size: 0.88rem; } .icon-btn.faint { opacity: 0.35; }

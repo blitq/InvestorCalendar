@@ -35,7 +35,7 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Reports | month / quarter / year summary: start and end value, net money in, profit, return vs benchmark, dividends, best and worst positions, all transactions; printable |
 | Goals | financial independence (monthly income at a safe withdrawal rate), dividend-income or amount goals; projection in today's money, time to goal, monthly contribution needed |
 | Languages | English and Polish (follows the browser, switchable in Settings); numbers and dates in the chosen locale |
-| Alerts & sharing | price alerts on the watchlist (dashboard banner + browser notification), read-only share link with weights and returns only, installable app (PWA) that works offline |
+| Alerts & sharing | watchlist with payout ratio, dividend growth, analyst upside, held/not-held filter and personal notes per ticker; price alerts on the watchlist (dashboard banner + browser notification), read-only share link with weights and returns only, installable app (PWA) that works offline |
 | Sync & backup | optional sync between devices through a private GitHub Gist (end-to-end encrypted with a passphrase, merges by transaction, deletions propagate), JSON backup, backup reminder |
 | Other | multiple portfolios, any base currency, split handling, manual prices for assets without data, dark mode, mobile layout |
 

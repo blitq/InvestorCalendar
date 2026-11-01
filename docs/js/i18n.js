@@ -163,6 +163,8 @@ const PL = {
   'Anything without a market price: a flat, a term deposit, a crypto wallet, gold, a loan you gave… You update its value by hand; deposits can grow at a fixed rate.': 'Wszystko bez ceny rynkowej: mieszkanie, lokata, portfel krypto, złoto, udzielona pożyczka… Wartość aktualizujesz ręcznie; lokaty mogą rosnąć według stałego oprocentowania.',
   'Paid with new money — also record a deposit (this portfolio tracks cash)': 'Zapłacone nowymi środkami — zapisz też wpłatę (ten portfel śledzi gotówkę)',
   'Report': 'Raport', 'Value at start': 'Wartość na początku', 'Value at end': 'Wartość na końcu', 'Best and worst': 'Najlepsze i najgorsze', 'No changes.': 'Brak zmian.', 'No dividends in this period.': 'Brak dywidend w tym okresie.',
+  'Payout': 'Wypłata', 'Div. growth': 'Wzrost dyw.', 'Held': 'W portfelu', 'Not held': 'Poza portfelem', 'My notes': 'Moje notatki', 'Add a note': 'Dodaj notatkę',
+  'Why you bought it, target price, when you would sell…': 'Dlaczego kupiłeś, cena docelowa, kiedy sprzedasz…',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',

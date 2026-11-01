@@ -55,7 +55,7 @@ export const store = {
   setSettings(patch) { state.settings = { ...state.settings, ...patch }; persist(); },
   /** Save settings without notifying listeners (no re-render), e.g. form inputs saved as you type. */
   setSettingsQuiet(patch) {
-    state.settings = { ...state.settings, ...patch };
+    Object.assign(state.settings, patch); // in place: cached contexts keep seeing current settings
     state.updatedAt = new Date().toISOString();
     try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* ignore */ }
   },

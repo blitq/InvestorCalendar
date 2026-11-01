@@ -100,7 +100,9 @@ export function holdingModal(h, ctx) {
     <div id="divHist"></div>
     ${h.lots.length ? `<h3 class="mt">Open lots (FIFO)</h3><div id="lotsT"></div>` : ''}
     <h3 class="mt">Transactions</h3><div id="txT"></div>
+    <h3 class="mt">My notes</h3><textarea id="posNote" rows="3" class="note-box" placeholder="Why you bought it, target price, when you would sell…">${esc(ctx.settings.notes?.[h.ticker] || '')}</textarea>
     <div class="row gap mt"><button class="btn sm-btn" id="renameTk" title="Ticker changed, merger, or wrong symbol: rewrite all transactions">Change ticker…</button></div>`, { wide: true });
+  $('#posNote', el).addEventListener('input', (e) => store.setSettingsQuiet({ notes: { ...(store.get().settings.notes || {}), [h.ticker]: e.target.value } }));
   $('#renameTk', el).addEventListener('click', () => {
     const to = (prompt(`New ticker for ${h.ticker} (Yahoo symbol). All transactions with ${h.ticker} will be updated.`, '') || '').trim().toUpperCase();
     if (!to || to === h.ticker) return;
