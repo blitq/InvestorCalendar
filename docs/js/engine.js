@@ -888,3 +888,25 @@ export function tradeStats(trades) {
     list,
   };
 }
+
+// ---------------------------------------------------------------- dividend history
+
+/**
+ * Annual dividend per share and growth for one ticker's payment history ([[date, dps]]).
+ * Only complete calendar years count for growth; the current year is reported as partial.
+ */
+export function dividendGrowth(divs, today = todayISO()) {
+  const thisYear = today.slice(0, 4);
+  const byYear = {};
+  for (const [d, v] of divs) byYear[d.slice(0, 4)] = (byYear[d.slice(0, 4)] || 0) + v;
+  const annual = Object.entries(byYear).sort().map(([year, dps]) => ({ year, dps, partial: year === thisYear }));
+  const full = annual.filter((a) => !a.partial);
+  const cagr = (n) => {
+    if (full.length < n + 1) return null;
+    const a = full[full.length - 1 - n].dps, b = full[full.length - 1].dps;
+    return a > 0 ? Math.pow(b / a, 1 / n) - 1 : null;
+  };
+  let streak = 0;
+  for (let i = full.length - 1; i > 0 && full[i].dps > full[i - 1].dps * 1.0001; i--) streak++;
+  return { annual, cagr1: cagr(1), cagr3: cagr(3), cagr5: cagr(5), streak };
+}

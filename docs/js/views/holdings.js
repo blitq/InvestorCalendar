@@ -1,5 +1,5 @@
 // holdings page — split from the former views.js
-import { todayISO, trailingYield, Series, TAX_FREE_TYPES, tradeStats } from '../engine.js';
+import { todayISO, trailingYield, Series, TAX_FREE_TYPES, tradeStats, dividendGrowth } from '../engine.js';
 import { store } from '../store.js';
 import { t as tr } from '../i18n.js';
 import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from '../bonds.js';
@@ -85,12 +85,32 @@ export function holdingModal(h, ctx) {
       ['Sector', q.sector], ['Industry', q.industry], ['Country', q.country], ['Market', q.market], ['P/E', q.pe && num(q.pe, 1)],
       ['Fwd P/E', q.forward_pe && num(q.forward_pe, 1)], ['Market cap', q.market_cap && money(q.market_cap, h.currency, { compact: true })],
       ['52w range', q.low_52w ? `${num(q.low_52w)} – ${num(q.high_52w)}` : null], ['Beta', q.beta && num(q.beta, 2)],
+      ['P/B', q.price_to_book && num(q.price_to_book, 2)], ['Profit margin', q.profit_margin && pct(q.profit_margin, { sign: false, digits: 1 })],
+      ['ROE', q.roe && pct(q.roe, { sign: false, digits: 1 })], ['Revenue growth', q.revenue_growth && pct(q.revenue_growth, { digits: 1 })],
+      ['Earnings growth', q.earnings_growth && pct(q.earnings_growth, { digits: 1 })], ['Debt / equity', q.debt_to_equity && num(q.debt_to_equity / 100, 2)],
+      ['Payout ratio', q.payout_ratio && pct(q.payout_ratio, { sign: false, digits: 0 })], ['5y avg yield', q.five_year_avg_yield && `${num(q.five_year_avg_yield, 2)}%`],
+      ['Analyst target', q.target_price && `${money(q.target_price, h.currency)} (${pct(q.target_price / h.price - 1, { digits: 0 })})`],
+      ['Rating', q.recommendation && `${q.recommendation.replace(/_/g, ' ')}${q.analysts ? ` · ${q.analysts} analysts` : ''}`], ['Employees', q.employees && num(q.employees, 0)],
     ].filter(([, v]) => v).map(([k, v]) => `<div><span class="muted">${k}</span><b>${esc(v)}</b></div>`).join('')}</div>
+    ${q.summary ? `<details class="summary-box"><summary class="small muted">About ${esc(h.name)}</summary><p class="small">${esc(q.summary)}${q.summary.length >= 700 ? '…' : ''}</p>${q.website ? `<a class="small" href="${esc(q.website)}" target="_blank" rel="noopener">${esc(q.website.replace(/^https?:\/\//, ''))}</a>` : ''}</details>` : ''}
     <div class="card-head"><h3>Price</h3><div class="seg" id="hRange"></div></div>
     <div class="chart-box"><canvas id="hChart"></canvas></div>
+    <div id="divHist"></div>
     ${h.lots.length ? `<h3 class="mt">Open lots (FIFO)</h3><div id="lotsT"></div>` : ''}
     <h3 class="mt">Transactions</h3><div id="txT"></div>`, { wide: true });
 
+  const g = dividendGrowth(market.dividends(h.ticker), ctx.result.today);
+  if (g.annual.length) {
+    $('#divHist', el).innerHTML = `<div class="card-head mt"><h3>Dividend history</h3><span class="muted small">per share, ${esc(h.currency)}</span></div>
+      <div class="kpis compact">${kpi('Growth 1y', pct(g.cagr1))}${kpi('Growth 3y', pct(g.cagr3), 'per year')}${kpi('Growth 5y', pct(g.cagr5), 'per year')}${kpi('Raised in a row', `${g.streak} y`)}</div>
+      <div class="chart-box small"><canvas id="dhChart"></canvas></div>`;
+    chart($('#dhChart', el), {
+      type: 'bar',
+      data: { labels: g.annual.map((a) => a.year), datasets: [{ label: tr('Dividend'), data: g.annual.map((a) => a.dps), backgroundColor: g.annual.map((a) => (a.partial ? 'rgba(13,148,136,0.3)' : 'rgba(13,148,136,0.75)')), borderRadius: 3 }] },
+      options: { responsive: true, maintainAspectRatio: false, animation: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${money(c.parsed.y, h.currency, { digits: 4 })}${g.annual[c.dataIndex].partial ? ' (so far)' : ''}` } } },
+        scales: { x: { grid: { display: false } }, y: { ticks: { callback: (v) => num(v, 2) } } } },
+    });
+  }
   const s = market.prices[h.ticker] || new Series();
   segmented($('#hRange', el), RANGES, '1Y', (rg) => {
     const from = rangeStart(rg, txs.length ? txs[txs.length - 1].date : s.dates[0]);

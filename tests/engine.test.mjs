@@ -289,3 +289,15 @@ test('tradeStats: win rate, profit factor, by year', async () => {
   assert.deepEqual(s.byYear.map((y) => [y.year, y.trades, y.gain]), [['2025', 1, 300], ['2024', 2, 50]]);
   assert.equal(tradeStats([]).winRate, null);
 });
+
+test('dividendGrowth: annual sums, CAGR over full years, growth streak', async () => {
+  const { dividendGrowth } = await import('../docs/js/engine.js');
+  const g = dividendGrowth([['2020-03-01', 1], ['2020-09-01', 1], ['2021-03-01', 2.2], ['2022-03-01', 2.4], ['2023-03-01', 2.6], ['2024-03-01', 2.5], ['2025-03-01', 3]], '2025-06-01');
+  assert.deepEqual(g.annual.map((a) => a.dps), [2, 2.2, 2.4, 2.6, 2.5, 3]);
+  assert.ok(g.annual.at(-1).partial);
+  close(g.cagr1, 2.5 / 2.6 - 1);
+  close(g.cagr3, Math.pow(2.5 / 2.2, 1 / 3) - 1);
+  assert.equal(g.cagr5, null); // needs 6 full years
+  assert.equal(g.streak, 0);   // 2024 was a cut
+  assert.equal(dividendGrowth([['2022-01-01', 1], ['2023-01-01', 2], ['2024-01-01', 3]], '2025-01-02').streak, 2);
+});

@@ -98,7 +98,8 @@ label.check { display: inline-flex; align-items: center; gap: 6px; cursor: point
 .kpi { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); min-width: 0; }
 .card .kpi { box-shadow: none; background: var(--bg); border: none; }
 .kpi-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; }
-.kpi-value { font-size: clamp(1.05rem, 1.5vw, 1.3rem); font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.kpi { container-type: inline-size; }
+.kpi-value { font-size: clamp(0.9rem, 8.5cqi, 1.35rem); font-weight: 650; margin-top: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kpi-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 .kpi-sub.pos { color: var(--pos); } .kpi-sub.neg { color: var(--neg); }
 .periods { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
@@ -203,7 +204,6 @@ td.empty { text-align: center; color: var(--muted); padding: 24px; }
   main { padding: 14px 16px 40px; }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .kpis { grid-template-columns: 1fr 1fr; }
-  .kpi-value { font-size: 1rem; }
   .form, .form.map { grid-template-columns: 1fr 1fr; }
   .card-head { flex-wrap: wrap; }
   .hero { padding: 20px; }
@@ -258,3 +258,4 @@ tr.current td { background: var(--accent-soft); }
 .tm-cell { position: absolute; box-sizing: border-box; border: 2px solid var(--card); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 0.8rem; overflow: hidden; text-align: center; }
 .tm-cell b { font-size: 0.85rem; }
 @media (max-width: 760px) { .treemap { height: 280px; } }
+.summary-box { margin: 0 0 12px; } .summary-box p { margin: 6px 0; line-height: 1.5; }

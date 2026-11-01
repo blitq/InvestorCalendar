@@ -148,6 +148,9 @@ const PL = {
   'Heatmap': 'Mapa cieplna', 'Contribution to profit': 'Wkład w zysk', 'Since buy': 'Od zakupu',
   'Closed trades': 'Zamknięte transakcje', 'every sale, matched FIFO': 'każda sprzedaż, rozliczenie FIFO', 'Trades': 'Transakcje', 'Average winner': 'Średni zysk', 'Average loser': 'Średnia strata',
   'Profit factor': 'Współczynnik zysku', 'gains ÷ losses': 'zyski ÷ straty', 'Average holding': 'Średni czas trzymania', 'Winners': 'Zyskowne', 'Held': 'Trzymane', 'No sales yet.': 'Brak sprzedaży.',
+  'P/B': 'C/WK', 'Profit margin': 'Marża zysku', 'ROE': 'ROE', 'Revenue growth': 'Wzrost przychodów', 'Earnings growth': 'Wzrost zysków', 'Debt / equity': 'Dług / kapitał',
+  'Payout ratio': 'Stopa wypłaty', '5y avg yield': 'Śr. stopa dyw. 5 lat', 'Analyst target': 'Cena docelowa analityków', 'Rating': 'Rekomendacja', 'Employees': 'Pracownicy',
+  'Dividend history': 'Historia dywidend', 'Growth 1y': 'Wzrost 1 rok', 'Growth 3y': 'Wzrost 3 lata', 'Growth 5y': 'Wzrost 5 lat', 'per year': 'rocznie', 'Raised in a row': 'Podwyżki z rzędu',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',
@@ -185,6 +188,7 @@ const PATTERNS = [
   [/^Targets add up to$/, 'Suma celów:'], [/^(.+) is ([\d.,]+) pp (above|below) its target weight\.$/, (m, a, b, c) => `${a} odbiega o ${b} pp ${c === 'above' ? 'w górę' : 'w dół'} od docelowego udziału.`],
   [/^positions (.+) · cash, fees & FX (.+)$/, 'pozycje $1 · gotówka, opłaty i kursy $2'],
   [/^(\d+)% winners$/, '$1% zyskownych'], [/^(\d+) d$/, '$1 dni'],
+  [/^per share, ([A-Z]{3})$/, 'na akcję, $1'], [/^About (.+)$/, 'O spółce: $1'], [/^(\d+) y$/, '$1 lat'],
   [/^Sync error: (.+)$/, 'Błąd synchronizacji: $1'], [/^Synced (.+)$/, 'Zsynchronizowano $1'], [/^(\d+) transactions ready/, (m) => m.replace(/^(\d+) transactions ready/, '$1 transakcji gotowych')],
 ];
 

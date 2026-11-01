@@ -17,10 +17,24 @@ QUOTE_FIELDS = {
     "high_52w": ("fiftyTwoWeekHigh",),
     "low_52w": ("fiftyTwoWeekLow",),
     "dividend_rate": ("dividendRate", "trailingAnnualDividendRate"),
+    "payout_ratio": ("payoutRatio",),
+    "five_year_avg_yield": ("fiveYearAvgDividendYield",),
+    "target_price": ("targetMeanPrice",),
+    "recommendation": ("recommendationKey",),
+    "analysts": ("numberOfAnalystOpinions",),
+    "revenue_growth": ("revenueGrowth",),
+    "earnings_growth": ("earningsGrowth",),
+    "profit_margin": ("profitMargins",),
+    "roe": ("returnOnEquity",),
+    "price_to_book": ("priceToBook",),
+    "debt_to_equity": ("debtToEquity",),
+    "employees": ("fullTimeEmployees",),
+    "website": ("website",),
+    "summary": ("longBusinessSummary",),
     "price": ("regularMarketPrice", "currentPrice", "navPrice"),
     "prev_close": ("regularMarketPreviousClose", "previousClose"),
 }
-PRICE_FIELDS = {"high_52w", "low_52w", "price", "prev_close"}  # dividendRate is already in major units
+PRICE_FIELDS = {"high_52w", "low_52w", "price", "prev_close", "target_price"}  # dividendRate is already in major units
 
 
 def unadjust_for_splits(rows, splits):
@@ -106,6 +120,8 @@ def fetch_ticker(ticker, start):
                     val = num(float(val) / divisor)
                 elif isinstance(val, float):
                     val = num(val, 4)
+                elif key == "summary":
+                    val = str(val)[:700]
                 quote[key] = val
                 break
     quote.setdefault("name", ticker)
