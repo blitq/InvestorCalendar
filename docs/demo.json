@@ -3,11 +3,13 @@
  "portfolios": [
   {
    "id": "main",
-   "name": "Main (broker)"
+   "name": "Main (broker)",
+   "type": "regular"
   },
   {
    "id": "ike",
-   "name": "IKE"
+   "name": "IKE",
+   "type": "IKE"
   }
  ],
  "transactions": [

@@ -185,3 +185,23 @@ test('settlement currency: PLN account buying USD shares', () => {
   close(r2.totals.realized, 3);
   close(r2.cash.PLN, 1000 - 40.5 + 3.3 + 43.5);
 });
+
+test('IKE contributions by year: deposits or net purchases', async () => {
+  const { contributionsByYear } = await import('../docs/js/engine.js');
+  const market = new Market({ fx: { PLN: { dates: ['2024-01-01'], usd: [0.25] } } });
+  const dep = contributionsByYear([
+    { portfolioId: 'ike', date: '2024-02-01', type: 'DEPOSIT', amount: 10000, currency: 'PLN' },
+    { portfolioId: 'ike', date: '2024-03-01', type: 'BUY', ticker: 'X', quantity: 1, price: 100, currency: 'USD' },
+    { portfolioId: 'other', date: '2024-03-01', type: 'DEPOSIT', amount: 5, currency: 'PLN' },
+  ], 'ike', market);
+  assert.equal(dep.method, 'deposits');
+  assert.deepEqual(dep.byYear, { 2024: 10000 });
+  const net = contributionsByYear([
+    { portfolioId: 'ike', date: '2024-03-01', type: 'BUY', ticker: 'X', quantity: 1, price: 100, fee: 1, currency: 'USD' },
+    { portfolioId: 'ike', date: '2025-03-01', type: 'BUY', ticker: 'Y', quantity: 10, price: 50, currency: 'PLN' },
+    { portfolioId: 'ike', date: '2025-04-01', type: 'SELL', ticker: 'X', quantity: 1, price: 300, currency: 'PLN', settleAmount: 1200, settleCurrency: 'PLN' },
+  ], 'ike', market);
+  assert.equal(net.method, 'net purchases');
+  close(net.byYear[2024], 404);
+  assert.equal(net.byYear[2025], 0); // sells larger than buys -> floored at 0
+});

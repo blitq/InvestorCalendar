@@ -29,7 +29,8 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Calendar | earnings, dividends, splits and expected dividends for your holdings |
 | Taxes (PIT-38) | FIFO per portfolio, NBP rate from the business day before each transaction, fees as costs, foreign dividend top-up (19% minus withholding) |
 | Watchlist | price, 1D/1M/1Y change, 52-week range, P/E, dividend yield, next event |
-| Other | multiple portfolios (e.g. broker account, IKE/IKZE), any base currency, split handling, manual prices for assets without data, dark mode, mobile layout |
+| Accounts | portfolio types Regular / IKE / IKZE / OIPE; yearly contribution limits with progress and remaining amount, IKZE PIT deduction estimate; tax-free accounts excluded from PIT-38 |
+| Other | multiple portfolios, any base currency, split handling, manual prices for assets without data, dark mode, mobile layout |
 
 ### How the numbers work
 - **Cash mode**: if a portfolio has DEPOSIT/WITHDRAWAL transactions, its cash balances count towards its value and deposits

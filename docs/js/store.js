@@ -54,6 +54,7 @@ export const store = {
   setSettings(patch) { state.settings = { ...state.settings, ...patch }; persist(); },
 
   addPortfolio(name) { const p = { id: uid(), name }; state.portfolios.push(p); persist(); return p; },
+  setPortfolioType(id, type) { const p = state.portfolios.find((x) => x.id === id); if (p) { p.type = type; persist(); } },
   renamePortfolio(id, name) { const p = state.portfolios.find((x) => x.id === id); if (p) { p.name = name; persist(); } },
   deletePortfolio(id) {
     if (state.portfolios.length <= 1) return false;

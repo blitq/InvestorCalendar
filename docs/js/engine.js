@@ -656,3 +656,37 @@ export function groupBy(holdings, keyFn) {
   return [...m.entries()].map(([label, value]) => ({ label, value, weight: total ? value / total : 0 }))
     .sort((a, b) => b.value - a.value);
 }
+
+// ---------------------------------------------------------------- IKE / IKZE
+
+export const ACCOUNT_TYPES = { regular: 'Regular (taxable)', IKE: 'IKE', IKZE: 'IKZE', OIPE: 'OIPE (PEPP)' };
+export const TAX_FREE_TYPES = new Set(['IKE', 'IKZE', 'OIPE']);
+// Statutory annual contribution limits in PLN (editable in Settings; IKZE ×1.5 for the self-employed).
+export const DEFAULT_LIMITS = {
+  IKE: { 2019: 13785, 2020: 15681, 2021: 15777, 2022: 17766, 2023: 20805, 2024: 23472, 2025: 26019, 2026: 28260 },
+  IKZE: { 2019: 5514, 2020: 6272.4, 2021: 6310.8, 2022: 7106.4, 2023: 8322, 2024: 9388.8, 2025: 10407.6, 2026: 11304 },
+};
+
+/**
+ * Contributions per calendar year (PLN) for one portfolio. Uses DEPOSITs when the portfolio
+ * records them, otherwise net purchases (buys − sells, floored at 0) as an approximation.
+ */
+export function contributionsByYear(transactions, portfolioId, market) {
+  const txs = transactions.filter((t) => t.portfolioId === portfolioId);
+  const useDeposits = txs.some((t) => t.type === 'DEPOSIT');
+  const pln = (amt, ccy, d) => amt * (market.fxRate(ccy || 'PLN', 'PLN', d) ?? 1);
+  const out = {};
+  for (const t of txs) {
+    const y = t.date.slice(0, 4);
+    let v = 0;
+    if (useDeposits) {
+      if (t.type === 'DEPOSIT') v = pln(n(t.amount), t.currency, t.date);
+    } else if (t.type === 'BUY' || t.type === 'SELL') {
+      const local = n(t.quantity) * n(t.price) + (t.type === 'BUY' ? 1 : -1) * n(t.fee);
+      v = (t.type === 'BUY' ? 1 : -1) * (t.settleCurrency ? pln(n(t.settleAmount), t.settleCurrency, t.date) : pln(local, t.currency, t.date));
+    }
+    out[y] = (out[y] || 0) + v;
+  }
+  for (const y of Object.keys(out)) out[y] = Math.max(0, out[y]);
+  return { byYear: out, method: useDeposits ? 'deposits' : 'net purchases' };
+}

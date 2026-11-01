@@ -1,7 +1,7 @@
 // All page views. Each export renders into `el` using the shared context from app.js.
 import {
   TX_TYPES, addDays, todayISO, periodStats, benchmarkSeries, forecastDividends, trailingYield,
-  computePolishTax, groupBy, Series,
+  computePolishTax, groupBy, Series, ACCOUNT_TYPES, TAX_FREE_TYPES, DEFAULT_LIMITS, contributionsByYear,
 } from './engine.js';
 import { buildMarket, loadEvents, loadHistories, loadNbp } from './data.js';
 import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from './importers.js';
@@ -75,6 +75,7 @@ export async function dashboard(el, ctx) {
     <div class="card-head"><h3>Returns by period</h3></div>
     <div class="periods" id="periods"></div>
   </div>
+  ${accountsCard(ctx)}
   <div id="masterHost"></div>
   <div class="grid-2-1">
     <div class="card">
@@ -113,6 +114,26 @@ export async function dashboard(el, ctx) {
   const until = addDays(today, 30);
   const up = events.filter((e) => held.has(e.ticker) && e.date >= today && e.date <= until).slice(0, 8);
   $('#upcoming').innerHTML = up.length ? up.map((e) => `<div class="mini-row"><span><span class="tag ${e.type}">${e.type}</span> <b>${esc(e.ticker)}</b></span><span class="muted">${fmtDate(e.date)}</span></div>`).join('') : '<div class="muted">Nothing in the next 30 days.</div>';
+}
+
+function accountsCard(ctx) {
+  const accts = ctx.state.portfolios.filter((p) => (p.type === 'IKE' || p.type === 'IKZE') && (ctx.selected === 'all' || ctx.selected === p.id));
+  if (!accts.length) return '';
+  const year = ctx.result.today.slice(0, 4);
+  const st = ctx.settings;
+  const limit = (kind) => (st.limits?.[kind]?.[year] ?? DEFAULT_LIMITS[kind][year] ?? null) * (kind === 'IKZE' && st.ikzeSelfEmployed ? 1.5 : 1);
+  const rows = accts.map((p) => {
+    const { byYear, method } = contributionsByYear(ctx.state.transactions, p.id, ctx.market);
+    const paid = byYear[year] || 0, lim = limit(p.type);
+    const left = lim ? Math.max(0, lim - paid) : null;
+    const over = lim && paid > lim + 0.5;
+    const ded = p.type === 'IKZE' ? `<div class="muted small">PIT deduction on ${money(Math.min(paid, lim || paid), 'PLN', { digits: 0 })}: ≈ ${money(Math.min(paid, lim || paid) * 0.12, 'PLN', { digits: 0 })} at 12% · ${money(Math.min(paid, lim || paid) * 0.32, 'PLN', { digits: 0 })} at 32% · ${money(Math.min(paid, lim || paid) * 0.19, 'PLN', { digits: 0 })} at 19% (linear). Withdrawal after 65 is taxed at a flat 10%.</div>` : '';
+    return `<div class="acct"><div class="row gap wrap"><b>${esc(p.name)}</b><span class="tag">${p.type}</span><span class="grow"></span>
+      <span>${money(paid, 'PLN')} ${lim ? `of ${money(lim, 'PLN', { digits: 0 })}` : ''}</span></div>
+      ${lim ? `<div class="bar big"><i style="width:${Math.min(100, (paid / lim) * 100).toFixed(1)}%;${over ? 'background:var(--neg)' : ''}"></i></div>` : ''}
+      <div class="small ${over ? 'neg' : 'muted'}">${over ? `Over the ${year} limit by ${money(paid - lim, 'PLN')} — the excess must be returned.` : lim ? `${money(left, 'PLN')} left for ${year}` : `No ${year} limit set (Settings)`} · counted from ${method}${(byYear[+year - 1]) ? ` · ${+year - 1}: ${money(byYear[+year - 1], 'PLN', { digits: 0 })}` : ''}</div>${ded}</div>`;
+  }).join('');
+  return `<div class="card"><div class="card-head"><h3>Retirement accounts ${year}</h3><a href="#/settings" class="link">limits →</a></div>${rows}</div>`;
 }
 
 function short(s, n = 22) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
@@ -845,8 +866,10 @@ export async function taxes(el, ctx) {
   if (!ctx.state.transactions.length) return emptyState(el, ctx);
   const tickers = [...new Set(ctx.state.transactions.filter((t) => t.ticker).map((t) => t.ticker))];
   const market = await buildMarket(tickers, { withNbp: true, manualPrices: ctx.settings.manualPrices });
-  const txs = ctx.selected === 'all' ? ctx.state.transactions : ctx.txs;
+  const taxFree = new Set(ctx.state.portfolios.filter((p) => TAX_FREE_TYPES.has(p.type)).map((p) => p.id));
+  const txs = (ctx.selected === 'all' ? ctx.state.transactions : ctx.txs).filter((t) => !taxFree.has(t.portfolioId));
   const tax = computePolishTax(txs, market);
+  const excludedNote = taxFree.size ? `<div class="muted small">Excluded as tax-free: ${ctx.state.portfolios.filter((p) => taxFree.has(p.id)).map((p) => esc(p.name)).join(', ')} (IKE / IKZE / OIPE).</div>` : '';
   if (!tax.years.length) {
     el.innerHTML = '<div class="card"><h3>No taxable events yet</h3><p class="muted">Sales and recorded dividends will show up here.</p></div>';
     return;
@@ -856,7 +879,7 @@ export async function taxes(el, ctx) {
   const P = (v) => money(v, 'PLN');
   el.innerHTML = `
   <div class="alert info">Estimate of the Polish <b>PIT-38</b> using FIFO per portfolio (treat each portfolio as one broker account) and NBP mid rates from the business day before each transaction.
-    Not tax advice — check against your broker's PIT-8C. Prior-year losses (up to 50% per year for 5 years) are not deducted automatically.</div>
+    Not tax advice — check against your broker's PIT-8C. Prior-year losses (up to 50% per year for 5 years) are not deducted automatically.${excludedNote}</div>
   ${tax.warnings.length ? `<div class="alert"><ul>${tax.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
   <div class="card"><div class="card-head"><h3>Tax year</h3><div class="seg" id="yearSeg">${tax.years.map((x) => `<button class="${x.year === y.year ? 'on' : ''}" data-y="${x.year}">${x.year}</button>`).join('')}</div></div>
     <div class="kpis">
@@ -957,6 +980,11 @@ export async function settings(el, ctx) {
       <h3 class="mt">Portfolios</h3>
       <div id="pfList"></div>
       <form id="pfAdd" class="row gap mt"><input name="n" placeholder="New portfolio name (e.g. IKE, XTB, mBank)" required class="grow"><button class="btn">Add</button></form>
+      <h3 class="mt">IKE / IKZE limits</h3>
+      <p class="muted small">Annual contribution limits in PLN. Edit if the official figure differs.</p>
+      <div class="form"><label>Year<select id="limYear">${Object.keys({ ...DEFAULT_LIMITS.IKE, ...(st.limits?.IKE || {}) }).sort().reverse().map((y) => `<option>${y}</option>`).join('')}</select></label>
+        <span></span><label>IKE limit<input type="number" step="any" id="limIKE"></label><label>IKZE limit<input type="number" step="any" id="limIKZE"></label>
+        <label class="check full"><input type="checkbox" id="limSelf" ${st.ikzeSelfEmployed ? 'checked' : ''}> I am self-employed (IKZE limit × 1.5)</label></div>
     </div>
     <div class="card">
       <h3>Backup &amp; data</h3>
@@ -993,9 +1021,19 @@ export async function settings(el, ctx) {
   </div>`;
 
   $('#sBase').addEventListener('change', (e) => store.setSettings({ baseCurrency: e.target.value }));
+  const limits = (kind, y) => st.limits?.[kind]?.[y] ?? DEFAULT_LIMITS[kind][y] ?? '';
+  const showLim = () => { const y = $('#limYear').value; $('#limIKE').value = limits('IKE', y); $('#limIKZE').value = limits('IKZE', y); };
+  $('#limYear').addEventListener('change', showLim); showLim();
+  ['IKE', 'IKZE'].forEach((k) => $(`#lim${k}`).addEventListener('change', (e) => {
+    const y = $('#limYear').value, cur = st.limits || {};
+    store.setSettings({ limits: { ...cur, [k]: { ...(cur[k] || {}), [y]: +e.target.value } } });
+  }));
+  $('#limSelf').addEventListener('change', (e) => store.setSettings({ ikzeSelfEmployed: e.target.checked }));
   $('#sAuto').addEventListener('change', (e) => store.setSettings({ autoDividends: e.target.checked }));
   $('#pfList').innerHTML = s.portfolios.map((p) => `<div class="mini-row"><span><b>${esc(p.name)}</b> <span class="muted small">${s.transactions.filter((t) => t.portfolioId === p.id).length} tx</span></span>
-    <span><button class="icon-btn" data-ren="${esc(p.id)}" title="Rename">✎</button>${s.portfolios.length > 1 ? `<button class="icon-btn" data-delp="${esc(p.id)}" title="Delete">🗑</button>` : ''}</span></div>`).join('');
+    <span class="row gap"><select class="sm" data-ptype="${esc(p.id)}" title="Account type">${Object.entries(ACCOUNT_TYPES).map(([k, v]) => `<option value="${k}" ${(p.type || 'regular') === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+    <button class="icon-btn" data-ren="${esc(p.id)}" title="Rename">✎</button>${s.portfolios.length > 1 ? `<button class="icon-btn" data-delp="${esc(p.id)}" title="Delete">🗑</button>` : ''}</span></div>`).join('');
+  $('#pfList').addEventListener('change', (e) => { const sel = e.target.closest('[data-ptype]'); if (sel) store.setPortfolioType(sel.dataset.ptype, sel.value); });
   $('#pfList').addEventListener('click', (e) => {
     const r = e.target.closest('[data-ren]'), d = e.target.closest('[data-delp]');
     if (r) { const n = prompt('New name', ctx.portfolioName(r.dataset.ren)); if (n) store.renamePortfolio(r.dataset.ren, n.trim()); }
