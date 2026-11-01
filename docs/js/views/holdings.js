@@ -97,7 +97,16 @@ export function holdingModal(h, ctx) {
     <div class="chart-box"><canvas id="hChart"></canvas></div>
     <div id="divHist"></div>
     ${h.lots.length ? `<h3 class="mt">Open lots (FIFO)</h3><div id="lotsT"></div>` : ''}
-    <h3 class="mt">Transactions</h3><div id="txT"></div>`, { wide: true });
+    <h3 class="mt">Transactions</h3><div id="txT"></div>
+    <div class="row gap mt"><button class="btn sm-btn" id="renameTk" title="Ticker changed, merger, or wrong symbol: rewrite all transactions">Change ticker…</button></div>`, { wide: true });
+  $('#renameTk', el).addEventListener('click', () => {
+    const to = (prompt(`New ticker for ${h.ticker} (Yahoo symbol). All transactions with ${h.ticker} will be updated.`, '') || '').trim().toUpperCase();
+    if (!to || to === h.ticker) return;
+    const n = store.renameTickers({ [h.ticker]: to });
+    store.setSettings({ symbolMap: { ...(ctx.settings.symbolMap || {}), [h.ticker]: to } });
+    toast(`${n} transactions moved to ${to}`);
+    document.querySelector('.modal-bg')?.remove();
+  });
 
   const g = dividendGrowth(market.dividends(h.ticker), ctx.result.today);
   if (g.annual.length) {

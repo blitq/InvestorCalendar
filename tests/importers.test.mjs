@@ -62,3 +62,10 @@ test('settlement columns round trip', () => {
   const { transactions } = rowsToTransactions(rows, detectColumns(headers), { portfolioId: 'a' });
   assert.deepEqual(transactions[0], txs[0]);
 });
+
+test('CONVERSION rows import with target amount and currency', () => {
+  const { headers, rows } = parseCSV('date,type,amount,currency,toAmount,toCurrency\n2024-01-02,Wymiana walut,4000,PLN,990,USD\n2024-01-03,conversion,10,PLN,,');
+  const { transactions, errors } = rowsToTransactions(rows, detectColumns(headers), { portfolioId: 'p' });
+  assert.deepEqual(transactions[0], { portfolioId: 'p', date: '2024-01-02', type: 'CONVERSION', currency: 'PLN', amount: 4000, toAmount: 990, toCurrency: 'USD' });
+  assert.equal(errors.length, 1);
+});

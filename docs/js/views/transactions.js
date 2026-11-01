@@ -18,7 +18,7 @@ export function txTable(el, txs, ctx, { compact = false } = {}) {
     { key: 'ticker', label: tr('Ticker'), render: (t) => `<b>${esc(t.ticker || '')}</b>` },
     { key: 'quantity', label: tr('Qty'), cls: 'num', render: (t) => (t.quantity ? qty(t.quantity) : '') },
     { key: 'price', label: tr('Price'), cls: 'num', render: (t) => (t.price ? money(t.price, t.currency) : '') },
-    { key: 'total', label: tr('Total'), cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') },
+    { key: 'total', label: tr('Total'), cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') + (t.type === 'CONVERSION' ? `<div class="small muted">→ ${money(t.toAmount, t.toCurrency)}</div>` : '') },
     { key: 'fee', label: tr('Fee / tax'), cls: 'num', sort: (t) => (t.fee || t.tax || 0), render: (t) => (t.fee || t.tax ? money(t.fee || t.tax, t.currency) : '') },
     ...(compact ? [] : [{ key: 'note', label: tr('Note'), render: (t) => `<span class="muted small">${esc(short(t.note || '', 30))}</span>` },
       { key: 'actions', label: '', render: (t) => `<button class="icon-btn" data-edit="${esc(t.id)}" title="Edit">✎</button><button class="icon-btn" data-del="${esc(t.id)}" title="Delete">🗑</button>` }]),
@@ -90,6 +90,8 @@ export function txForm(ctx, tx = null) {
       <label data-f="amount"><span data-amount-label>Amount</span><input type="number" step="any" min="0" name="amount" value="${tx?.amount ?? ''}"></label>
       <label data-f="tax">Tax withheld<input type="number" step="any" min="0" name="tax" value="${tx?.tax ?? ''}"></label>
       <label>Currency<input name="currency" maxlength="3" required value="${esc(tx?.currency || ctx.base)}" style="text-transform:uppercase"></label>
+      <label data-f="to">Received amount<input type="number" step="any" min="0" name="toAmount" value="${tx?.toAmount ?? ''}"></label>
+      <label data-f="to">Received currency<input name="toCurrency" maxlength="3" value="${esc(tx?.toCurrency || '')}" style="text-transform:uppercase" placeholder="USD"></label>
       <details class="full settle" data-f="settle" ${tx?.settleCurrency ? 'open' : ''}><summary class="small">Paid / received in another currency (e.g. PLN account buying USD shares)</summary>
         <div class="form">
           <label>Account currency<input name="settleCurrency" maxlength="3" placeholder="PLN" value="${esc(tx?.settleCurrency || '')}" style="text-transform:uppercase"></label>
@@ -103,12 +105,12 @@ export function txForm(ctx, tx = null) {
       <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${tx ? 'Save' : 'Add'}</button></div>
     </form>`);
   const f = $('#txf', el);
-  const FIELDS_BY_TYPE = { BUY: ['ticker', 'quantity', 'price', 'fee', 'settle'], SELL: ['ticker', 'quantity', 'price', 'fee', 'settle'], DIVIDEND: ['ticker', 'amount', 'tax', 'settle'] };
+  const FIELDS_BY_TYPE = { BUY: ['ticker', 'quantity', 'price', 'fee', 'settle'], SELL: ['ticker', 'quantity', 'price', 'fee', 'settle'], DIVIDEND: ['ticker', 'amount', 'tax', 'settle'], CONVERSION: ['amount', 'to'] };
   const sync = () => {
     const type = f.type.value;
     const show = FIELDS_BY_TYPE[type] || ['amount'];
     $$('[data-f]', f).forEach((l) => { l.hidden = !show.includes(l.dataset.f); });
-    $('[data-amount-label]', f).textContent = type === 'DIVIDEND' ? 'Gross amount' : 'Amount';
+    $('[data-amount-label]', f).textContent = type === 'DIVIDEND' ? 'Gross amount' : type === 'CONVERSION' ? 'Amount sold' : 'Amount';
     $('[data-settle-label]', f).textContent = type === 'BUY' ? 'Total charged' : 'Total received';
     const tk = f.ticker.value.trim().toUpperCase();
     const hint = [];
@@ -145,6 +147,11 @@ export function txForm(ctx, tx = null) {
     const want = FIELDS_BY_TYPE[type] || ['amount'];
     for (const k of want) {
       if (k === 'ticker') { if (fd.ticker) out.ticker = fd.ticker.trim().toUpperCase(); continue; }
+      if (k === 'to') {
+        out.toAmount = +fd.toAmount || 0; out.toCurrency = (fd.toCurrency || '').trim().toUpperCase();
+        if (!out.toAmount || !out.toCurrency) return toast('Received amount and currency are required', 'error');
+        continue;
+      }
       if (k === 'settle') {
         const sc = (fd.settleCurrency || '').trim().toUpperCase();
         if (sc && sc !== out.currency && +fd.settleAmount > 0) { out.settleCurrency = sc; out.settleAmount = +fd.settleAmount; }

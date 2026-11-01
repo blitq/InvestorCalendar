@@ -1,7 +1,7 @@
 // CSV import/export with automatic column detection (English + Polish headers).
 // Pure functions — tested in Node.
 
-export const FIELDS = ['date', 'type', 'ticker', 'quantity', 'price', 'fee', 'amount', 'tax', 'currency', 'settleAmount', 'settleCurrency', 'note'];
+export const FIELDS = ['date', 'type', 'ticker', 'quantity', 'price', 'fee', 'amount', 'tax', 'currency', 'settleAmount', 'settleCurrency', 'toAmount', 'toCurrency', 'note'];
 
 const SYNONYMS = {
   date: ['date', 'data', 'trade date', 'data transakcji', 'czas', 'time', 'open time', 'close time', 'execution date', 'settlement date'],
@@ -15,6 +15,8 @@ const SYNONYMS = {
   currency: ['currency', 'waluta', 'ccy', 'curr'],
   note: ['note', 'notes', 'comment', 'komentarz', 'uwagi', 'description', 'opis'],
   settleAmount: ['settleamount', 'settle amount', 'settlement amount', 'kwota rozliczenia', 'wartość rozliczenia', 'wartosc rozliczenia', 'total in account currency', 'account amount'],
+  toAmount: ['toamount', 'to amount', 'amount received', 'kwota docelowa', 'kwota po wymianie'],
+  toCurrency: ['tocurrency', 'to currency', 'target currency', 'waluta docelowa'],
   settleCurrency: ['settlecurrency', 'settle currency', 'settlement currency', 'waluta rozliczenia', 'account currency', 'waluta rachunku'],
 };
 
@@ -27,6 +29,7 @@ const TYPE_WORDS = [
   ['FEE', ['fee', 'prowizja', 'opłata', 'oplata', 'commission', 'custody fee']],
   ['INTEREST', ['interest', 'odsetki', 'free funds interest']],
   ['TAX', ['tax', 'podatek', 'withholding tax']],
+  ['CONVERSION', ['conversion', 'exchange', 'fx', 'currency exchange', 'wymiana', 'przewalutowanie', 'wymiana walut']],
 ];
 
 export function detectDelimiter(text) {
@@ -172,6 +175,11 @@ export function rowsToTransactions(rows, mapping, defaults = {}) {
       tx.amount = Math.abs(amount);
       if (ticker) tx.ticker = ticker;
       if (type === 'DIVIDEND') { tx.tax = Math.abs(parseNumber(get(r, 'tax')) || 0); Object.assign(tx, settle); }
+      if (type === 'CONVERSION') {
+        tx.toAmount = Math.abs(parseNumber(get(r, 'toAmount')) || 0);
+        tx.toCurrency = String(get(r, 'toCurrency') || '').trim().toUpperCase().slice(0, 3);
+        if (!tx.toAmount || !tx.toCurrency) { errors.push({ row: rowNo, message: 'conversion needs toAmount and toCurrency' }); return; }
+      }
     }
     transactions.push(tx);
   });

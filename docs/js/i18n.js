@@ -151,6 +151,8 @@ const PL = {
   'P/B': 'C/WK', 'Profit margin': 'Marża zysku', 'ROE': 'ROE', 'Revenue growth': 'Wzrost przychodów', 'Earnings growth': 'Wzrost zysków', 'Debt / equity': 'Dług / kapitał',
   'Payout ratio': 'Stopa wypłaty', '5y avg yield': 'Śr. stopa dyw. 5 lat', 'Analyst target': 'Cena docelowa analityków', 'Rating': 'Rekomendacja', 'Employees': 'Pracownicy',
   'Dividend history': 'Historia dywidend', 'Growth 1y': 'Wzrost 1 rok', 'Growth 3y': 'Wzrost 3 lata', 'Growth 5y': 'Wzrost 5 lat', 'per year': 'rocznie', 'Raised in a row': 'Podwyżki z rzędu',
+  'Received amount': 'Otrzymana kwota', 'Received currency': 'Otrzymana waluta', 'Amount sold': 'Sprzedana kwota', 'Change ticker…': 'Zmień ticker…',
+  'Ticker changed, merger, or wrong symbol: rewrite all transactions': 'Zmiana tickera, fuzja lub błędny symbol: popraw wszystkie transakcje', 'CONVERSION': 'WYMIANA',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',

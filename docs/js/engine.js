@@ -6,6 +6,7 @@
 //   DIVIDEND             ticker, amount (gross), tax (withheld at source)
 //   DEPOSIT / WITHDRAWAL amount             -> switches the portfolio into "cash mode"
 //   FEE / INTEREST / TAX amount
+//   CONVERSION           amount (sold, in currency) → toAmount in toCurrency (cash exchange, not a flow)
 //   optional on BUY/SELL/DIVIDEND: settleAmount + settleCurrency = cash actually moved in the
 //   account currency (e.g. PLN paid for USD shares, incl. fees and FX spread)
 //
@@ -13,8 +14,8 @@
 // its value and deposits/withdrawals are the external flows. Otherwise every buy is
 // treated as fresh money in and every sell / dividend as money taken out.
 
-export const TX_TYPES = ['BUY', 'SELL', 'DIVIDEND', 'DEPOSIT', 'WITHDRAWAL', 'FEE', 'INTEREST', 'TAX'];
-const TYPE_ORDER = { DEPOSIT: 0, INTEREST: 1, BUY: 2, SELL: 3, DIVIDEND: 4, FEE: 5, TAX: 6, WITHDRAWAL: 7 };
+export const TX_TYPES = ['BUY', 'SELL', 'DIVIDEND', 'DEPOSIT', 'WITHDRAWAL', 'FEE', 'INTEREST', 'TAX', 'CONVERSION'];
+const TYPE_ORDER = { DEPOSIT: 0, INTEREST: 1, CONVERSION: 2, BUY: 3, SELL: 4, DIVIDEND: 5, FEE: 6, TAX: 7, WITHDRAWAL: 8 };
 export const PL_TAX_RATE = 0.19;
 const EPS = 1e-9;
 
@@ -362,6 +363,11 @@ export function computePortfolio(transactions, market, opts = {}) {
         case 'INTEREST':
           totals.interest += n(t.amount) * rate;
           if (cm) addCash(pid, ccy, n(t.amount)); else flowOut -= n(t.amount) * rate;
+          break;
+        case 'CONVERSION':
+          // internal: cash changes currency; the FX spread shows up as a (small) loss in value
+          if (cm) { addCash(pid, ccy, -n(t.amount)); addCash(pid, (t.toCurrency || base).toUpperCase(), n(t.toAmount)); }
+          else warnings.add('Currency conversions only matter in portfolios that record deposits (cash tracking).');
           break;
         case 'FEE':
         case 'TAX':

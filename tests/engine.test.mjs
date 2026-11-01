@@ -301,3 +301,15 @@ test('dividendGrowth: annual sums, CAGR over full years, growth streak', async (
   assert.equal(g.streak, 0);   // 2024 was a cut
   assert.equal(dividendGrowth([['2022-01-01', 1], ['2023-01-01', 2], ['2024-01-01', 3]], '2025-01-02').streak, 2);
 });
+
+test('CONVERSION moves cash between currencies without being a flow', () => {
+  const market = new Market({ fx: { PLN: { dates: ['2024-01-01'], usd: [0.25] } } });
+  const r = computePortfolio([
+    { portfolioId: 'p', date: '2024-01-01', type: 'DEPOSIT', amount: 4000, currency: 'PLN' },
+    { portfolioId: 'p', date: '2024-01-02', type: 'CONVERSION', amount: 4000, currency: 'PLN', toAmount: 990, toCurrency: 'USD' },
+  ], market, { base: 'PLN', today: '2024-01-03' });
+  assert.deepEqual(r.cash, { USD: 990 });
+  close(r.totals.invested, 4000);
+  close(r.totals.value, 3960);   // 990 USD × 4 PLN
+  close(r.totals.profit, -40);   // the spread
+});
