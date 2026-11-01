@@ -1,7 +1,7 @@
 // transactions page — split from the former views.js
 import { TX_TYPES, todayISO, Series } from '../engine.js';
 import { loadHistories } from '../data.js';
-import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from '../importers.js';
+import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint, gpwTicker } from '../importers.js';
 import { store } from '../store.js';
 import { t as tr } from '../i18n.js';
 import { detectBroker, PARSERS, BROKER_NAMES } from '../brokers.js';
@@ -263,7 +263,7 @@ export function importDialog(ctx) {
     // symbol mapping: remembered map → anything unknown or unresolved ISINs
     const saved = s.settings.symbolMap || {};
     const symbols = [...new Set(outcome.transactions.map((t) => t.ticker).filter(Boolean))];
-    for (const sym of symbols) if (!(sym in symMap)) symMap[sym] = saved[sym] || (sym.startsWith('ISIN:') ? '' : sym);
+    for (const sym of symbols) if (!(sym in symMap)) symMap[sym] = saved[sym] || gpwTicker(sym) || (sym.startsWith('ISIN:') ? '' : sym);
     const unknown = symbols.filter((sym) => sym.startsWith('ISIN:') || !known.has(symMap[sym] || sym) || saved[sym]);
     $('#symBox', el).innerHTML = unknown.length ? `<h4>Symbols <span class="muted small">— use Yahoo Finance tickers (AAPL, PKO.WA, VWCE.DE). Saved for future imports.</span></h4>
       <div class="sym-grid">${unknown.map((sym) => {

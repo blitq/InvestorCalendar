@@ -69,3 +69,21 @@ test('CONVERSION rows import with target amount and currency', () => {
   assert.deepEqual(transactions[0], { portfolioId: 'p', date: '2024-01-02', type: 'CONVERSION', currency: 'PLN', amount: 4000, toAmount: 990, toCurrency: 'USD' });
   assert.equal(errors.length, 1);
 });
+
+test('mBank-style export in Windows-1250 with GPW short names', async () => {
+  const { decodeBytes, gpwTicker } = await import('../docs/js/importers.js');
+  // "Czas transakcji;Walor;Giełda;K/S;Liczba;Kurs;Waluta;Prowizja" encoded in cp1250 (ł = 0xB3)
+  const head = 'Czas transakcji;Walor;Giełda;K/S;Liczba;Kurs;Waluta;Prowizja\n';
+  const body = '05.03.2024 10:01:02;PKNORLEN;WWA-GPW;K;10;63,50;PLN;3,00\n06.03.2024 11:00:00;ETFBW20TR;WWA-GPW;S;2;120,00;PLN;1,00\n';
+  const bytes = Uint8Array.from([...head + body].map((c) => (c === 'ł' ? 0xb3 : c.charCodeAt(0))));
+  const text = decodeBytes(bytes);
+  assert.ok(text.includes('Giełda'));
+  const { headers, rows } = parseCSV(text);
+  const m = detectColumns(headers);
+  const { transactions, errors } = rowsToTransactions(rows, m, { portfolioId: 'p', currency: 'PLN' });
+  assert.deepEqual(errors, []);
+  assert.deepEqual(transactions.map((t) => [t.type, t.ticker, t.quantity, t.price, t.fee]), [['BUY', 'PKN.WA', 10, 63.5, 3], ['SELL', 'ETFBW20TR.WA', 2, 120, 1]]);
+  assert.equal(gpwTicker('cd projekt'.replace(' ', '')), 'CDR.WA');
+  assert.equal(gpwTicker('AAPL'), null);
+  assert.equal(decodeBytes(new TextEncoder().encode('﻿zażółć')), 'zażółć');
+});
