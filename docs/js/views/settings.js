@@ -62,6 +62,12 @@ export async function settings(el, ctx) {
     </div>
   </div>
   <div class="card">
+    <h3>Benchmarks</h3>
+    <p class="muted small">Compare your portfolio with the indices from <code>config.json</code> or with any tracked ticker (for example the ETF you would otherwise buy).</p>
+    <div id="bmList"></div>
+    <form id="bmAdd" class="row gap wrap mt"><select name="t" class="sm">${(ctx.meta.tickers || []).filter((t) => !ctx.meta.benchmarks?.[t]).map((t) => `<option value="${esc(t)}">${esc(t)} · ${esc(ctx.quotes[t]?.name || '')}</option>`).join('')}</select><button class="btn">Add benchmark</button></form>
+  </div>
+  <div class="card">
     <h3>Taxes</h3>
     <div class="form">
       <label>Exchange-rate date for trades<select id="tDate"><option value="trade">Trade date (NBP rate from the day before)</option><option value="settlement">Settlement date T+2</option></select></label>
@@ -89,6 +95,10 @@ export async function settings(el, ctx) {
   }));
   $('#limSelf').addEventListener('change', (e) => store.setSettings({ ikzeSelfEmployed: e.target.checked }));
   $('#sAuto').addEventListener('change', (e) => store.setSettings({ autoDividends: e.target.checked }));
+  const extraB = st.extraBenchmarks || [];
+  $('#bmList').innerHTML = Object.entries(ctx.meta.benchmarks || {}).map(([t, name]) => `<div class="mini-row"><span><b>${esc(t)}</b> <span class="muted small">${esc(name)}</span></span>${extraB.includes(t) ? `<button class="icon-btn" data-rmbm="${esc(t)}" title="Remove">✕</button>` : '<span class="muted small">config.json</span>'}</div>`).join('');
+  $('#bmList').addEventListener('click', (e) => { const b = e.target.closest('[data-rmbm]'); if (b) store.setSettings({ extraBenchmarks: extraB.filter((x) => x !== b.dataset.rmbm) }); });
+  $('#bmAdd').addEventListener('submit', (e) => { e.preventDefault(); const t = e.target.t.value; if (t) store.setSettings({ extraBenchmarks: [...new Set([...extraB, t])] }); });
   $('#tDate').value = st.taxDateMode || 'trade';
   $('#tDate').addEventListener('change', (e) => store.setSettings({ taxDateMode: e.target.value }));
   $('#tCarry').addEventListener('change', (e) => store.setSettings({ taxCarryForward: e.target.checked }));

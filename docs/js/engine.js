@@ -939,3 +939,20 @@ export function taxReportCSV(y) {
   ];
   return [...rows, ...sum].map((r) => r.map(esc).join(',')).join('\n');
 }
+
+// ---------------------------------------------------------------- risk statistics
+
+/** Annualised TWR, volatility, max drawdown and Sharpe (rf = 0) from a daily series. */
+export function riskStats(series) {
+  const { dates, twr } = series;
+  if (!dates.length) return { years: 0, cagr: null, vol: null, mdd: 0, mddDate: null, sharpe: null };
+  const rets = [];
+  for (let i = 1; i < twr.length; i++) if (twr[i - 1] > 0 && twr[i] !== twr[i - 1]) rets.push(twr[i] / twr[i - 1] - 1);
+  const mean = rets.reduce((a, b) => a + b, 0) / (rets.length || 1);
+  const vol = rets.length > 1 ? Math.sqrt(rets.reduce((a, b) => a + (b - mean) ** 2, 0) / (rets.length - 1)) * Math.sqrt(252) : null;
+  let peak = 0, mdd = 0, mddDate = null;
+  for (let i = 0; i < twr.length; i++) { peak = Math.max(peak, twr[i]); const dd = twr[i] / peak - 1; if (dd < mdd) { mdd = dd; mddDate = dates[i]; } }
+  const years = (Date.parse(dates[dates.length - 1]) - Date.parse(dates[0])) / (365.25 * 864e5);
+  const cagr = years > 0.5 ? Math.pow(twr[twr.length - 1], 1 / years) - 1 : null;
+  return { years, cagr, vol, mdd, mddDate, sharpe: cagr !== null && vol ? cagr / vol : null };
+}

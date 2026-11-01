@@ -1,5 +1,5 @@
 // analysis page — split from the former views.js
-import { periodStats, benchmarkSeries, groupBy, contributions, addDays } from '../engine.js';
+import { periodStats, benchmarkSeries, groupBy, contributions, addDays, riskStats, computePortfolio, xirr } from '../engine.js';
 import { squarify } from '../treemap.js';
 import { t as tr } from '../i18n.js';
 import { $, $$, esc, money, num, pct, cls, fmtDate, kpi, toast, table, chart, cssVar, PALETTE, downsample } from '../ui.js';
@@ -29,15 +29,8 @@ export async function analysis(el, ctx) {
   }
 
   // risk & yearly stats from daily TWR index
-  const { dates, twr, value } = r.series;
-  const rets = [];
-  for (let i = 1; i < twr.length; i++) if (twr[i - 1] > 0 && twr[i] !== twr[i - 1]) rets.push(twr[i] / twr[i - 1] - 1);
-  const mean = rets.reduce((a, b) => a + b, 0) / (rets.length || 1);
-  const vol = Math.sqrt(rets.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, rets.length - 1)) * Math.sqrt(252);
-  let peak = 0, mdd = 0, mddDate = null;
-  for (let i = 0; i < twr.length; i++) { peak = Math.max(peak, twr[i]); const dd = twr[i] / peak - 1; if (dd < mdd) { mdd = dd; mddDate = dates[i]; } }
-  const years = (Date.parse(dates[dates.length - 1]) - Date.parse(dates[0])) / (365.25 * 864e5);
-  const cagr = years > 0.5 ? Math.pow(twr[twr.length - 1], 1 / years) - 1 : null;
+  const { dates, value, twr } = r.series;
+  const { cagr, vol, mdd, mddDate, years } = riskStats(r.series);
 
   el.innerHTML = `
   <div class="kpis">
@@ -57,9 +50,12 @@ export async function analysis(el, ctx) {
     <p class="muted small">Every contribution and withdrawal you made is replayed into the benchmark (converted to ${base}).</p>
     <div class="chart-box"><canvas id="simChart"></canvas></div></div>
   <div class="card"><div class="card-head"><h3>Returns by year</h3></div><div id="yearT"></div></div>
-  <div class="card"><div class="card-head"><h3>Monthly returns (TWR)</h3></div><div id="heat" class="heat"></div></div>`;
+  <div class="card"><div class="card-head"><h3>Monthly returns (TWR)</h3></div><div id="heat" class="heat"></div></div>
+  ${ctx.selected === 'all' && ctx.state.portfolios.length > 1 ? `<div class="card"><div class="card-head"><h3>Compare portfolios</h3><span class="muted small">each from its own start</span></div>
+    <div id="cmpT"></div><div class="chart-box mt"><canvas id="cmpChart"></canvas></div></div>` : ''}`;
 
   drawHeatmap(el, ctx);
+  if (ctx.selected === 'all' && ctx.state.portfolios.length > 1) drawComparison(el, ctx);
   groups.forEach(([, g], i) => doughnut($(`#al${i}`), $(`#all${i}`), g.slice(0, 10), base));
   $('#shareBtn').addEventListener('click', async () => {
     const link = shareLink(ctx);
@@ -205,5 +201,38 @@ function drawHeatmap(el, ctx) {
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => money(c.parsed.x, base, { sign: true }) } } },
         scales: { x: { ticks: { callback: (v) => money(v, base, { compact: true }) } }, y: { grid: { display: false } } } },
     });
+  });
+}
+
+
+/** Side-by-side statistics and TWR curves for every portfolio. */
+function drawComparison(el, ctx) {
+  const { base, market } = ctx;
+  const rows = ctx.state.portfolios.map((p, i) => {
+    const txs = ctx.state.transactions.filter((t) => t.portfolioId === p.id);
+    if (!txs.length) return null;
+    const r = computePortfolio(txs, market, { base, autoDividends: ctx.settings.autoDividends, estimateWithholding: ctx.settings.estimateWithholding, today: ctx.result.today });
+    return { name: p.name, type: p.type || 'regular', color: PALETTE[i % PALETTE.length], series: r.series, ...r.totals, ...riskStats(r.series) };
+  }).filter(Boolean);
+  table($('#cmpT', el), rows, [
+    { key: 'name', label: tr('Portfolio'), render: (x) => `<i class="dot" style="background:${x.color}"></i><b>${esc(x.name)}</b>${x.type !== 'regular' ? ` <span class="tag">${x.type}</span>` : ''}` },
+    { key: 'value', label: tr('Value'), cls: 'num', render: (x) => money(x.value, base) },
+    { key: 'profit', label: tr('Profit'), cls: 'num', render: (x) => `<span class="${cls(x.profit)}">${money(x.profit, base, { sign: true })}</span>` },
+    { key: 'twr', label: 'TWR', cls: 'num', render: (x) => `<span class="${cls(x.twr)}">${pct(x.twr)}</span>` },
+    { key: 'cagr', label: tr('Annualised TWR'), cls: 'num', render: (x) => pct(x.cagr) },
+    { key: 'xirr', label: 'XIRR', cls: 'num', render: (x) => pct(x.xirr) },
+    { key: 'vol', label: tr('Volatility'), cls: 'num', render: (x) => pct(x.vol, { sign: false }) },
+    { key: 'mdd', label: tr('Max drawdown'), cls: 'num', render: (x) => `<span class="neg">${pct(x.mdd)}</span>` },
+    { key: 'sharpe', label: 'Sharpe', cls: 'num', render: (x) => (x.sharpe === null ? '—' : num(x.sharpe, 2)) },
+  ], { sortKey: 'value' });
+  const all = [...new Set(rows.flatMap((x) => x.series.dates))].sort();
+  const idx = downsample(all.length, 300).map((i) => all[i]);
+  chart($('#cmpChart', el), {
+    type: 'line',
+    data: { labels: idx, datasets: rows.map((x) => {
+      const m = new Map(x.series.dates.map((d, i) => [d, x.series.twr[i]]));
+      return { label: x.name, data: idx.map((d) => (m.has(d) ? (m.get(d) - 1) * 100 : null)), borderColor: x.color, pointRadius: 0, borderWidth: 1.8, spanGaps: true };
+    }) },
+    options: lineOpts('%'),
   });
 }

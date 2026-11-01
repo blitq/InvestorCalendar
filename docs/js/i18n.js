@@ -154,6 +154,8 @@ const PL = {
   'Received amount': 'Otrzymana kwota', 'Received currency': 'Otrzymana waluta', 'Amount sold': 'Sprzedana kwota', 'Change ticker…': 'Zmień ticker…',
   'Ticker changed, merger, or wrong symbol: rewrite all transactions': 'Zmiana tickera, fuzja lub błędny symbol: popraw wszystkie transakcje', 'CONVERSION': 'WYMIANA',
   'Print / PDF': 'Drukuj / PDF',
+  'Compare portfolios': 'Porównanie portfeli', 'each from its own start': 'każdy od własnego początku', 'Add benchmark': 'Dodaj benchmark',
+  'Compare your portfolio with the indices from': 'Porównuj portfel z indeksami z', 'or with any tracked ticker (for example the ETF you would otherwise buy).': 'albo z dowolnym śledzonym tickerem (np. ETF-em, który kupił(a)byś zamiast).',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',

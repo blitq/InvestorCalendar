@@ -325,3 +325,14 @@ test('taxReportCSV lists sales, dividends and totals', async () => {
   assert.match(lines[2], /^dividend,2024-06-01,X/);
   assert.match(lines[6], /^tax_19pct,.*,38,,,0,$/);
 });
+
+test('riskStats: drawdown, annualised return', async () => {
+  const { riskStats } = await import('../docs/js/engine.js');
+  const dates = [], twr = [];
+  for (let i = 0; i <= 730; i++) { dates.push(addDays('2022-01-01', i)); twr.push(i < 100 ? 1 + i / 100 : i < 200 ? 2 - (i - 100) / 200 : 1.5 + (i - 200) / 1000); }
+  const r = riskStats({ dates, twr });
+  close(r.mdd, -0.25); // peak 2.0 (day 100), trough 1.5 (day 200)
+  close(r.cagr, Math.pow(twr.at(-1), 1 / r.years) - 1);
+  assert.ok(r.vol > 0);
+  assert.equal(riskStats({ dates: [], twr: [] }).cagr, null);
+});
