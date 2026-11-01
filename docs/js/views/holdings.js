@@ -4,6 +4,7 @@ import { store } from '../store.js';
 import { t as tr } from '../i18n.js';
 import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from '../bonds.js';
 import { loadCpi } from '../data.js';
+import { ASSET_KINDS, customTicker } from '../customassets.js';
 import { $, $$, esc, money, num, qty, pct, cls, fmtDate, kpi, toast, table, chart, cssVar, downsample } from '../ui.js';
 import { RANGES, emptyState, lineOpts, modal, rangeStart, segmented, short, warningsBlock } from './common.js';
 import { txTable } from './transactions.js';
@@ -70,6 +71,7 @@ export async function holdings(el, ctx) {
 
 export function holdingModal(h, ctx) {
   if (ctx.settings.bonds?.[h.ticker]) return bondModal(h, ctx);
+  if (ctx.settings.customAssets?.[h.ticker]) return customModal(h, ctx);
   const { market, base } = ctx;
   const q = ctx.quotes[h.ticker] || {};
   const ty = trailingYield(market, h.ticker);
@@ -169,6 +171,7 @@ export function bondForm(ctx, existing = null) {
       ${existing ? '' : `<label>Number of bonds (100 PLN each)<input type="number" min="1" step="1" name="qty" required></label>
       <label>Price per bond<input type="number" step="0.01" min="0" name="price" value="100"><span class="muted small">99.90 when rolling over (zamiana)</span></label>
       <label>Portfolio<select name="portfolioId">${s.portfolios.map((p) => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>`}
+      ${existing ? '' : depositCheckbox()}
       <label>Early redemption fee per bond (PLN)<input type="number" step="0.01" min="0" name="fee" value="${b.fee ?? ''}" placeholder="default for the type"></label>
       <div class="full muted small" id="bfHint"></div>
       <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${existing ? 'Save' : 'Add bonds'}</button></div>
@@ -181,6 +184,7 @@ export function bondForm(ctx, existing = null) {
     $('#bfHint', f).textContent = `Series ${seriesCode(type, d)} · matures ${fmtDate(addMonths(d, BOND_TYPES[type].months))}`;
   };
   f.addEventListener('input', sync); sync();
+  if (!existing) syncDepositBox(f, ctx);
   f.addEventListener('submit', (e) => {
     e.preventDefault();
     const type = f.type.value, purchaseDate = f.purchaseDate.value;
@@ -189,6 +193,7 @@ export function bondForm(ctx, existing = null) {
     if (f.fee.value !== '') terms.fee = +f.fee.value;
     store.setSettings({ bonds: { ...(ctx.settings.bonds || {}), [ticker]: terms } });
     if (!existing) {
+      if (f.dep.checked) store.upsertTransaction({ portfolioId: f.portfolioId.value, date: purchaseDate, type: 'DEPOSIT', amount: +f.qty.value * (+f.price.value || 100), currency: 'PLN', note: `funds for ${type} bonds` });
       store.upsertTransaction({ portfolioId: f.portfolioId.value, date: purchaseDate, type: 'BUY', ticker, quantity: +f.qty.value, price: +f.price.value || 100, fee: 0, currency: 'PLN', note: `${type} treasury bonds` });
       toast(`Added ${f.qty.value} × ${seriesCode(type, purchaseDate)}`);
     } else toast('Bond terms saved');
@@ -238,4 +243,86 @@ export async function bondModal(h, ctx) {
     if (r.tax) store.upsertTransaction({ portfolioId: pid, date: d, type: 'TAX', ticker: h.ticker, amount: Math.round(h.qty * r.tax * 100) / 100, currency: 'PLN', note: '19% tax on bond interest' });
     toast('Redemption recorded'); close();
   });
+}
+
+
+// ---------------------------------------------------------------- custom assets
+
+export function customForm(ctx) {
+  const s = ctx.state;
+  const pid = ctx.selected !== 'all' ? ctx.selected : s.portfolios[0].id;
+  const { el, close } = modal('Add other asset', `
+    <p class="muted small">Anything without a market price: a flat, a term deposit, a crypto wallet, gold, a loan you gave… You update its value by hand; deposits can grow at a fixed rate.</p>
+    <form id="cf" class="form">
+      <label>Name<input name="name" required placeholder="e.g. Flat in Kraków, Deposit 6M"></label>
+      <label>Kind<select name="kind">${Object.entries(ASSET_KINDS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
+      <label>Purchase date<input type="date" name="date" value="${todayISO()}" max="${todayISO()}" required></label>
+      <label>Amount paid (total)<input type="number" step="any" min="0" name="cost" required></label>
+      <label>Current value (optional)<input type="number" step="any" min="0" name="now" placeholder="same as paid"></label>
+      <label>Currency<input name="currency" maxlength="3" value="${esc(ctx.base)}" style="text-transform:uppercase" required></label>
+      <label data-rate>Interest rate (% a year)<input type="number" step="0.01" name="rate" placeholder="deposits only"></label>
+      <label>Portfolio<select name="portfolioId">${s.portfolios.map((p) => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>
+      ${depositCheckbox()}
+      <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">Add asset</button></div>
+    </form>`);
+  const f = $('#cf', el);
+  syncDepositBox(f, ctx);
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const all = ctx.settings.customAssets || {};
+    const ticker = customTicker(f.name.value, all);
+    const date = f.date.value, cost = +f.cost.value, now = f.now.value === '' ? null : +f.now.value;
+    const valuations = [[date, cost]];
+    if (now !== null && now !== cost) valuations.push([todayISO(), now]);
+    store.setSettings({ customAssets: { ...all, [ticker]: { name: f.name.value.trim(), kind: f.kind.value, currency: f.currency.value.toUpperCase(), rate: f.rate.value === '' ? 0 : +f.rate.value, valuations } } });
+    if (f.dep.checked) store.upsertTransaction({ portfolioId: f.portfolioId.value, date, type: 'DEPOSIT', amount: cost, currency: f.currency.value.toUpperCase(), note: `funds for ${f.name.value.trim()}` });
+    store.upsertTransaction({ portfolioId: f.portfolioId.value, date, type: 'BUY', ticker, quantity: 1, price: cost, fee: 0, currency: f.currency.value.toUpperCase(), note: f.name.value.trim() });
+    toast(`Added ${f.name.value}`);
+    close();
+  });
+}
+
+function customModal(h, ctx) {
+  const a = ctx.settings.customAssets[h.ticker];
+  const save = (patch) => store.setSettings({ customAssets: { ...ctx.settings.customAssets, [h.ticker]: { ...a, ...patch } } });
+  const vals = [...a.valuations].sort((x, y) => y[0].localeCompare(x[0]));
+  const { el, close } = modal(`${esc(a.name)} <span class="muted">${esc(ASSET_KINDS[a.kind] || '')}</span>`, `
+    <div class="kpis compact">
+      ${kpi('Value', money(h.value, ctx.base), h.currency !== ctx.base ? money(h.qty * h.price, h.currency) : '')}
+      ${kpi('Gain', `<span class="${cls(h.unrealized)}">${money(h.unrealized, ctx.base, { sign: true })}</span>`, pct(h.unrealizedPct))}
+      ${kpi('Last valuation', fmtDate(vals[0][0]), a.rate ? `+${num(a.rate, 2)}% a year since then` : 'held flat until the next update')}
+    </div>
+    <form id="cvf" class="row gap wrap"><input type="date" name="d" value="${todayISO()}" max="${todayISO()}" class="sm" required>
+      <input type="number" step="any" min="0" name="v" placeholder="New value (total)" class="sm" required><button class="btn">Update value</button></form>
+    <form id="crf" class="row gap wrap mt"><label class="muted small">Interest rate (% a year) <input type="number" step="0.01" name="r" value="${a.rate || ''}" class="sm" style="width:90px"></label><button class="btn sm-btn">Save rate</button></form>
+    <h3 class="mt">Valuations</h3>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th class="num">Value</th><th></th></tr></thead><tbody>
+      ${vals.map(([d, v]) => `<tr><td>${fmtDate(d)}</td><td class="num">${money(v * h.qty, h.currency)}</td><td>${vals.length > 1 ? `<button class="icon-btn" data-rmv="${d}" title="Remove">✕</button>` : ''}</td></tr>`).join('')}
+    </tbody></table></div>`, { wide: true });
+  $('#cvf', el).addEventListener('submit', (e) => {
+    e.preventDefault();
+    const d = e.target.d.value, v = +e.target.v.value / (h.qty || 1);
+    save({ valuations: [...a.valuations.filter(([x]) => x !== d), [d, v]] });
+    toast('Value updated'); close();
+  });
+  $('#crf', el).addEventListener('submit', (e) => { e.preventDefault(); save({ rate: +e.target.r.value || 0 }); toast('Rate saved'); close(); });
+  el.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rmv]');
+    if (b) { save({ valuations: a.valuations.filter(([x]) => x !== b.dataset.rmv) }); close(); }
+  });
+}
+
+
+// Portfolios that track cash (have deposits) need the money to come from somewhere.
+function depositCheckbox() {
+  return `<label class="check full" data-depbox><input type="checkbox" name="dep"> Paid with new money — also record a deposit (this portfolio tracks cash)</label>`;
+}
+function syncDepositBox(f, ctx) {
+  const upd = () => {
+    const tracksCash = ctx.state.transactions.some((t) => t.portfolioId === f.portfolioId.value && (t.type === 'DEPOSIT' || t.type === 'WITHDRAWAL'));
+    $('[data-depbox]', f).hidden = !tracksCash;
+    f.dep.checked = tracksCash;
+  };
+  f.portfolioId.addEventListener('change', upd);
+  upd();
 }

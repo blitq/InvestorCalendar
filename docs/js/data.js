@@ -1,6 +1,7 @@
 // Loads the static JSON produced by backend/generate.py (served from docs/data/).
 import { Market, todayISO } from './engine.js';
 import { bondHistory, bondName, isBondTicker } from './bonds.js';
+import { customHistory, isCustomTicker, ASSET_KINDS } from './customassets.js';
 
 const cache = new Map();
 
@@ -33,8 +34,8 @@ export async function loadHistories(tickers) {
 }
 
 /** Build a Market for the given tickers (+ benchmarks). */
-export async function buildMarket(tickers, { manualPrices = {}, withNbp = false, extra = [], bonds = {} } = {}) {
-  const bondTickers = tickers.filter((t) => isBondTicker(t) && bonds[t]);
+export async function buildMarket(tickers, { manualPrices = {}, withNbp = false, extra = [], bonds = {}, customAssets = {} } = {}) {
+  const bondTickers = tickers.filter((t) => (isBondTicker(t) && bonds[t]) || (isCustomTicker(t) && customAssets[t]));
   const [quotes, fx, histories, nbp, cpi] = await Promise.all([
     loadQuotes(), loadFx(), loadHistories([...tickers.filter((t) => !bondTickers.includes(t)), ...extra]),
     withNbp ? loadNbp() : Promise.resolve({}), bondTickers.length ? loadCpi() : Promise.resolve(null),
@@ -42,6 +43,12 @@ export async function buildMarket(tickers, { manualPrices = {}, withNbp = false,
   // treasury bonds: synthetic daily value + interest payouts computed from the bond's terms
   const q = { ...quotes };
   for (const t of bondTickers) {
+    if (isCustomTicker(t)) {
+      const a = { ...customAssets[t], ticker: t };
+      histories[t] = customHistory(a, todayISO());
+      q[t] = { ticker: t, name: a.name, currency: a.currency || 'PLN', market: 'Custom assets', sector: ASSET_KINDS[a.kind] || 'Other', quote_type: 'CUSTOM', custom: true };
+      continue;
+    }
     const bond = { ...bonds[t], ticker: t };
     histories[t] = bondHistory(bond, cpi, todayISO());
     q[t] = { ticker: t, name: bondName(bond), currency: 'PLN', country: 'Poland', market: 'Treasury bonds', sector: 'Government bonds', quote_type: 'BOND', bond: true };

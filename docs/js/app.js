@@ -48,10 +48,10 @@ async function getContext() {
   const extraB = (settings.extraBenchmarks || []).filter((t) => meta.files?.[t] && !meta.benchmarks?.[t]);
   const benchmarks = [...Object.keys(meta.benchmarks || {}), ...extraB];
   const metaView = { ...meta, benchmarks: { ...(meta.benchmarks || {}), ...Object.fromEntries(extraB.map((t) => [t, quotes[t]?.name ? `${t} · ${quotes[t].name}` : t])) } };
-  const market = await buildMarket(tickers, { manualPrices: settings.manualPrices, extra: benchmarks, bonds: settings.bonds || {} });
+  const market = await buildMarket(tickers, { manualPrices: settings.manualPrices, extra: benchmarks, bonds: settings.bonds || {}, customAssets: settings.customAssets || {} });
   const base = settings.baseCurrency || 'PLN';
   const result = computePortfolio(txs, market, { base, autoDividends: settings.autoDividends, estimateWithholding: settings.estimateWithholding });
-  const missing = tickers.filter((t) => !meta.files?.[t] && !settings.manualPrices?.[t] && !settings.bonds?.[t]);
+  const missing = tickers.filter((t) => !meta.files?.[t] && !settings.manualPrices?.[t] && !settings.bonds?.[t] && !settings.customAssets?.[t]);
   ctxCache = { version, state, settings, selected, txs, meta: metaView, quotes, fx, market, base, result, missing, benchmarks, repoUrl: repoUrl(),
     portfolioName: (id) => state.portfolios.find((p) => p.id === id)?.name || id,
     invalidate, navigate, setSelected };

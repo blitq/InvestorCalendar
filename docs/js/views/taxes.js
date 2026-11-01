@@ -10,10 +10,10 @@ import { settings } from './settings.js';
 export async function taxes(el, ctx) {
   if (!ctx.state.transactions.length) return emptyState(el, ctx);
   const tickers = [...new Set(ctx.state.transactions.filter((t) => t.ticker).map((t) => t.ticker))];
-  const market = await buildMarket(tickers, { withNbp: true, manualPrices: ctx.settings.manualPrices, bonds: ctx.settings.bonds || {} });
+  const market = await buildMarket(tickers, { withNbp: true, manualPrices: ctx.settings.manualPrices, bonds: ctx.settings.bonds || {}, customAssets: ctx.settings.customAssets || {} });
   const taxFree = new Set(ctx.state.portfolios.filter((p) => TAX_FREE_TYPES.has(p.type)).map((p) => p.id));
   // treasury bonds: the 19% on interest is withheld by the issuer, they do not go into PIT-38
-  const txs = (ctx.selected === 'all' ? ctx.state.transactions : ctx.txs).filter((t) => !taxFree.has(t.portfolioId) && !ctx.settings.bonds?.[t.ticker]);
+  const txs = (ctx.selected === 'all' ? ctx.state.transactions : ctx.txs).filter((t) => !taxFree.has(t.portfolioId) && !ctx.settings.bonds?.[t.ticker] && !ctx.settings.customAssets?.[t.ticker]); // custom assets (real estate, deposits…) are not PIT-38
   const st = ctx.settings;
   const tax = computePolishTax(txs, market, { dateMode: st.taxDateMode || 'trade', carryForward: st.taxCarryForward !== false, priorLosses: st.taxPriorLosses || {} });
   const excludedNote = taxFree.size ? `<div class="muted small">Excluded as tax-free: ${ctx.state.portfolios.filter((p) => taxFree.has(p.id)).map((p) => esc(p.name)).join(', ')} (IKE / IKZE / OIPE).</div>` : '';

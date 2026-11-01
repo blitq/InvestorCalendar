@@ -156,6 +156,12 @@ const PL = {
   'Print / PDF': 'Drukuj / PDF',
   'Compare portfolios': 'Porównanie portfeli', 'each from its own start': 'każdy od własnego początku', 'Add benchmark': 'Dodaj benchmark',
   'Compare your portfolio with the indices from': 'Porównuj portfel z indeksami z', 'or with any tracked ticker (for example the ETF you would otherwise buy).': 'albo z dowolnym śledzonym tickerem (np. ETF-em, który kupił(a)byś zamiast).',
+  '+ Other asset': '+ Inne aktywo', 'Add other asset': 'Dodaj inne aktywo', 'Name': 'Nazwa', 'Kind': 'Rodzaj', 'Amount paid (total)': 'Zapłacona kwota (łącznie)', 'Current value (optional)': 'Obecna wartość (opcjonalnie)',
+  'Interest rate (% a year)': 'Oprocentowanie (% rocznie)', 'Add asset': 'Dodaj aktywo', 'Update value': 'Aktualizuj wartość', 'Save rate': 'Zapisz oprocentowanie', 'Valuations': 'Wyceny', 'Last valuation': 'Ostatnia wycena',
+  'Real estate': 'Nieruchomości', 'Deposit / savings': 'Lokata / oszczędności', 'Gold / metals': 'Złoto / metale', 'Vehicle': 'Pojazd', 'Collectibles': 'Kolekcje', 'Private equity / loans': 'Udziały prywatne / pożyczki',
+  'held flat until the next update': 'stała do następnej aktualizacji', 'New value (total)': 'Nowa wartość (łącznie)', 'deposits only': 'tylko lokaty',
+  'Anything without a market price: a flat, a term deposit, a crypto wallet, gold, a loan you gave… You update its value by hand; deposits can grow at a fixed rate.': 'Wszystko bez ceny rynkowej: mieszkanie, lokata, portfel krypto, złoto, udzielona pożyczka… Wartość aktualizujesz ręcznie; lokaty mogą rosnąć według stałego oprocentowania.',
+  'Paid with new money — also record a deposit (this portfolio tracks cash)': 'Zapłacone nowymi środkami — zapisz też wpłatę (ten portfel śledzi gotówkę)',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',

@@ -7,7 +7,7 @@ import { t as tr } from '../i18n.js';
 import { detectBroker, PARSERS, BROKER_NAMES } from '../brokers.js';
 import { $, $$, esc, money, num, qty, fmtDate, toast, download, readFile, table } from '../ui.js';
 import { modal, short } from './common.js';
-import { bondForm } from './holdings.js';
+import { bondForm, customForm } from './holdings.js';
 
 
 export function txTable(el, txs, ctx, { compact = false } = {}) {
@@ -49,6 +49,7 @@ export async function transactions(el, ctx) {
         <select id="txType" class="sm"><option value="">All types</option>${TX_TYPES.map((x) => `<option>${x}</option>`).join('')}</select>
         <button class="btn primary" id="addTx">+ Add</button>
         <button class="btn" id="addBond">+ Treasury bonds</button>
+        <button class="btn" id="addCustom">+ Other asset</button>
         <button class="btn" id="impTx">Import CSV</button>
         <button class="btn" id="expTx">Export CSV</button>
       </div>
@@ -67,6 +68,7 @@ export async function transactions(el, ctx) {
   $('#txType').addEventListener('change', draw);
   $('#addTx').addEventListener('click', () => txForm(ctx));
   $('#addBond').addEventListener('click', () => bondForm(ctx));
+  $('#addCustom').addEventListener('click', () => customForm(ctx));
   $('#impTx').addEventListener('click', () => importDialog(ctx));
   $('#expTx').addEventListener('click', () => download(`transactions-${todayISO()}.csv`, toCSV(ctx.txs, ctx.state.portfolios), 'text/csv'));
   draw();

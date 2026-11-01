@@ -30,6 +30,7 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Taxes (PIT-38) | CSV export and printable report; FIFO per portfolio, NBP rate from the business day before the trade or T+2 settlement date, fees as costs, foreign dividend top-up (19% minus withholding), automatic loss carry-forward (one-off up to PLN 5M or 50%/year, 5 years, plus losses from before your data), per-country breakdown for PIT/ZG |
 | Watchlist | price, 1D/1M/1Y change, 52-week range, P/E, dividend yield, next event |
 | Treasury bonds | Polish retail bonds OTS, ROR, DOR, TOS, COI, ROS, EDO, ROD: value with accrued interest, inflation-linked rates (CPI two months before each period + margin, editable per period), capitalisation or yearly/monthly interest payouts, early-redemption value after fee and 19% tax, maturity tracking |
+| Other assets | real estate, deposits, crypto wallets, gold, private loans… valued by hand (valuation history) or growing at a fixed interest rate; included in value, returns and allocation |
 | Accounts | portfolio types Regular / IKE / IKZE / OIPE; yearly contribution limits with progress and remaining amount, IKZE PIT deduction estimate; tax-free accounts excluded from PIT-38 |
 | Goals | financial independence (monthly income at a safe withdrawal rate), dividend-income or amount goals; projection in today's money, time to goal, monthly contribution needed |
 | Languages | English and Polish (follows the browser, switchable in Settings); numbers and dates in the chosen locale |

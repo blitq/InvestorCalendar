@@ -18,7 +18,7 @@ export async function analysis(el, ctx) {
     ['Country', groupBy(withCash, (h) => q(h, 'country'))],
     ['Currency', groupBy(withCash, (h) => (h.cash ? 'Cash' : h.currency))],
     ['Market', groupBy(withCash, (h) => q(h, 'market'))],
-    ['Asset type', groupBy(withCash, (h) => (h.cash ? 'Cash' : ({ EQUITY: 'Stocks', ETF: 'ETFs', MUTUALFUND: 'Funds', CRYPTOCURRENCY: 'Crypto', BOND: 'Bonds' }[market.quotes[h.ticker]?.quote_type] || 'Other')))],
+    ['Asset type', groupBy(withCash, (h) => (h.cash ? 'Cash' : ({ EQUITY: 'Stocks', ETF: 'ETFs', MUTUALFUND: 'Funds', CRYPTOCURRENCY: 'Crypto', BOND: 'Bonds' }[market.quotes[h.ticker]?.quote_type] || (market.quotes[h.ticker]?.custom ? market.quotes[h.ticker].sector : 'Other'))))],
   ];
   if (ctx.selected === 'all' && ctx.state.portfolios.length > 1) {
     const per = ctx.state.portfolios.map((p) => {
