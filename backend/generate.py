@@ -6,6 +6,7 @@ Outputs (docs/data/):
   history/<sym>.json   daily closes (split-unadjusted), dividends, splits
   fx.json              daily USD value of each currency
   nbp.json             NBP table A mid rates (PLN per unit) for PIT-38 tax maths
+  cpi.json             monthly y/y inflation for Poland (treasury bond indexation)
   events.json          earnings / dividend / split calendar
 
 Usage:
@@ -30,7 +31,7 @@ CONFIG_PATH = os.path.join(BASE_DIR, "config.json")
 DATA_DIR = os.path.join(BASE_DIR, "docs", "data")
 HISTORY_DIR = os.path.join(DATA_DIR, "history")
 
-STEPS = ("prices", "fx", "nbp", "events")
+STEPS = ("prices", "fx", "nbp", "cpi", "events")
 
 
 def load_json(path, default):
@@ -183,6 +184,16 @@ def main(argv=None):
     if "nbp" in steps:
         print("NBP rates")
         step_nbp(config.get("nbp_currencies", ["USD", "EUR"]), date.fromisoformat(start))
+
+    if "cpi" in steps:
+        print("Inflation (bond indexation)")
+        from cpi import fetch_cpi
+        try:
+            cpi = fetch_cpi(start[:7])
+            write_json(os.path.join(DATA_DIR, "cpi.json"), cpi)
+            print(f"  {len(cpi['months'])} months, last {cpi['months'][-1]}")
+        except Exception as e:
+            print(f"  FAILED ({e}); keeping previous data")
 
     if "events" in steps:
         print("Events")

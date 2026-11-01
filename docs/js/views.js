@@ -7,6 +7,8 @@ import { buildMarket, loadEvents, loadHistories, loadNbp } from './data.js';
 import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from './importers.js';
 import { store } from './store.js';
 import { masterChart } from './masterchart.js';
+import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from './bonds.js';
+import { loadCpi } from './data.js';
 import { detectBroker, PARSERS, BROKER_NAMES } from './brokers.js';
 import { getConfig as getSyncConfig, connect as connectSync, disconnect as disconnectSync, syncNow } from './sync.js';
 import {
@@ -270,6 +272,7 @@ function modal(title, bodyHtml, { wide = false } = {}) {
 }
 
 function holdingModal(h, ctx) {
+  if (ctx.settings.bonds?.[h.ticker]) return bondModal(h, ctx);
   const { market, base } = ctx;
   const q = ctx.quotes[h.ticker] || {};
   const ty = trailingYield(market, h.ticker);
@@ -364,6 +367,7 @@ export async function transactions(el, ctx) {
         <input type="search" id="txSearch" placeholder="Search ticker / note…" class="sm">
         <select id="txType" class="sm"><option value="">All types</option>${TX_TYPES.map((x) => `<option>${x}</option>`).join('')}</select>
         <button class="btn primary" id="addTx">+ Add</button>
+        <button class="btn" id="addBond">+ Treasury bonds</button>
         <button class="btn" id="impTx">Import CSV</button>
         <button class="btn" id="expTx">Export CSV</button>
       </div>
@@ -381,6 +385,7 @@ export async function transactions(el, ctx) {
   $('#txSearch').addEventListener('input', draw);
   $('#txType').addEventListener('change', draw);
   $('#addTx').addEventListener('click', () => txForm(ctx));
+  $('#addBond').addEventListener('click', () => bondForm(ctx));
   $('#impTx').addEventListener('click', () => importDialog(ctx));
   $('#expTx').addEventListener('click', () => download(`transactions-${todayISO()}.csv`, toCSV(ctx.txs, ctx.state.portfolios), 'text/csv'));
   draw();
@@ -647,6 +652,95 @@ function importDialog(ctx) {
 }
 const r4 = (x) => Math.round(x * 1e4) / 1e4;
 
+// ======================================================================= treasury bonds
+
+function bondForm(ctx, existing = null) {
+  const s = ctx.state;
+  const pid = ctx.selected !== 'all' ? ctx.selected : s.portfolios[0].id;
+  const b = existing || { type: 'EDO', purchaseDate: todayISO(), firstRate: '', margin: '' };
+  const { el, close } = modal(existing ? 'Edit bond terms' : 'Add treasury bonds', `
+    <p class="muted small">Polish retail treasury bonds (obligacje skarbowe). Enter the terms of your series from
+      <a href="https://www.obligacjeskarbowe.pl/" target="_blank" rel="noopener">obligacjeskarbowe.pl</a> or your bond account:
+      first-year rate and, for inflation-linked bonds, the margin. Later rates follow inflation automatically and can be corrected per period.</p>
+    <form id="bf" class="form">
+      <label>Type<select name="type" ${existing ? 'disabled' : ''}>${Object.entries(BOND_TYPES).map(([k, d]) => `<option value="${k}" ${k === b.type ? 'selected' : ''}>${k} — ${d.label}</option>`).join('')}</select></label>
+      <label>Purchase date<input type="date" name="purchaseDate" value="${b.purchaseDate}" max="${todayISO()}" required ${existing ? 'disabled' : ''}></label>
+      <label>First-year rate (%)<input type="number" step="0.01" min="0" name="firstRate" value="${b.firstRate}" required placeholder="e.g. 6.55"></label>
+      <label data-margin>Margin above inflation (%)<input type="number" step="0.01" min="0" name="margin" value="${b.margin}" placeholder="EDO 2.00 · COI 1.50 · ROS 2.00 · ROD 2.50"></label>
+      ${existing ? '' : `<label>Number of bonds (100 PLN each)<input type="number" min="1" step="1" name="qty" required></label>
+      <label>Price per bond<input type="number" step="0.01" min="0" name="price" value="100"><span class="muted small">99.90 when rolling over (zamiana)</span></label>
+      <label>Portfolio<select name="portfolioId">${s.portfolios.map((p) => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>`}
+      <label>Early redemption fee per bond (PLN)<input type="number" step="0.01" min="0" name="fee" value="${b.fee ?? ''}" placeholder="default for the type"></label>
+      <div class="full muted small" id="bfHint"></div>
+      <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${existing ? 'Save' : 'Add bonds'}</button></div>
+    </form>`);
+  const f = $('#bf', el);
+  const sync = () => {
+    const type = f.type.value, d = f.purchaseDate.value || todayISO();
+    $('[data-margin]', f).hidden = BOND_TYPES[type].kind !== 'cpi' && BOND_TYPES[type].kind !== 'ref';
+    f.fee.placeholder = `default ${num(BOND_TYPES[type].fee, 2)} PLN`;
+    $('#bfHint', f).textContent = `Series ${seriesCode(type, d)} · matures ${fmtDate(addMonths(d, BOND_TYPES[type].months))}`;
+  };
+  f.addEventListener('input', sync); sync();
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const type = f.type.value, purchaseDate = f.purchaseDate.value;
+    const ticker = existing?.ticker || bondTicker(type, purchaseDate);
+    const terms = { type, purchaseDate, firstRate: +f.firstRate.value, margin: f.margin.value === '' ? 0 : +f.margin.value, overrides: existing?.overrides || {} };
+    if (f.fee.value !== '') terms.fee = +f.fee.value;
+    store.setSettings({ bonds: { ...(ctx.settings.bonds || {}), [ticker]: terms } });
+    if (!existing) {
+      store.upsertTransaction({ portfolioId: f.portfolioId.value, date: purchaseDate, type: 'BUY', ticker, quantity: +f.qty.value, price: +f.price.value || 100, fee: 0, currency: 'PLN', note: `${type} treasury bonds` });
+      toast(`Added ${f.qty.value} × ${seriesCode(type, purchaseDate)}`);
+    } else toast('Bond terms saved');
+    close();
+  });
+}
+
+async function bondModal(h, ctx) {
+  const terms = { ...ctx.settings.bonds[h.ticker], ticker: h.ticker };
+  const cpi = await loadCpi();
+  const periods = bondSchedule(terms, cpi);
+  const today = ctx.result.today;
+  const taxFree = h.portfolios.every((pid) => TAX_FREE_TYPES.has(ctx.state.portfolios.find((p) => p.id === pid)?.type));
+  const red = bondRedemption(terms, periods, today, { taxFree });
+  const v = bondValueOn(terms, periods, today);
+  const def = BOND_TYPES[terms.type];
+  const { el, close } = modal(`${esc(seriesCode(terms.type, terms.purchaseDate))} <span class="muted">${esc(def.label)}</span>`, `
+    <div class="kpis compact">
+      ${kpi('Value', money(h.value, 'PLN'), `${qty(h.qty)} bonds × ${money(v.value, 'PLN')}`)}
+      ${kpi('Interest earned', money(h.qty * (v.value - 100) + h.qty * v.paid, 'PLN'), def.payout ? `paid out ${money(h.qty * v.paid, 'PLN')}` : 'capitalised')}
+      ${kpi(red.matured ? 'At maturity' : 'If redeemed today', money(h.qty * red.net, 'PLN'), `fee ${money(h.qty * red.fee, 'PLN')} · tax ${money(h.qty * red.tax, 'PLN')}${taxFree ? ' (IKE/IKZE: no tax)' : ''}`)}
+      ${kpi('Matures', fmtDate(periods[periods.length - 1].end), red.matured ? 'matured — record the payout' : `${Math.ceil((Date.parse(periods[periods.length - 1].end) - Date.parse(today)) / 864e5 / 30.4)} months left`)}
+    </div>
+    <p class="muted small">${cpi.source ? `Inflation: ${esc(cpi.source)}. ` : ''}Type the official rate into any period to override the estimate.</p>
+    <div class="table-wrap"><table><thead><tr><th>#</th><th>From</th><th>To</th><th class="num">Rate %</th><th>Basis</th><th class="num">Value at end</th></tr></thead><tbody>
+    ${periods.map((p) => `<tr class="${today >= p.start && today < p.end ? 'current' : ''}"><td>${p.idx + 1}</td><td>${fmtDate(p.start)}</td><td>${fmtDate(p.end)}</td>
+      <td class="num"><input type="number" step="0.01" class="sm tgt" data-ov="${p.idx}" value="${p.rate.toFixed(2)}" ${p.idx === 0 ? 'disabled' : ''}></td>
+      <td class="small muted">${esc(p.source)}${p.cpi !== undefined ? ` (${num(p.cpi, 1)}% + ${num(terms.margin, 2)}%)` : ''}</td>
+      <td class="num">${money(bondValueOn(terms, periods, p.end).value, 'PLN')}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="row gap wrap mt"><button class="btn" id="bEdit">Edit terms</button><button class="btn" id="bRedeem">Record redemption…</button></div>`, { wide: true });
+  $$('[data-ov]', el).forEach((inp) => inp.addEventListener('change', () => {
+    const ov = { ...(terms.overrides || {}) };
+    const k = +inp.dataset.ov;
+    if (inp.value === '') delete ov[k]; else ov[k] = +inp.value;
+    const { ticker, ...rest } = terms;
+    store.setSettings({ bonds: { ...ctx.settings.bonds, [h.ticker]: { ...rest, overrides: ov } } });
+    toast('Rate saved'); close();
+  }));
+  $('#bEdit', el).addEventListener('click', () => { close(); bondForm(ctx, terms); });
+  $('#bRedeem', el).addEventListener('click', () => {
+    const d = prompt('Redemption date (YYYY-MM-DD)', red.matured ? periods[periods.length - 1].end : today);
+    if (!d) return;
+    const r = bondRedemption(terms, periods, d, { taxFree });
+    const pid = h.portfolios[0];
+    store.upsertTransaction({ portfolioId: pid, date: d, type: 'SELL', ticker: h.ticker, quantity: h.qty, price: Math.round(r.gross * 100) / 100, fee: Math.round(h.qty * r.fee * 100) / 100, currency: 'PLN', note: 'bond redemption' });
+    if (r.tax) store.upsertTransaction({ portfolioId: pid, date: d, type: 'TAX', ticker: h.ticker, amount: Math.round(h.qty * r.tax * 100) / 100, currency: 'PLN', note: '19% tax on bond interest' });
+    toast('Redemption recorded'); close();
+  });
+}
+
 // ======================================================================= dividends
 
 export async function dividends(el, ctx) {
@@ -746,7 +840,8 @@ function barOpts(base, stacked = false) {
 // ======================================================================= analysis
 
 export async function analysis(el, ctx) {
-  const { result: r, base, market, quotes } = ctx;
+  const { result: r, base, market } = ctx;
+  const quotes = market.quotes;
   if (!ctx.txs.length) return emptyState(el, ctx);
   const H = [...r.holdings];
   const withCash = r.totals.cashValue > 0 ? [...H, { ticker: 'Cash', value: r.totals.cashValue, cash: true }] : H;
@@ -756,7 +851,7 @@ export async function analysis(el, ctx) {
     ['Country', groupBy(withCash, (h) => q(h, 'country'))],
     ['Currency', groupBy(withCash, (h) => (h.cash ? 'Cash' : h.currency))],
     ['Market', groupBy(withCash, (h) => q(h, 'market'))],
-    ['Asset type', groupBy(withCash, (h) => (h.cash ? 'Cash' : ({ EQUITY: 'Stocks', ETF: 'ETFs', MUTUALFUND: 'Funds', CRYPTOCURRENCY: 'Crypto' }[quotes[h.ticker]?.quote_type] || 'Other')))],
+    ['Asset type', groupBy(withCash, (h) => (h.cash ? 'Cash' : ({ EQUITY: 'Stocks', ETF: 'ETFs', MUTUALFUND: 'Funds', CRYPTOCURRENCY: 'Crypto', BOND: 'Bonds' }[market.quotes[h.ticker]?.quote_type] || 'Other')))],
   ];
   if (ctx.selected === 'all' && ctx.state.portfolios.length > 1) {
     const per = ctx.state.portfolios.map((p) => {
@@ -991,9 +1086,10 @@ export async function calendar(el, ctx) {
 export async function taxes(el, ctx) {
   if (!ctx.state.transactions.length) return emptyState(el, ctx);
   const tickers = [...new Set(ctx.state.transactions.filter((t) => t.ticker).map((t) => t.ticker))];
-  const market = await buildMarket(tickers, { withNbp: true, manualPrices: ctx.settings.manualPrices });
+  const market = await buildMarket(tickers, { withNbp: true, manualPrices: ctx.settings.manualPrices, bonds: ctx.settings.bonds || {} });
   const taxFree = new Set(ctx.state.portfolios.filter((p) => TAX_FREE_TYPES.has(p.type)).map((p) => p.id));
-  const txs = (ctx.selected === 'all' ? ctx.state.transactions : ctx.txs).filter((t) => !taxFree.has(t.portfolioId));
+  // treasury bonds: the 19% on interest is withheld by the issuer, they do not go into PIT-38
+  const txs = (ctx.selected === 'all' ? ctx.state.transactions : ctx.txs).filter((t) => !taxFree.has(t.portfolioId) && !ctx.settings.bonds?.[t.ticker]);
   const st = ctx.settings;
   const tax = computePolishTax(txs, market, { dateMode: st.taxDateMode || 'trade', carryForward: st.taxCarryForward !== false, priorLosses: st.taxPriorLosses || {} });
   const excludedNote = taxFree.size ? `<div class="muted small">Excluded as tax-free: ${ctx.state.portfolios.filter((p) => taxFree.has(p.id)).map((p) => esc(p.name)).join(', ')} (IKE / IKZE / OIPE).</div>` : '';

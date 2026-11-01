@@ -563,7 +563,14 @@ export function forecastDividends(holdings, market, base, today = todayISO()) {
     if (h.qty <= EPS) continue;
     const ccy = market.currency(h.ticker) || h.currency;
     const rate = market.fxRate(ccy, base, today) ?? 1;
-    for (const [d, dps] of market.dividends(h.ticker)) {
+    const divs = market.dividends(h.ticker);
+    const until = addDays(today, 365);
+    if (divs.some(([d]) => d > today)) {
+      // scheduled payments are known (e.g. treasury bond coupons): use them as they are
+      for (const [d, dps] of divs) if (d > today && d <= until) items.push({ date: d, ticker: h.ticker, currency: ccy, dps, amount: dps * h.qty, amountBase: dps * h.qty * rate });
+      continue;
+    }
+    for (const [d, dps] of divs) {
       if (d <= from || d > today) continue;
       const amount = dps * h.qty;
       items.push({ date: addYears(d, 1), ticker: h.ticker, currency: ccy, dps, amount, amountBase: amount * rate });

@@ -43,10 +43,10 @@ async function getContext() {
   if (state.transactions.some((t) => resolved[t.ticker]) && store.renameTickers(resolved)) return getContext();
   const tickers = [...new Set(state.transactions.filter((t) => t.ticker).map((t) => t.ticker))];
   const benchmarks = Object.keys(meta.benchmarks || {});
-  const market = await buildMarket(tickers, { manualPrices: settings.manualPrices, extra: benchmarks });
+  const market = await buildMarket(tickers, { manualPrices: settings.manualPrices, extra: benchmarks, bonds: settings.bonds || {} });
   const base = settings.baseCurrency || 'PLN';
   const result = computePortfolio(txs, market, { base, autoDividends: settings.autoDividends, estimateWithholding: settings.estimateWithholding });
-  const missing = tickers.filter((t) => !meta.files?.[t] && !settings.manualPrices?.[t]);
+  const missing = tickers.filter((t) => !meta.files?.[t] && !settings.manualPrices?.[t] && !settings.bonds?.[t]);
   ctxCache = { version, state, settings, selected, txs, meta, quotes, fx, market, base, result, missing, benchmarks, repoUrl: repoUrl(),
     portfolioName: (id) => state.portfolios.find((p) => p.id === id)?.name || id,
     invalidate, navigate, setSelected };

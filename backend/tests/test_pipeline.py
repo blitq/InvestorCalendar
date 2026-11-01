@@ -89,3 +89,10 @@ def test_isin_resolve_uses_cache(monkeypatch):
     out = isin.resolve(["US0378331005", "PLPKO0000016"], {"US0378331005": "AAPL"}, session=s, sleep=0)
     assert out == {"US0378331005": "AAPL", "PLPKO0000016": "PKO.WA"}
     assert s.calls == 1
+
+
+def test_parse_eurostat_cpi():
+    from cpi import parse_eurostat
+    payload = {"dimension": {"time": {"category": {"index": {"2024-02": 1, "2024-01": 0}}}}, "value": {"1": 3.3, "0": 4.5}}
+    assert parse_eurostat(payload)["months"] == ["2024-01", "2024-02"]
+    assert parse_eurostat(payload)["yoy"] == [4.5, 3.3]

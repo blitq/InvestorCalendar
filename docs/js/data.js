@@ -1,5 +1,6 @@
 // Loads the static JSON produced by backend/generate.py (served from docs/data/).
-import { Market } from './engine.js';
+import { Market, todayISO } from './engine.js';
+import { bondHistory, bondName, isBondTicker } from './bonds.js';
 
 const cache = new Map();
 
@@ -17,6 +18,7 @@ export const loadQuotes = () => getJSON('quotes.json', {});
 export const loadFx = () => getJSON('fx.json', {});
 export const loadNbp = () => getJSON('nbp.json', {});
 export const loadEvents = () => getJSON('events.json', { events: [] });
+export const loadCpi = () => getJSON('cpi.json', { months: [], yoy: [] });
 
 export async function loadHistories(tickers) {
   const meta = await loadMeta();
@@ -31,9 +33,18 @@ export async function loadHistories(tickers) {
 }
 
 /** Build a Market for the given tickers (+ benchmarks). */
-export async function buildMarket(tickers, { manualPrices = {}, withNbp = false, extra = [] } = {}) {
-  const [quotes, fx, histories, nbp] = await Promise.all([
-    loadQuotes(), loadFx(), loadHistories([...tickers, ...extra]), withNbp ? loadNbp() : Promise.resolve({}),
+export async function buildMarket(tickers, { manualPrices = {}, withNbp = false, extra = [], bonds = {} } = {}) {
+  const bondTickers = tickers.filter((t) => isBondTicker(t) && bonds[t]);
+  const [quotes, fx, histories, nbp, cpi] = await Promise.all([
+    loadQuotes(), loadFx(), loadHistories([...tickers.filter((t) => !bondTickers.includes(t)), ...extra]),
+    withNbp ? loadNbp() : Promise.resolve({}), bondTickers.length ? loadCpi() : Promise.resolve(null),
   ]);
-  return new Market({ quotes, fx, histories, nbp, manualPrices });
+  // treasury bonds: synthetic daily value + interest payouts computed from the bond's terms
+  const q = { ...quotes };
+  for (const t of bondTickers) {
+    const bond = { ...bonds[t], ticker: t };
+    histories[t] = bondHistory(bond, cpi, todayISO());
+    q[t] = { ticker: t, name: bondName(bond), currency: 'PLN', country: 'Poland', market: 'Treasury bonds', sector: 'Government bonds', quote_type: 'BOND', bond: true };
+  }
+  return new Market({ quotes: q, fx, histories, nbp, manualPrices });
 }
