@@ -842,3 +842,21 @@ export function rebalancePlan(rows, targets, { cash = 0, mode = 'buy', wholeShar
   }
   return { total, items, cashLeft: cash - (mode === 'full' ? items.reduce((s, i) => s + i.amount, 0) : spent) };
 }
+
+// ---------------------------------------------------------------- contribution
+
+/**
+ * Profit contributed by each position between `from` and `to` (base currency): change in its
+ * value minus money put in, plus dividends paid out. Replays each ticker on its own.
+ */
+export function contributions(transactions, market, opts = {}) {
+  const groups = new Map();
+  for (const t of transactions) if (t.ticker) (groups.get(t.ticker) || groups.set(t.ticker, []).get(t.ticker)).push(t);
+  const out = [];
+  for (const [ticker, txs] of groups) {
+    const r = computePortfolio(txs, market, opts);
+    const p = periodStats(r.series, opts.from || '0000-00-00', opts.to);
+    if (p) out.push({ ticker, profit: p.profit, startValue: p.startValue, endValue: p.endValue, twr: p.twr });
+  }
+  return out.sort((a, b) => b.profit - a.profit);
+}

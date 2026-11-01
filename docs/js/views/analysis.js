@@ -1,8 +1,9 @@
 // analysis page — split from the former views.js
-import { periodStats, benchmarkSeries, groupBy } from '../engine.js';
+import { periodStats, benchmarkSeries, groupBy, contributions, addDays } from '../engine.js';
+import { squarify } from '../treemap.js';
 import { t as tr } from '../i18n.js';
-import { $, esc, money, num, pct, cls, fmtDate, kpi, toast, table, chart, cssVar, PALETTE, downsample } from '../ui.js';
-import { doughnut, emptyState, lineOpts } from './common.js';
+import { $, $$, esc, money, num, pct, cls, fmtDate, kpi, toast, table, chart, cssVar, PALETTE, downsample } from '../ui.js';
+import { doughnut, emptyState, lineOpts, segmented } from './common.js';
 
 
 export async function analysis(el, ctx) {
@@ -46,6 +47,10 @@ export async function analysis(el, ctx) {
     ${kpi('Sharpe (rf=0)', cagr !== null && vol ? num(cagr / vol, 2) : '—')}
     ${kpi('Positions', String(H.length), `top 3 = ${pct(H.slice(0, 3).reduce((s, h) => s + h.weight, 0), { sign: false, digits: 0 })}`)}
   </div>
+  <div class="card"><div class="card-head wrap"><h3>Heatmap</h3><div class="seg" id="hmRange"></div></div>
+    <div class="treemap" id="treemap"></div>
+    <div class="card-head mt"><h3>Contribution to profit</h3><span class="muted small" id="ctNote"></span></div>
+    <div class="chart-box" id="ctBox"><canvas id="ctChart"></canvas></div></div>
   <div class="row gap end share-row"><button class="btn sm-btn" id="shareBtn" title="Copy a link that shows weights and returns, never amounts">Share allocation link</button></div>
   <div class="grid-3" id="allocGrid">${groups.map(([title], i) => `<div class="card"><div class="card-head"><h3>${title}</h3></div><div class="chart-box small"><canvas id="al${i}"></canvas></div><div id="all${i}" class="legend-list"></div></div>`).join('')}</div>
   <div class="card"><div class="card-head"><h3>Actual vs “same money into a benchmark”</h3><select id="simSel" class="sm"></select></div>
@@ -54,6 +59,7 @@ export async function analysis(el, ctx) {
   <div class="card"><div class="card-head"><h3>Returns by year</h3></div><div id="yearT"></div></div>
   <div class="card"><div class="card-head"><h3>Monthly returns (TWR)</h3></div><div id="heat" class="heat"></div></div>`;
 
+  drawHeatmap(el, ctx);
   groups.forEach(([, g], i) => doughnut($(`#al${i}`), $(`#all${i}`), g.slice(0, 10), base));
   $('#shareBtn').addEventListener('click', async () => {
     const link = shareLink(ctx);
@@ -152,4 +158,52 @@ export async function shared(el) {
   doughnut($('#shChart'), $('#shList'), rows, 'PLN');
   const secs = groupBy(rows.map((x) => ({ value: x.value, s: x.sector })), (x) => x.s || 'Other');
   $('#shSec').innerHTML = secs.map((x) => `<div class="mini-row"><span>${esc(x.label)}</span><span>${pct(x.weight, { sign: false, digits: 1 })}</span></div>`).join('');
+}
+
+
+const HM_RANGES = [['Day', 'day'], ['1M', 30], ['YTD', 'ytd'], ['1Y', 365], ['Since buy', 'all']];
+
+/** Treemap of holdings (size = value, colour = change) + per-position profit contribution. */
+function drawHeatmap(el, ctx) {
+  const { result: r, base, market } = ctx;
+  const today = r.today;
+  const memo = new Map();
+  segmented($('#hmRange', el), HM_RANGES, 'Day', (rg) => {
+    const from = rg === 'day' ? null : rg === 'all' ? '0000-00-00' : rg === 'ytd' ? `${+today.slice(0, 4) - 1}-12-31` : addDays(today, -rg);
+    const change = (h) => {
+      if (rg === 'day') return h.dayChangePct;
+      if (rg === 'all') return h.unrealizedPct;
+      const p0 = market.price(h.ticker, from);
+      return p0 ? h.price / p0 - 1 : h.priceChangePct;
+    };
+    // treemap
+    const box = $('#treemap', el);
+    const W = box.clientWidth || 800, H = box.clientHeight || 360;
+    const cells = squarify(r.holdings.map((h) => ({ value: h.value, pos: h, ch: change(h) })), W, H); // note: layout adds x/y/w/h
+    const color = (c) => {
+      const a = Math.min(1, Math.abs(c || 0) / (rg === 'day' ? 0.03 : 0.25));
+      return c >= 0 ? `rgba(16,185,129,${0.18 + a * 0.72})` : `rgba(239,68,68,${0.18 + a * 0.72})`;
+    };
+    box.innerHTML = cells.map((c) => `<div class="tm-cell" style="left:${c.x}px;top:${c.y}px;width:${c.w}px;height:${c.h}px;background:${color(c.ch)}" title="${esc(c.pos.name)} · ${money(c.pos.value, base)} · ${pct(c.ch)}">
+      ${c.w > 46 && c.h > 30 ? `<b>${esc(c.pos.ticker.replace(/#\d+$/, ''))}</b><span>${pct(c.ch, { digits: 1 })}</span>` : ''}</div>`).join('');
+    // contribution
+    const key = String(rg);
+    if (!memo.has(key)) {
+      memo.set(key, rg === 'day'
+        ? r.holdings.map((h) => ({ ticker: h.ticker, profit: h.dayChange })).sort((a, b) => b.profit - a.profit)
+        : contributions(ctx.txs, market, { base, from, autoDividends: ctx.settings.autoDividends, estimateWithholding: ctx.settings.estimateWithholding, today }));
+    }
+    const list = memo.get(key).filter((x) => Math.abs(x.profit) > 0.005);
+    const sum = list.reduce((a, x) => a + x.profit, 0);
+    const total = rg === 'day' ? r.totals.dayChange : periodStats(r.series, from || today)?.profit ?? 0;
+    $('#ctNote', el).textContent = rg === 'day' ? '' : `positions ${money(sum, base, { sign: true })} · cash, fees & FX ${money(total - sum, base, { sign: true })}`;
+    $('#ctBox', el).style.height = `${Math.max(160, list.length * 26 + 40)}px`;
+    chart($('#ctChart', el), {
+      type: 'bar',
+      data: { labels: list.map((x) => x.ticker), datasets: [{ label: tr('Profit'), data: list.map((x) => x.profit), backgroundColor: list.map((x) => (x.profit >= 0 ? 'rgba(16,185,129,0.75)' : 'rgba(239,68,68,0.75)')), borderRadius: 3 }] },
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => money(c.parsed.x, base, { sign: true }) } } },
+        scales: { x: { ticks: { callback: (v) => money(v, base, { compact: true }) } }, y: { grid: { display: false } } } },
+    });
+  });
 }

@@ -254,3 +254,7 @@ input.tgt { width: 80px; text-align: right; }
 tr.current td { background: var(--accent-soft); }
 .icon-btn.tiny { font-size: 0.7rem; padding: 0 2px; color: inherit; }
 .share-row { margin-bottom: 10px; } .goal-form { grid-template-columns: repeat(3, 1fr); } @media (max-width: 760px) { .goal-form { grid-template-columns: 1fr 1fr; } }
+.treemap { position: relative; height: 360px; border-radius: 8px; overflow: hidden; }
+.tm-cell { position: absolute; box-sizing: border-box; border: 2px solid var(--card); border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text); font-size: 0.8rem; overflow: hidden; text-align: center; }
+.tm-cell b { font-size: 0.85rem; }
+@media (max-width: 760px) { .treemap { height: 280px; } }

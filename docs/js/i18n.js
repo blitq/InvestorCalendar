@@ -145,6 +145,7 @@ const PL = {
   'Add your transactions (or import a CSV from your broker) and get value history, profit, time- and money-weighted returns, dividends, allocation, a corporate events calendar and a Polish PIT-38 tax estimate. Your data stays in this browser.': 'Dodaj transakcje (albo zaimportuj plik od brokera) i zobacz historię wartości, zysk, stopy zwrotu TWR i XIRR, dywidendy, alokację, kalendarz wydarzeń i szacunek PIT-38. Dane zostają w tej przeglądarce.',
   'Don’t know the ticker? Leave it empty and add the ISIN to': 'Nie znasz tickera? Zostaw puste i dodaj ISIN do',
   '— the data workflow resolves ISINs automatically, then re-import.': '— workflow danych sam zamieni ISIN na ticker; potem zaimportuj ponownie.',
+  'Heatmap': 'Mapa cieplna', 'Contribution to profit': 'Wkład w zysk', 'Since buy': 'Od zakupu',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',
@@ -180,6 +181,7 @@ const PATTERNS = [
   [/^fee (.+) · tax (.+?)( \(IKE\/IKZE: no tax\))?$/, (m, a, b, c) => `opłata ${a} · podatek ${b}${c ? ' (IKE/IKZE: bez podatku)' : ''}`], [/^since (.+)$/, 'od $1'],
   [/^([\d\s,.\u00a0]+) bonds × (.+)$/, '$1 obligacji × $2'], [/^matured — record the payout$/, 'wykupione — zapisz wypłatę'], [/^(\d+) y (\d+) m$/, '$1 l. $2 mies.'],
   [/^Targets add up to$/, 'Suma celów:'], [/^(.+) is ([\d.,]+) pp (above|below) its target weight\.$/, (m, a, b, c) => `${a} odbiega o ${b} pp ${c === 'above' ? 'w górę' : 'w dół'} od docelowego udziału.`],
+  [/^positions (.+) · cash, fees & FX (.+)$/, 'pozycje $1 · gotówka, opłaty i kursy $2'],
   [/^Sync error: (.+)$/, 'Błąd synchronizacji: $1'], [/^Synced (.+)$/, 'Zsynchronizowano $1'], [/^(\d+) transactions ready/, (m) => m.replace(/^(\d+) transactions ready/, '$1 transakcji gotowych')],
 ];
 
