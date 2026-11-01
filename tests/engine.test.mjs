@@ -313,3 +313,15 @@ test('CONVERSION moves cash between currencies without being a flow', () => {
   close(r.totals.value, 3960);   // 990 USD × 4 PLN
   close(r.totals.profit, -40);   // the spread
 });
+
+test('taxReportCSV lists sales, dividends and totals', async () => {
+  const { taxReportCSV } = await import('../docs/js/engine.js');
+  const csv = taxReportCSV({ year: '2024', proceeds: 1200, costs: 1000, income: 200, divGross: 10, divWithheld: 1.5, divToPay: 0.4, divToPayRounded: 0, taxBase: 200, tax: 38, lossDeducted: 0,
+    trades: [{ date: '2024-05-01', ticker: 'X', qty: 1, currency: 'USD', rate: 4, proceeds: 1200, costs: 1000, income: 200, buys: [{ qty: 1, price: 250, date: '2024-01-01', rate: 4 }] }],
+    dividends: [{ date: '2024-06-01', ticker: 'X', currency: 'USD', rate: 4, gross: 10, withheld: 1.5, toPay: 0.4, domestic: false }] });
+  const lines = csv.split('\n');
+  assert.equal(lines.length, 7);
+  assert.match(lines[1], /^sale,2024-05-01,X,1,USD,4,1200\.00,1000\.00,200\.00/);
+  assert.match(lines[2], /^dividend,2024-06-01,X/);
+  assert.match(lines[6], /^tax_19pct,.*,38,,,0,$/);
+});

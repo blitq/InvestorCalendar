@@ -153,6 +153,7 @@ const PL = {
   'Dividend history': 'Historia dywidend', 'Growth 1y': 'Wzrost 1 rok', 'Growth 3y': 'Wzrost 3 lata', 'Growth 5y': 'Wzrost 5 lat', 'per year': 'rocznie', 'Raised in a row': 'Podwyżki z rzędu',
   'Received amount': 'Otrzymana kwota', 'Received currency': 'Otrzymana waluta', 'Amount sold': 'Sprzedana kwota', 'Change ticker…': 'Zmień ticker…',
   'Ticker changed, merger, or wrong symbol: rewrite all transactions': 'Zmiana tickera, fuzja lub błędny symbol: popraw wszystkie transakcje', 'CONVERSION': 'WYMIANA',
+  'Print / PDF': 'Drukuj / PDF',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',
@@ -191,6 +192,7 @@ const PATTERNS = [
   [/^positions (.+) · cash, fees & FX (.+)$/, 'pozycje $1 · gotówka, opłaty i kursy $2'],
   [/^(\d+)% winners$/, '$1% zyskownych'], [/^(\d+) d$/, '$1 dni'],
   [/^per share, ([A-Z]{3})$/, 'na akcję, $1'], [/^About (.+)$/, 'O spółce: $1'], [/^(\d+) y$/, '$1 lat'],
+  [/^PIT-38 (\d{4}) — estimate$/, 'PIT-38 $1 — szacunek'],
   [/^Sync error: (.+)$/, 'Błąd synchronizacji: $1'], [/^Synced (.+)$/, 'Zsynchronizowano $1'], [/^(\d+) transactions ready/, (m) => m.replace(/^(\d+) transactions ready/, '$1 transakcji gotowych')],
 ];
 

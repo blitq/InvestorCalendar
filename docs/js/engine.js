@@ -916,3 +916,26 @@ export function dividendGrowth(divs, today = todayISO()) {
   for (let i = full.length - 1; i > 0 && full[i].dps > full[i - 1].dps * 1.0001; i--) streak++;
   return { annual, cagr1: cagr(1), cagr3: cagr(3), cagr5: cagr(5), streak };
 }
+
+// ---------------------------------------------------------------- PIT-38 export
+
+/** CSV report for one tax year from computePolishTax(): sales with FIFO detail, dividends, summary. */
+export function taxReportCSV(y) {
+  const r2 = (x) => (Math.round(x * 100) / 100).toFixed(2);
+  const esc = (v) => { const s = String(v ?? ''); return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const rows = [['section', 'date', 'ticker', 'quantity', 'currency', 'nbp_rate', 'revenue_pln', 'costs_pln', 'income_pln', 'gross_pln', 'withheld_pln', 'to_pay_pln', 'details']];
+  for (const t of y.trades) {
+    rows.push(['sale', t.date, t.ticker, t.qty, t.currency, t.rate, r2(t.proceeds), r2(t.costs), r2(t.income), '', '', '',
+      t.buys.map((b) => `${b.qty} @ ${b.price} on ${b.date} (rate ${b.rate})`).join('; ')]);
+  }
+  for (const d of y.dividends) {
+    rows.push(['dividend', d.date, d.ticker || '', '', d.currency, d.rate, '', '', '', r2(d.gross), r2(d.withheld), r2(d.toPay), d.domestic ? 'Polish issuer: taxed at source' : '']);
+  }
+  const sum = [
+    ['summary', '', '', '', '', '', r2(y.proceeds), r2(y.costs), r2(y.income), r2(y.divGross), r2(y.divWithheld), r2(y.divToPay), ''],
+    ['loss_deducted', '', '', '', '', '', '', '', r2(y.lossDeducted || 0), '', '', '', (y.lossDeductions || []).map((l) => `${l.fromYear}: ${r2(l.amount)}`).join('; ')],
+    ['tax_base', '', '', '', '', '', '', '', String(y.taxBase), '', '', '', 'rounded to full PLN'],
+    ['tax_19pct', '', '', '', '', '', '', '', String(y.tax), '', '', String(y.divToPayRounded), ''],
+  ];
+  return [...rows, ...sum].map((r) => r.map(esc).join(',')).join('\n');
+}

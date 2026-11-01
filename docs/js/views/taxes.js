@@ -1,8 +1,8 @@
 // taxes page — split from the former views.js
-import { computePolishTax, TAX_FREE_TYPES } from '../engine.js';
+import { computePolishTax, TAX_FREE_TYPES, taxReportCSV } from '../engine.js';
 import { buildMarket } from '../data.js';
 import { t as tr } from '../i18n.js';
-import { $, esc, money, num, qty, cls, fmtDate, kpi, table } from '../ui.js';
+import { $, esc, download, money, num, qty, cls, fmtDate, kpi, table } from '../ui.js';
 import { emptyState } from './common.js';
 import { settings } from './settings.js';
 
@@ -29,7 +29,9 @@ export async function taxes(el, ctx) {
     Rates use the ${st.taxDateMode === 'settlement' ? 'T+2 settlement date' : 'trade date'}; prior-year losses are ${st.taxCarryForward === false ? 'not deducted' : 'deducted automatically (oldest first, one-off up to PLN 5M, else 50% a year, 5 years)'} — change in Settings.
     Not tax advice — check against your broker's PIT-8C.${excludedNote}</div>
   ${tax.warnings.length ? `<div class="alert"><ul>${tax.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
-  <div class="card"><div class="card-head"><h3>Tax year</h3><div class="seg" id="yearSeg">${tax.years.map((x) => `<button class="${x.year === y.year ? 'on' : ''}" data-y="${x.year}">${x.year}</button>`).join('')}</div></div>
+  <div class="card"><div class="card-head"><h3>Tax year</h3><div class="row gap wrap"><div class="seg" id="yearSeg">${tax.years.map((x) => `<button class="${x.year === y.year ? 'on' : ''}" data-y="${x.year}">${x.year}</button>`).join('')}</div>
+    <button class="btn sm-btn no-print" id="taxCsv">Export CSV</button><button class="btn sm-btn no-print" id="taxPrint">Print / PDF</button></div></div>
+    <div class="print-only"><h2>PIT-38 ${y.year} — estimate</h2><p class="small">Generated ${new Date().toLocaleString()} · FIFO, NBP rates · not tax advice</p></div>
     <div class="kpis">
       ${kpi('Przychód (revenue)', P(y.proceeds), 'PIT-38 sec. C, field 22')}
       ${kpi('Koszty (costs)', P(y.costs), 'field 23')}
@@ -46,6 +48,8 @@ export async function taxes(el, ctx) {
   </div>
   <div class="card"><div class="card-head"><h3>Sales (${y.trades.length})</h3></div><div id="taxTrades"></div></div>
   <div class="card"><div class="card-head"><h3>Dividends (${y.dividends.length})</h3></div><div id="taxDivs"></div></div>`;
+  $('#taxCsv').addEventListener('click', () => download(`pit38-${y.year}.csv`, taxReportCSV(y), 'text/csv'));
+  $('#taxPrint').addEventListener('click', () => window.print());
   $('#yearSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-y]'); if (b) { history.replaceState(null, '', `#/taxes?y=${b.dataset.y}`); taxes(el, ctx); } });
   table($('#taxCountries'), y.countries, [
     { key: 'country', label: tr('Country') },
@@ -54,7 +58,7 @@ export async function taxes(el, ctx) {
     { key: 'divWithheld', label: tr('Tax abroad'), cls: 'num', render: (c) => P(c.divWithheld) },
     { key: 'divToPay', label: tr('To pay in PL'), cls: 'num', render: (c) => P(c.divToPay) },
   ], { sortKey: 'country', sortDir: 1, empty: 'Nothing this year.' });
-  const usable = tax.losses.filter((l) => l.remaining > 0.5 && +l.expires >= +y.year);
+  const usable = tax.losses.filter((l) => l.remaining > 0.5 && +l.year <= +y.year && +l.expires >= +y.year); // losses that exist in the selected year
   table($('#taxLosses'), usable, [
     { key: 'year', label: tr('Loss year') },
     { key: 'original', label: tr('Loss'), cls: 'num', render: (l) => P(l.original) },

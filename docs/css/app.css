@@ -260,3 +260,12 @@ tr.current td { background: var(--accent-soft); }
 @media (max-width: 760px) { .treemap { height: 280px; } }
 .summary-box { margin: 0 0 12px; } .summary-box p { margin: 6px 0; line-height: 1.5; }
 .tag.conversion { background: rgba(100,116,139,0.15); color: var(--muted); }
+.print-only { display: none; }
+@media print {
+  .sidebar, .topbar, .no-print, .toast, #yearSeg button:not(.on) { display: none !important; }
+  .print-only { display: block; margin-bottom: 8px; }
+  body { background: #fff; color: #000; }
+  main { padding: 0; max-width: none; }
+  .card, .kpi { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  .alert { border-color: #ccc; background: #fff; }
+}
