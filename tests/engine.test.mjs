@@ -336,3 +336,28 @@ test('riskStats: drawdown, annualised return', async () => {
   assert.ok(r.vol > 0);
   assert.equal(riskStats({ dates: [], twr: [] }).cagr, null);
 });
+
+test('MERGER moves lots to the new ticker at a ratio; SPINOFF splits the cost', async () => {
+  const { contributions } = await import('../docs/js/engine.js');
+  const market = new Market({ histories: {
+    OLD: { currency: 'USD', ...daily('2024-01-01', '2024-03-01', () => 10), dividends: [], splits: [] },
+    NEW: { currency: 'USD', ...daily('2024-01-01', '2024-03-01', () => 25), dividends: [], splits: [] },
+    SPIN: { currency: 'USD', ...daily('2024-01-01', '2024-03-01', () => 4), dividends: [], splits: [] },
+  } });
+  const buy = { portfolioId: 'p', date: '2024-01-02', type: 'BUY', ticker: 'OLD', quantity: 100, price: 10, currency: 'USD' };
+  const m = computePortfolio([buy, { portfolioId: 'p', date: '2024-02-01', type: 'MERGER', ticker: 'OLD', toTicker: 'NEW', ratio: 0.4, currency: 'USD' }], market, { base: 'USD', today: '2024-03-01' });
+  assert.deepEqual(m.holdings.map((h) => [h.ticker, h.qty]), [['NEW', 40]]);
+  close(m.holdings[0].costBase, 1000);
+  close(m.holdings[0].lots[0].price, 25);
+  assert.equal(m.holdings[0].lots[0].date, '2024-01-02'); // original purchase date kept
+  const s = computePortfolio([buy, { portfolioId: 'p', date: '2024-02-01', type: 'SPINOFF', ticker: 'OLD', toTicker: 'SPIN', ratio: 0.5, costPct: 20, currency: 'USD' }], market, { base: 'USD', today: '2024-03-01' });
+  const h = Object.fromEntries(s.holdings.map((x) => [x.ticker, x]));
+  close(h.OLD.costBase, 800); close(h.SPIN.costBase, 200); close(h.SPIN.qty, 50);
+  close(s.totals.value, 100 * 10 + 50 * 4);
+  // tax FIFO uses the same cost split
+  const tax = computePolishTax([{ ...buy, currency: 'PLN' }, { portfolioId: 'p', date: '2024-02-01', type: 'SPINOFF', ticker: 'OLD', toTicker: 'SPIN', ratio: 0.5, costPct: 20, currency: 'PLN' },
+    { portfolioId: 'p', date: '2024-02-10', type: 'SELL', ticker: 'SPIN', quantity: 50, price: 5, currency: 'PLN' }], market);
+  close(tax.years[0].costs, 200); close(tax.years[0].proceeds, 250);
+  // contribution keeps parent and child together
+  assert.equal(contributions([buy, { portfolioId: 'p', date: '2024-02-01', type: 'SPINOFF', ticker: 'OLD', toTicker: 'SPIN', ratio: 0.5, costPct: 20, currency: 'USD' }], market, { base: 'USD', today: '2024-03-01' })[0].ticker, 'OLD + SPIN');
+});

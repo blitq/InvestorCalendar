@@ -275,3 +275,4 @@ tr.current td { background: var(--accent-soft); }
 .wz-step { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-top: 1px solid var(--border); }
 .wz-n { flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
 .wz-pf { margin-bottom: 6px; max-width: 520px; }
+.tag.spinoff, .tag.merger { background: rgba(139,92,246,0.14); color: #7c3aed; }

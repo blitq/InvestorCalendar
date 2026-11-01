@@ -170,6 +170,8 @@ const PL = {
   '+ Add account': '+ Dodaj rachunek', 'Add your investments': 'Dodaj swoje inwestycje', 'Import a broker file (XTB, Degiro, IBKR, Revolut, CSV)': 'Zaimportuj plik od brokera (XTB, Degiro, IBKR, Revolut, CSV)',
   'Add a transaction by hand': 'Dodaj transakcję ręcznie', 'Add treasury bonds': 'Dodaj obligacje skarbowe', 'Just look around (demo data)': 'Tylko się rozejrzę (dane demo)', 'e.g. XTB, mBank, IKE': 'np. XTB, mBank, IKE',
   'Free and private: everything stays in this browser (you can turn on encrypted sync later). Three quick steps.': 'Za darmo i prywatnie: wszystko zostaje w tej przeglądarce (szyfrowaną synchronizację możesz włączyć później). Trzy szybkie kroki.',
+  'New ticker': 'Nowy ticker', 'New shares per old share': 'Nowe akcje na jedną starą', 'Cost moved to the new company (%)': 'Koszt przeniesiony do nowej spółki (%)',
+  'e.g. the merged or spun-off company': 'np. spółka po fuzji lub wydzielona', "from the company's announcement": 'z komunikatu spółki', 'SPINOFF': 'WYDZIELENIE', 'MERGER': 'FUZJA',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',
