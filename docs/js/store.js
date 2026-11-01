@@ -14,6 +14,7 @@ const DEFAULT_STATE = () => ({
     benchmark: '',
     manualPrices: {},   // ticker -> { price, currency }
     watchlist: [],
+    symbolMap: {},      // symbol in a broker file -> Yahoo ticker (remembered between imports)
     lang: 'en',
   },
 });
@@ -72,6 +73,13 @@ export const store = {
   addTransactions(list) {
     for (const tx of list) state.transactions.push({ ...tx, id: tx.id || uid() });
     persist();
+  },
+  /** Rename tickers in all transactions, e.g. { 'ISIN:US0378331005': 'AAPL' } once the backend resolved it. */
+  renameTickers(map) {
+    let n = 0;
+    for (const t of state.transactions) if (t.ticker && map[t.ticker]) { t.ticker = map[t.ticker]; n++; }
+    if (n) persist();
+    return n;
   },
   deleteTransactions(ids) {
     const s = new Set(ids);

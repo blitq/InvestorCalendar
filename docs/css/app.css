@@ -248,3 +248,4 @@ td.empty { text-align: center; color: var(--muted); padding: 24px; }
 }
 .opts select { max-width: 200px; }
 .form details.settle { border: 1px dashed var(--border); border-radius: 8px; padding: 8px 10px; } .form details.settle summary { cursor: pointer; color: var(--muted); }
+.sym-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px 16px; margin-bottom: 10px; } .sym-grid label { display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; } .sym-grid label > span { font-weight: 600; }

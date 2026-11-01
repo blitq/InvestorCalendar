@@ -36,6 +36,9 @@ async function getContext() {
   if (!state.portfolios.some((p) => p.id === selected)) selected = 'all';
   const txs = selected === 'all' ? state.transactions : state.transactions.filter((t) => t.portfolioId === selected);
   const [meta, quotes, fx] = await Promise.all([loadMeta(), loadQuotes(), loadFx()]);
+  // ISINs imported earlier (e.g. Degiro) that the data workflow has since resolved -> real tickers
+  const resolved = Object.fromEntries(Object.entries(meta.isins || {}).map(([i, t]) => [`ISIN:${i}`, t]));
+  if (state.transactions.some((t) => resolved[t.ticker]) && store.renameTickers(resolved)) return getContext();
   const tickers = [...new Set(state.transactions.filter((t) => t.ticker).map((t) => t.ticker))];
   const benchmarks = Object.keys(meta.benchmarks || {});
   const market = await buildMarket(tickers, { manualPrices: settings.manualPrices, extra: benchmarks });

@@ -7,6 +7,7 @@ import { buildMarket, loadEvents, loadHistories, loadNbp } from './data.js';
 import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from './importers.js';
 import { store } from './store.js';
 import { masterChart } from './masterchart.js';
+import { detectBroker, PARSERS, BROKER_NAMES } from './brokers.js';
 import {
   $, $$, esc, money, num, qty, pct, cls, fmtDate, kpi, toast, download, readFile, table, chart, cssVar, PALETTE, downsample,
 } from './ui.js';
@@ -415,68 +416,173 @@ function txForm(ctx, tx = null) {
   });
 }
 
+const SHEETJS = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+function loadScript(src) {
+  return new Promise((res, rej) => {
+    if ([...document.scripts].some((s) => s.src === src)) return res();
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+/** Read a CSV/TXT/XLSX file into candidate tables: [{ name, rows }] */
+async function fileToTables(file) {
+  if (/\.xlsx?$/i.test(file.name)) {
+    await loadScript(SHEETJS);
+    const wb = window.XLSX.read(await file.arrayBuffer(), { cellDates: true });
+    return wb.SheetNames.map((name) => ({ name,
+      rows: window.XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, raw: false, dateNF: 'yyyy-mm-dd hh:mm:ss', defval: '' }).map((r) => r.map((c) => String(c ?? ''))) }));
+  }
+  const text = await readFile(file);
+  const { headers, rows } = parseCSV(text);
+  return [{ name: file.name, rows: [headers, ...rows], text }];
+}
+
 function importDialog(ctx) {
   const s = ctx.state;
   const pid = ctx.selected !== 'all' ? ctx.selected : s.portfolios[0].id;
-  const { el, close } = modal('Import transactions from CSV', `
-    <p class="muted small">Works with most broker exports (EN/PL headers are detected automatically) and with this app's own CSV export.
-    Tickers should be Yahoo Finance symbols (AAPL, PKO.WA, SAP.DE…). Use “ticker suffix” to append e.g. <code>.WA</code> to bare Polish tickers.</p>
-    <div class="row gap wrap">
-      <input type="file" id="csvFile" accept=".csv,.txt,text/csv">
-      <span class="muted">or paste below</span>
-    </div>
-    <textarea id="csvText" rows="5" placeholder="date,type,ticker,quantity,price,fee,currency&#10;2024-03-05,BUY,AAPL,10,170.5,1,USD"></textarea>
+  const { el, close } = modal('Import transactions', `
+    <p class="muted small">Upload a broker statement — <b>XTB</b> (cash operations, xlsx or csv), <b>Degiro</b> (Transactions.csv and Account.csv),
+    <b>Interactive Brokers</b> (activity statement csv) and <b>Revolut</b> are recognised automatically. Anything else (mBank, Bossa, your own sheet…)
+    goes through the column mapper; Polish and English headers are detected.</p>
+    <div class="row gap wrap"><input type="file" id="csvFile" accept=".csv,.txt,.xlsx,.xls,text/csv"><span class="muted">or paste CSV below</span></div>
+    <textarea id="csvText" rows="4" placeholder="date,type,ticker,quantity,price,fee,currency&#10;2024-03-05,BUY,AAPL,10,170.5,1,USD"></textarea>
+    <div id="detected"></div>
     <div class="form">
       <label>Into portfolio<select id="impPf">${s.portfolios.map((p) => `<option value="${esc(p.id)}" ${p.id === pid ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>
-      <label>Default currency<input id="impCcy" value="${esc(ctx.base)}" maxlength="3"></label>
-      <label>Ticker suffix<input id="impSfx" placeholder=".WA"></label>
-      <label>Default type<select id="impType"><option value="">(from column / sign)</option>${TX_TYPES.map((x) => `<option>${x}</option>`).join('')}</select></label>
-      <label class="check"><input type="checkbox" id="impMonth"> Dates are month-first (US)</label>
+      <label>Default / account currency<input id="impCcy" value="${esc(ctx.base)}" maxlength="3"></label>
+      <label data-generic>Ticker suffix<input id="impSfx" placeholder=".WA"></label>
+      <label data-generic>Default type<select id="impType"><option value="">(from column / sign)</option>${TX_TYPES.map((x) => `<option>${x}</option>`).join('')}</select></label>
+      <label class="check" data-generic><input type="checkbox" id="impMonth"> Dates are month-first (US)</label>
       <label class="check"><input type="checkbox" id="impDup" checked> Skip duplicates</label>
     </div>
     <div id="mapBox"></div>
+    <div id="symBox"></div>
     <div id="preview"></div>
     <div class="row gap end"><button class="btn" data-close>Cancel</button><button class="btn primary" id="doImport" disabled>Import</button></div>`, { wide: true });
 
-  let parsed = null, mapping = {}, outcome = null;
-  const refresh = () => {
-    const text = $('#csvText', el).value;
-    if (!text.trim()) { $('#mapBox', el).innerHTML = ''; $('#preview', el).innerHTML = ''; $('#doImport', el).disabled = true; return; }
-    if (!parsed || parsed.text !== text) { parsed = { text, ...parseCSV(text) }; mapping = detectColumns(parsed.headers); drawMapping(); }
-    outcome = rowsToTransactions(parsed.rows, mapping, {
-      portfolioId: $('#impPf', el).value, currency: $('#impCcy', el).value.toUpperCase(), tickerSuffix: $('#impSfx', el).value.trim(),
-      type: $('#impType', el).value || null, monthFirst: $('#impMonth', el).checked,
-    });
-    let txs = outcome.transactions;
+  const known = new Set([...Object.keys(ctx.quotes), ...(ctx.meta.tickers || []), ...s.transactions.map((t) => t.ticker).filter(Boolean)]);
+  const isinNames = ctx.meta.isins || {};
+  let tables = null, broker = null, table = null, mapping = {}, outcome = null, symMap = {}, checkToken = 0;
+
+  const opts = () => ({ portfolioId: $('#impPf', el).value, currency: $('#impCcy', el).value.toUpperCase(), accountCurrency: null,
+    tickerSuffix: $('#impSfx', el).value.trim(), type: $('#impType', el).value || null, monthFirst: $('#impMonth', el).checked,
+    isinMap: { ...isinNames, ...Object.fromEntries(Object.entries(s.settings.symbolMap || {}).filter(([k]) => k.startsWith('ISIN:')).map(([k, v]) => [k.slice(5), v])) } });
+
+  const setTables = (list) => {
+    tables = list; broker = null; table = null;
+    for (const t of list) { const b = detectBroker(t.rows); if (b) { broker = b; table = t; break; } }
+    if (!table) table = list.find((t) => t.rows.length > 1) || list[0];
+    mapping = broker ? {} : detectColumns(table.rows[0] || []);
+    $('#detected', el).innerHTML = broker ? `<div class="alert info">Detected <b>${esc(BROKER_NAMES[broker])}</b>${list.length > 1 ? ` (sheet “${esc(table.name)}”)` : ''}. Columns are read automatically — beta: if something looks off, tell us what your file looks like.</div>` : '';
+    $$('[data-generic]', el).forEach((x) => { x.hidden = !!broker; });
+    drawMapping(); refresh();
+  };
+
+  const drawMapping = () => {
+    if (broker || !table) { $('#mapBox', el).innerHTML = ''; return; }
+    const headers = table.rows[0] || [];
+    $('#mapBox', el).innerHTML = `<h4>Column mapping</h4><div class="form map">${FIELDS.map((f) => `<label>${f}<select data-map="${f}"><option value="">—</option>${headers.map((h, i) => `<option value="${i}" ${mapping[f] === i ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></label>`).join('')}</div>`;
+    $$('[data-map]', el).forEach((sel) => sel.addEventListener('change', () => { mapping[sel.dataset.map] = sel.value === '' ? undefined : +sel.value; refresh(); }));
+  };
+
+  function parse() {
+    const o = opts();
+    if (broker) {
+      const r = PARSERS[broker](table.rows, { portfolioId: o.portfolioId, isinMap: o.isinMap, accountCurrency: null });
+      if (r.accountCurrency) $('#impCcy', el).value = r.accountCurrency;
+      return r;
+    }
+    return { ...rowsToTransactions(table.rows.slice(1), mapping, o), notes: [] };
+  }
+
+  function refresh() {
+    if (!table) { $('#preview', el).innerHTML = ''; $('#symBox', el).innerHTML = ''; $('#doImport', el).disabled = true; return; }
+    outcome = parse();
+    // symbol mapping: remembered map → anything unknown or unresolved ISINs
+    const saved = s.settings.symbolMap || {};
+    const symbols = [...new Set(outcome.transactions.map((t) => t.ticker).filter(Boolean))];
+    for (const sym of symbols) if (!(sym in symMap)) symMap[sym] = saved[sym] || (sym.startsWith('ISIN:') ? '' : sym);
+    const unknown = symbols.filter((sym) => sym.startsWith('ISIN:') || !known.has(symMap[sym] || sym) || saved[sym]);
+    $('#symBox', el).innerHTML = unknown.length ? `<h4>Symbols <span class="muted small">— use Yahoo Finance tickers (AAPL, PKO.WA, VWCE.DE). Saved for future imports.</span></h4>
+      <div class="sym-grid">${unknown.map((sym) => {
+        const note = outcome.transactions.find((t) => t.ticker === sym)?.note || '';
+        const ok = known.has(symMap[sym]);
+        return `<label><span>${esc(sym)}${note ? ` <span class="muted small">${esc(short(note, 28))}</span>` : ''}</span>
+          <input data-sym="${esc(sym)}" value="${esc(symMap[sym])}" placeholder="${sym.startsWith('ISIN:') ? 'ticker or keep ISIN' : ''}" class="sm"> ${ok ? '<span class="pos small">✓ has data</span>' : '<span class="muted small">no market data yet</span>'}</label>`;
+      }).join('')}</div>
+      ${unknown.some((x) => x.startsWith('ISIN:')) ? `<p class="muted small">Don’t know the ticker? Leave it empty and add the ISIN to <code>tickers.json</code> — the data workflow resolves ISINs automatically, then re-import.</p>` : ''}` : '';
+    $$('[data-sym]', el).forEach((inp) => inp.addEventListener('change', () => { symMap[inp.dataset.sym] = inp.value.trim().toUpperCase(); refresh(); }));
+
+    let txs = outcome.transactions.map((t) => (t.ticker && symMap[t.ticker] ? { ...t, ticker: symMap[t.ticker] } : { ...t }));
     let dups = 0;
     if ($('#impDup', el).checked) {
       const have = new Set(store.get().transactions.map(txFingerprint));
       txs = txs.filter((t) => (have.has(txFingerprint(t)) ? (dups++, false) : true));
     }
     outcome.final = txs;
-    $('#preview', el).innerHTML = `<p><b>${txs.length}</b> transactions ready${dups ? `, ${dups} duplicates skipped` : ''}${outcome.errors.length ? `, <span class="neg">${outcome.errors.length} rows skipped</span>` : ''}.</p>
+    drawPreview(dups, []);
+    sanityCheck(txs, dups);
+  }
+
+  function drawPreview(dups, issues) {
+    const txs = outcome.final;
+    const counts = TX_TYPES.map((ty) => [ty, txs.filter((t) => t.type === ty).length]).filter(([, c]) => c);
+    $('#preview', el).innerHTML = `<p><b>${txs.length}</b> transactions ready${counts.length ? ` (${counts.map(([ty, c]) => `${c} ${ty.toLowerCase()}`).join(', ')})` : ''}${dups ? `, ${dups} duplicates skipped` : ''}${outcome.errors.length ? `, <span class="neg">${outcome.errors.length} rows skipped</span>` : ''}.</p>
+      ${(outcome.notes || []).map((n) => `<div class="muted small">ℹ ${esc(n)}</div>`).join('')}
+      ${issues.length ? `<div class="alert"><b>Price check:</b><ul>${issues.slice(0, 12).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}
       ${outcome.errors.length ? `<details><summary>Skipped rows</summary><ul class="small">${outcome.errors.slice(0, 50).map((e) => `<li>Row ${e.row}: ${esc(e.message)}</li>`).join('')}</ul></details>` : ''}
-      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Ticker</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Fee</th><th class="num">Amount</th><th>Ccy</th></tr></thead><tbody>
-      ${txs.slice(0, 8).map((t) => `<tr><td>${t.date}</td><td>${t.type}</td><td>${esc(t.ticker || '')}</td><td class="num">${t.quantity ?? ''}</td><td class="num">${t.price ?? ''}</td><td class="num">${t.fee ?? ''}</td><td class="num">${t.amount ?? ''}</td><td>${esc(t.currency)}</td></tr>`).join('')}
-      </tbody></table></div>${txs.length > 8 ? `<p class="muted small">…and ${txs.length - 8} more</p>` : ''}`;
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Ticker</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Fee</th><th class="num">Amount</th><th>Ccy</th><th class="num">Settled</th></tr></thead><tbody>
+      ${txs.slice(0, 10).map((t) => `<tr><td>${t.date}</td><td>${t.type}</td><td>${esc(t.ticker || '')}</td><td class="num">${t.quantity ?? ''}</td><td class="num">${t.price ?? ''}</td><td class="num">${t.fee || ''}</td><td class="num">${t.amount ?? ''}${t.tax ? ` <span class="muted small">tax ${num(t.tax, 2)}</span>` : ''}</td><td>${esc(t.currency)}</td><td class="num">${t.settleAmount ? `${t.settleAmount} ${t.settleCurrency}` : ''}</td></tr>`).join('')}
+      </tbody></table></div>${txs.length > 10 ? `<p class="muted small">…and ${txs.length - 10} more</p>` : ''}`;
     $('#doImport', el).disabled = !txs.length;
-  };
-  const drawMapping = () => {
-    $('#mapBox', el).innerHTML = `<h4>Column mapping</h4><div class="form map">${FIELDS.map((f) => `<label>${f}<select data-map="${f}"><option value="">—</option>${parsed.headers.map((h, i) => `<option value="${i}" ${mapping[f] === i ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></label>`).join('')}</div>`;
-    $$('[data-map]', el).forEach((sel) => sel.addEventListener('change', () => {
-      mapping[sel.dataset.map] = sel.value === '' ? undefined : +sel.value;
-      refresh();
-    }));
-  };
-  $('#csvFile', el).addEventListener('change', async (e) => { const file = e.target.files[0]; if (file) { $('#csvText', el).value = await readFile(file); refresh(); } });
-  $('#csvText', el).addEventListener('input', refresh);
+  }
+
+  // Compare trade prices with market closes: fixes pence-quoted LSE prices, flags likely mistakes.
+  async function sanityCheck(txs, dups) {
+    const token = ++checkToken;
+    const tickers = [...new Set(txs.filter((t) => t.price && t.ticker && ctx.meta.files?.[t.ticker]).map((t) => t.ticker))];
+    if (!tickers.length) return;
+    const hist = await loadHistories(tickers);
+    if (token !== checkToken) return;
+    const issues = [];
+    for (const t of txs) {
+      const h = hist[t.ticker];
+      if (!h || !t.price) continue;
+      const s2 = new Series(h.dates, h.close);
+      const px = s2.at(t.date);
+      if (!px) continue;
+      const ratio = t.price / px;
+      if (ratio > 70 && ratio < 140) { t.price = r4(t.price / 100); if (t.fee) t.fee = r4(t.fee / 100); t.note = [t.note, 'price converted from pence'].filter(Boolean).join('; '); issues.push(`${t.date} ${t.ticker}: price looked like pence/cents — divided by 100.`); }
+      else if (ratio > 2.5 || ratio < 0.4) issues.push(`${t.date} ${t.ticker}: price ${num(t.price, 4)} is far from the market close ${num(px, 4)} ${h.currency} — check the ticker or currency.`);
+      else if (h.currency && t.currency !== h.currency && !t.settleCurrency) issues.push(`${t.ticker}: file says ${t.currency}, market data is in ${h.currency}.`);
+    }
+    drawPreview(dups, [...new Set(issues)]);
+  }
+
+  $('#csvFile', el).addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try { const list = await fileToTables(file); $('#csvText', el).value = list[0].text || `(${file.name}: ${list.length} sheet(s))`; symMap = {}; setTables(list); }
+    catch (err) { toast('Could not read file: ' + err.message, 'error'); }
+  });
+  $('#csvText', el).addEventListener('input', () => {
+    const text = $('#csvText', el).value;
+    if (!text.trim()) { tables = table = null; refresh(); return; }
+    const { headers, rows } = parseCSV(text);
+    setTables([{ name: 'pasted', rows: [headers, ...rows], text }]);
+  });
   ['#impPf', '#impCcy', '#impSfx', '#impType', '#impMonth', '#impDup'].forEach((id) => $(id, el).addEventListener('change', refresh));
   $('#doImport', el).addEventListener('click', () => {
+    const remember = Object.fromEntries(Object.entries(symMap).filter(([k, v]) => v && v !== k));
+    if (Object.keys(remember).length) store.setSettings({ symbolMap: { ...(s.settings.symbolMap || {}), ...remember } });
     store.addTransactions(outcome.final);
     toast(`Imported ${outcome.final.length} transactions`);
     close();
   });
 }
+const r4 = (x) => Math.round(x * 1e4) / 1e4;
 
 // ======================================================================= dividends
 
@@ -837,8 +943,9 @@ export async function watchlist(el, ctx) {
 export async function settings(el, ctx) {
   const s = ctx.state;
   const st = s.settings;
-  const wanted = [...new Set([...(ctx.meta.tickers || []), ...ctx.missing, ...(st.watchlist || []).filter((t) => !ctx.meta.files?.[t])])].sort();
-  const needsAdding = wanted.filter((t) => !(ctx.meta.tickers || []).includes(t));
+  const bare = (t) => t.replace(/^ISIN:/, ''); // tickers.json accepts ISINs; the workflow resolves them
+  const wanted = [...new Set([...(ctx.meta.tickers || []), ...Object.keys(ctx.meta.isins || {}), ...ctx.missing.map(bare), ...(st.watchlist || []).filter((t) => !ctx.meta.files?.[t])])].sort();
+  const needsAdding = wanted.filter((t) => !(ctx.meta.tickers || []).includes(t) && !(ctx.meta.isins || {})[t]);
   el.innerHTML = `
   <div class="grid-2">
     <div class="card">

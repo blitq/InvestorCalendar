@@ -21,6 +21,7 @@ from datetime import date, datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from isin import is_isin, resolve as resolve_isins  # noqa: E402
 from markets import safe_filename, stooq_exchange, strip_suffix  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -148,8 +149,20 @@ def main(argv=None):
     args = parser.parse_args(argv)
     steps = set(args.only or STEPS)
 
-    tickers = load_json(TICKERS_PATH, [])
+    raw_tickers = [str(t).strip() for t in load_json(TICKERS_PATH, []) if str(t).strip()]
     config = load_json(CONFIG_PATH, {})
+    # ISINs in tickers.json (e.g. from a Degiro export) are resolved to Yahoo symbols
+    isin_path = os.path.join(DATA_DIR, "isins.json")
+    isins = load_json(isin_path, {})
+    wanted_isins = [t.upper() for t in raw_tickers if is_isin(t)]
+    if wanted_isins:
+        print(f"Resolving {len(wanted_isins)} ISINs via OpenFIGI")
+        isins = resolve_isins(wanted_isins, isins)
+        write_json(isin_path, isins, pretty=True)
+        for i in wanted_isins:
+            print(f"  {i} -> {isins.get(i) or 'NOT FOUND'}")
+    tickers = list(dict.fromkeys(
+        (isins.get(t.upper()) if is_isin(t) else t) for t in raw_tickers if not is_isin(t) or isins.get(t.upper())))
     start = config.get("history_start", "2016-01-01")
     benchmarks = config.get("benchmarks", {})
     meta_path = os.path.join(DATA_DIR, "meta.json")
@@ -178,6 +191,7 @@ def main(argv=None):
     meta.update({
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "tickers": tickers,
+        "isins": {i: isins[i] for i in wanted_isins if isins.get(i)},
         "benchmarks": benchmarks,
         "files": files,
     })

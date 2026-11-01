@@ -52,3 +52,40 @@ def test_nbp_incremental(monkeypatch):
     out = nbp.update_currency("USD", existing, date(2024, 1, 1), today=date(2024, 1, 10))
     assert calls == [(date(2024, 1, 3), date(2024, 1, 10))]
     assert out == {"dates": ["2024-01-02", "2024-01-03"], "rates": [3.9, 4.0]}
+
+
+def test_isin_pick_symbol():
+    from isin import is_isin, pick_symbol
+    assert is_isin("US0378331005") and not is_isin("AAPL")
+    rows = [{"ticker": "AAPL", "exchCode": "UA"}, {"ticker": "AAPL", "exchCode": "US"}, {"ticker": "APC", "exchCode": "GY"}]
+    assert pick_symbol("US0378331005", rows) == "AAPL"
+    assert pick_symbol("PLPKO0000016", [{"ticker": "PKO", "exchCode": "PW"}]) == "PKO.WA"
+    fund = [{"ticker": "VWRA", "exchCode": "LN"}, {"ticker": "VWCE", "exchCode": "GY"}]
+    assert pick_symbol("IE00BK5BQT80", fund) == "VWCE.DE"
+    assert pick_symbol("US0846707026", [{"ticker": "BRK/B", "exchCode": "US"}]) == "BRK-B"
+    assert pick_symbol("XX0000000000", []) is None
+
+
+def test_isin_resolve_uses_cache(monkeypatch):
+    import isin
+
+    class Resp:
+        def raise_for_status(self):
+            pass
+
+        def json(self):
+            return [{"data": [{"ticker": "PKO", "exchCode": "PW"}]}]
+
+    class Sess:
+        def __init__(self):
+            self.calls = 0
+
+        def post(self, url, json, timeout):
+            self.calls += 1
+            assert [j["idValue"] for j in json] == ["PLPKO0000016"]
+            return Resp()
+
+    s = Sess()
+    out = isin.resolve(["US0378331005", "PLPKO0000016"], {"US0378331005": "AAPL"}, session=s, sleep=0)
+    assert out == {"US0378331005": "AAPL", "PLPKO0000016": "PKO.WA"}
+    assert s.calls == 1

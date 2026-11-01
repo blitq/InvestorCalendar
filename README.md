@@ -22,7 +22,8 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Dashboard | value, total profit, today's change, TWR, XIRR, returns for 1D…Max, allocation, movers, upcoming events |
 | Master chart | one chart with toggleable value, net invested, profit, return (TWR / XIRR / profit ÷ invested), drawdown, benchmarks (% change or "same money"), dividend and deposit bars, buy/sell/dividend/event markers; ranges 1M…Max or custom dates, drag-to-zoom (mouse and touch), log scale, daily/weekly/monthly points, filter by asset, crosshair tooltip, summary for the window, PNG/CSV export; settings are remembered |
 | Holdings | positions with avg price, FIFO lots, unrealized/realized P&L, dividends, total return; per-stock chart with buy/sell markers and fundamentals |
-| Transactions | buy, sell, dividend, deposit, withdrawal, fee, interest, tax; CSV import with auto column detection (EN/PL headers, EU number/date formats, duplicate skipping), CSV export |
+| Transactions | buy, sell, dividend, deposit, withdrawal, fee, interest, tax; trades settled in another account currency (e.g. PLN paid for USD shares); CSV export |
+| Broker import | **XTB** (cash operations xlsx/csv), **Degiro** (Transactions.csv + Account.csv), **Interactive Brokers** (activity statement), **Revolut**; anything else via the column mapper (EN/PL headers, EU formats). Symbol mapping remembered between imports, duplicate skipping, price sanity check (fixes pence-quoted LSE prices) |
 | Dividends | received (recorded or estimated from market data), next-12-month forecast, monthly/yearly charts, yield and yield on cost |
 | Analysis | allocation by sector, country, currency, market, asset type and portfolio; volatility, max drawdown, Sharpe; yearly returns vs benchmarks; monthly heatmap; "same money into a benchmark" simulation |
 | Calendar | earnings, dividends, splits and expected dividends for your holdings |
@@ -43,6 +44,7 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 1. Push this repository to GitHub, then go to **Settings → Pages** and set **Source: GitHub Actions**.
    The **Build data and deploy site** workflow publishes the site on every push to `main` and on its schedule.
 2. Edit `tickers.json` and list the Yahoo Finance symbols you hold or watch (`AAPL`, `PKO.WA`, `SAP.DE`, `LLOY.L`, …).
+   ISINs work too (`IE00BK5BQT80`): the workflow resolves them through OpenFIGI, and imported "ISIN:…" positions switch to the ticker automatically.
    Pushing that change rebuilds and redeploys the site; you can also run the workflow by hand from the Actions tab.
 3. Open the site, then add transactions or import a CSV. **Settings → Market data** lists any of your tickers that have no data yet,
    with a ready-to-paste `tickers.json`.
