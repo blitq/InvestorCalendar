@@ -280,11 +280,15 @@ export function computePortfolio(transactions, market, opts = {}) {
         const ccy = market.currency(tk) || posInfo.get(key)?.currency || base;
         const gross = qty * dps;
         const rate = fx(ccy, d);
-        result.dividends.push({ date: d, portfolioId: pid, ticker: tk, currency: ccy, gross, tax: 0, net: gross,
-          grossBase: gross * rate, netBase: gross * rate, estimated: true });
-        pos(pid, tk, ccy).dividends += gross * rate;
-        totals.dividends += gross * rate;
-        if (cashMode[pid]) addCash(pid, ccy, gross); else flowOut -= gross * rate;
+        // typical treaty withholding for the issuer's country (tax-free accounts still pay foreign WHT)
+        const wht = opts.estimateWithholding === false ? 0 : (WITHHOLDING[countryOf(market, tk)] ?? 0.15);
+        const tax = gross * wht, net = gross - tax;
+        result.dividends.push({ date: d, portfolioId: pid, ticker: tk, currency: ccy, gross, tax, net,
+          grossBase: gross * rate, netBase: net * rate, estimated: true });
+        pos(pid, tk, ccy).dividends += net * rate;
+        totals.dividends += net * rate;
+        totals.taxes += tax * rate;
+        if (cashMode[pid]) addCash(pid, ccy, net); else flowOut -= net * rate;
       }
     }
 
@@ -578,26 +582,96 @@ export function trailingYield(market, ticker, today = todayISO()) {
 
 // ---------------------------------------------------------------- Polish tax (PIT-38)
 
+/** Add n business days (Mon–Fri) to an ISO date — used for T+2 settlement. */
+export function addBusinessDays(iso, k) {
+  let d = iso;
+  while (k > 0) {
+    d = addDays(d, 1);
+    const wd = new Date(d + 'T00:00:00Z').getUTCDay();
+    if (wd !== 0 && wd !== 6) k--;
+  }
+  return d;
+}
+
+export const MAX_LOSS_YEARS = 5;
+export const LOSS_ONE_OFF_CAP = 5_000_000;
+
+/**
+ * Apply prior-year capital losses (Polish rules since 2019): each loss can be used in the next 5 years,
+ * up to 50% of it per year, or once up to PLN 5M in a single year. Greedy: oldest losses first,
+ * using the one-off when the 50% cap would leave income untaxed-able.
+ * years: [{year, income}] (any order); priorLosses: {year: amount} for losses from before your data.
+ */
+export function applyLossCarryForward(years, priorLosses = {}) {
+  const losses = [];
+  for (const [y, amt] of Object.entries(priorLosses)) if (+amt > 0) losses.push({ year: String(y), orig: +amt, left: +amt, oneOffUsed: false });
+  const sorted = [...years].sort((a, b) => a.year.localeCompare(b.year));
+  for (const y of sorted) {
+    y.lossDeductions = [];
+    y.lossDeducted = 0;
+    let room = Math.max(0, y.income);
+    for (const L of losses.sort((a, b) => a.year.localeCompare(b.year))) {
+      if (room <= 0) break;
+      if (L.left <= 0 || +y.year - +L.year > MAX_LOSS_YEARS || +y.year <= +L.year) continue;
+      const half = L.orig * 0.5;
+      const cap = L.oneOffUsed ? Math.min(half, L.left) : Math.min(L.left, Math.max(half, LOSS_ONE_OFF_CAP));
+      const take = Math.min(cap, room);
+      if (take <= 0) continue;
+      if (take > half + 1e-6) L.oneOffUsed = true;
+      L.left -= take; room -= take;
+      y.lossDeducted += take;
+      y.lossDeductions.push({ fromYear: L.year, amount: take, oneOff: take > half + 1e-6 });
+    }
+    if (y.income < 0 && !losses.some((L) => L.year === y.year)) losses.push({ year: y.year, orig: -y.income, left: -y.income, oneOffUsed: false });
+  }
+  return losses.map((L) => ({ year: L.year, original: L.orig, remaining: L.left, expires: String(+L.year + MAX_LOSS_YEARS) }));
+}
+
+const COUNTRY_CODES = {
+  'United States': 'US', Poland: 'PL', Germany: 'DE', France: 'FR', Netherlands: 'NL', 'United Kingdom': 'GB', Ireland: 'IE',
+  Switzerland: 'CH', Spain: 'ES', Italy: 'IT', Denmark: 'DK', Sweden: 'SE', Norway: 'NO', Finland: 'FI', Canada: 'CA',
+  Austria: 'AT', Belgium: 'BE', Japan: 'JP', Luxembourg: 'LU', Portugal: 'PT', 'Czech Republic': 'CZ', Australia: 'AU', 'Hong Kong': 'HK',
+};
+const SUFFIX_COUNTRY = { WA: 'PL', DE: 'DE', F: 'DE', PA: 'FR', AS: 'NL', L: 'GB', IR: 'IE', SW: 'CH', MC: 'ES', MI: 'IT', CO: 'DK', ST: 'SE', OL: 'NO', HE: 'FI', TO: 'CA', VI: 'AT', BR: 'BE', T: 'JP', LS: 'PT', PR: 'CZ', AX: 'AU', HK: 'HK' };
+/** Typical dividend withholding for a Polish resident (treaty rate / W-8BEN), used for estimated dividends. */
+export const WITHHOLDING = { US: 0.15, PL: 0.19, DE: 0.26375, FR: 0.128, NL: 0.15, GB: 0, IE: 0.25, CH: 0.35, ES: 0.19, IT: 0.26, DK: 0.27, SE: 0.3, NO: 0.25, FI: 0.35, CA: 0.25, AT: 0.275, BE: 0.3, JP: 0.15315, LU: 0.15, PT: 0.25, CZ: 0.15, AU: 0.3, HK: 0 };
+
+export function countryOf(market, ticker) {
+  const name = market.quotes?.[ticker]?.country;
+  if (name && COUNTRY_CODES[name]) return COUNTRY_CODES[name];
+  const m = String(ticker || '').match(/\.([A-Z]+)$/);
+  if (m) return SUFFIX_COUNTRY[m[1]] || null;
+  return ticker ? 'US' : null;
+}
+
 /**
  * Capital gains and foreign dividend tax per calendar year, Polish rules:
  *  - FIFO per account (portfolio) and ticker,
  *  - foreign amounts converted at the NBP mid rate of the last business day before the
- *    transaction date (buy cost at the buy rate, proceeds at the sell rate),
+ *    transaction date (or the T+2 settlement date with dateMode 'settlement'),
  *  - fees are deductible costs,
+ *  - prior-year losses carried forward (50%/year or one-off up to PLN 5M, 5 years),
  *  - foreign dividends: 19% minus tax withheld abroad (never below zero).
  * Only recorded transactions are used (estimated dividends are not taxable evidence).
+ * opts: { dateMode: 'trade'|'settlement', carryForward: true, priorLosses: {year: amount} }
  */
-export function computePolishTax(transactions, market) {
+export function computePolishTax(transactions, market, opts = {}) {
   const txs = sortTransactions(transactions);
   const book = new FifoBook();
   const years = {};
   const warnings = new Set();
-  const year = (y) => (years[y] ??= { year: y, proceeds: 0, costs: 0, income: 0, trades: [], dividends: [], divGross: 0, divWithheld: 0, divToPay: 0 });
+  const settle = opts.dateMode === 'settlement';
+  const year = (y) => (years[y] ??= { year: y, proceeds: 0, costs: 0, income: 0, trades: [], dividends: [], divGross: 0, divWithheld: 0, divToPay: 0, byCountry: {} });
+  const country = (y, tk) => {
+    const c = countryOf(market, tk) || '??';
+    return (y.byCountry[c] ??= { country: c, proceeds: 0, costs: 0, income: 0, divGross: 0, divWithheld: 0, divToPay: 0 });
+  };
   const rate = (ccy, d) => {
     const r = market.nbpRate(ccy, d);
     if (r === null) { warnings.add(`No NBP rate for ${ccy} before ${d}.`); return null; }
     return r;
   };
+  const tradeRateDate = (d) => (settle ? addBusinessDays(d, 2) : d);
 
   const tickers = new Set(txs.filter((t) => t.ticker).map((t) => t.ticker));
   const splits = [];
@@ -610,10 +684,10 @@ export function computePolishTax(transactions, market) {
     const ccy = t.currency || market.currency(t.ticker) || 'PLN';
     const key = `${t.portfolioId}|${t.ticker}`;
     if (t.type === 'BUY') {
-      const r = rate(ccy, t.date);
+      const r = rate(ccy, tradeRateDate(t.date));
       book.buy(key, { date: t.date, qty: n(t.quantity), price: n(t.price), fee: n(t.fee), rate: r ?? 0, currency: ccy });
     } else if (t.type === 'SELL') {
-      const r = rate(ccy, t.date) ?? 0;
+      const r = rate(ccy, tradeRateDate(t.date)) ?? 0;
       const qty = n(t.quantity);
       const { used, shortfall } = book.sell(key, qty);
       if (shortfall) warnings.add(`SELL ${t.ticker} on ${t.date}: no matching purchase for ${fmtQty(shortfall)} shares — cost assumed 0.`);
@@ -621,27 +695,39 @@ export function computePolishTax(transactions, market) {
       const costs = used.reduce((s, l) => s + (l.qty * l.price + l.fee) * l.rate, 0) + n(t.fee) * r;
       const y = year(t.date.slice(0, 4));
       y.proceeds += proceeds; y.costs += costs; y.income += proceeds - costs;
+      const c = country(y, t.ticker);
+      c.proceeds += proceeds; c.costs += costs; c.income += proceeds - costs;
       y.trades.push({ date: t.date, portfolioId: t.portfolioId, ticker: t.ticker, qty, currency: ccy, rate: r,
         proceeds, costs, income: proceeds - costs,
         buys: used.map((l) => ({ date: l.date, qty: l.qty, price: l.price, rate: l.rate })) });
     } else if (t.type === 'DIVIDEND') {
       const r = rate(ccy, t.date) ?? 0;
       const gross = n(t.amount) * r, withheld = n(t.tax) * r;
-      const domestic = ccy === 'PLN';
+      // Polish companies withhold the 19% themselves; anything else needs the top-up in PIT-38
+      const noInfo = !market.quotes?.[t.ticker]?.country && !/\./.test(t.ticker || '');
+      const domestic = t.ticker && !noInfo ? countryOf(market, t.ticker) === 'PL' : ccy === 'PLN';
       const toPay = domestic ? 0 : Math.max(0, gross * PL_TAX_RATE - withheld);
       const y = year(t.date.slice(0, 4));
       y.dividends.push({ date: t.date, ticker: t.ticker, currency: ccy, rate: r, gross, withheld, toPay, domestic });
-      if (!domestic) { y.divGross += gross; y.divWithheld += withheld; y.divToPay += toPay; }
+      if (!domestic) {
+        y.divGross += gross; y.divWithheld += withheld; y.divToPay += toPay;
+        const c = country(y, t.ticker);
+        c.divGross += gross; c.divWithheld += withheld; c.divToPay += toPay;
+      }
     }
   }
 
-  for (const y of Object.values(years)) {
-    y.taxBase = Math.max(0, Math.round(y.income));
+  const list = Object.values(years);
+  const lossesLeft = opts.carryForward === false ? [] : applyLossCarryForward(list, opts.priorLosses);
+  for (const y of list) {
+    y.lossDeducted = opts.carryForward === false ? 0 : (y.lossDeducted || 0);
+    y.taxBase = Math.max(0, Math.round(y.income - y.lossDeducted));
     y.tax = Math.round(y.taxBase * PL_TAX_RATE);
     y.loss = y.income < 0 ? -y.income : 0;
     y.divToPayRounded = Math.round(y.divToPay);
+    y.countries = Object.values(y.byCountry).sort((a, b) => a.country.localeCompare(b.country));
   }
-  return { years: Object.values(years).sort((a, b) => b.year.localeCompare(a.year)), warnings: [...warnings] };
+  return { years: list.sort((a, b) => b.year.localeCompare(a.year)), losses: lossesLeft, warnings: [...warnings] };
 }
 
 // ---------------------------------------------------------------- allocation

@@ -868,7 +868,8 @@ export async function taxes(el, ctx) {
   const market = await buildMarket(tickers, { withNbp: true, manualPrices: ctx.settings.manualPrices });
   const taxFree = new Set(ctx.state.portfolios.filter((p) => TAX_FREE_TYPES.has(p.type)).map((p) => p.id));
   const txs = (ctx.selected === 'all' ? ctx.state.transactions : ctx.txs).filter((t) => !taxFree.has(t.portfolioId));
-  const tax = computePolishTax(txs, market);
+  const st = ctx.settings;
+  const tax = computePolishTax(txs, market, { dateMode: st.taxDateMode || 'trade', carryForward: st.taxCarryForward !== false, priorLosses: st.taxPriorLosses || {} });
   const excludedNote = taxFree.size ? `<div class="muted small">Excluded as tax-free: ${ctx.state.portfolios.filter((p) => taxFree.has(p.id)).map((p) => esc(p.name)).join(', ')} (IKE / IKZE / OIPE).</div>` : '';
   if (!tax.years.length) {
     el.innerHTML = '<div class="card"><h3>No taxable events yet</h3><p class="muted">Sales and recorded dividends will show up here.</p></div>';
@@ -879,21 +880,41 @@ export async function taxes(el, ctx) {
   const P = (v) => money(v, 'PLN');
   el.innerHTML = `
   <div class="alert info">Estimate of the Polish <b>PIT-38</b> using FIFO per portfolio (treat each portfolio as one broker account) and NBP mid rates from the business day before each transaction.
-    Not tax advice — check against your broker's PIT-8C. Prior-year losses (up to 50% per year for 5 years) are not deducted automatically.${excludedNote}</div>
+    Rates use the ${st.taxDateMode === 'settlement' ? 'T+2 settlement date' : 'trade date'}; prior-year losses are ${st.taxCarryForward === false ? 'not deducted' : 'deducted automatically (oldest first, one-off up to PLN 5M, else 50% a year, 5 years)'} — change in Settings.
+    Not tax advice — check against your broker's PIT-8C.${excludedNote}</div>
   ${tax.warnings.length ? `<div class="alert"><ul>${tax.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
   <div class="card"><div class="card-head"><h3>Tax year</h3><div class="seg" id="yearSeg">${tax.years.map((x) => `<button class="${x.year === y.year ? 'on' : ''}" data-y="${x.year}">${x.year}</button>`).join('')}</div></div>
     <div class="kpis">
       ${kpi('Przychód (revenue)', P(y.proceeds), 'PIT-38 sec. C, field 22')}
       ${kpi('Koszty (costs)', P(y.costs), 'field 23')}
       ${kpi(y.income >= 0 ? 'Dochód (income)' : 'Strata (loss)', `<span class="${cls(y.income)}">${P(y.income)}</span>`, y.income >= 0 ? 'field 24' : 'field 25 — carry forward')}
+      ${y.lossDeducted ? kpi('Prior losses deducted', P(y.lossDeducted), y.lossDeductions.map((l) => `${l.fromYear}${l.oneOff ? ' (one-off)' : ''}: ${P(l.amount)}`).join(' · ') + ' — field 28') : ''}
       ${kpi('Podatek 19% (tax)', `<b>${P(y.tax)}</b>`, `base ${P(y.taxBase)} rounded`)}
       ${kpi('Foreign dividends: tax to pay', `<b>${P(y.divToPayRounded)}</b>`, `sec. G · gross ${P(y.divGross)}, withheld ${P(y.divWithheld)}`)}
       ${kpi('Total due', `<b>${P(y.tax + y.divToPayRounded)}</b>`)}
     </div>
   </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><h3>By country</h3><span class="muted small">helps with PIT/ZG</span></div><div id="taxCountries"></div></div>
+    <div class="card"><div class="card-head"><h3>Losses to carry forward</h3><a class="link" href="#/settings">settings →</a></div><div id="taxLosses"></div></div>
+  </div>
   <div class="card"><div class="card-head"><h3>Sales (${y.trades.length})</h3></div><div id="taxTrades"></div></div>
   <div class="card"><div class="card-head"><h3>Dividends (${y.dividends.length})</h3></div><div id="taxDivs"></div></div>`;
   $('#yearSeg').addEventListener('click', (e) => { const b = e.target.closest('[data-y]'); if (b) { history.replaceState(null, '', `#/taxes?y=${b.dataset.y}`); taxes(el, ctx); } });
+  table($('#taxCountries'), y.countries, [
+    { key: 'country', label: 'Country' },
+    { key: 'income', label: 'Gains', cls: 'num', render: (c) => `<span class="${cls(c.income)}">${P(c.income)}</span>` },
+    { key: 'divGross', label: 'Dividends', cls: 'num', render: (c) => P(c.divGross) },
+    { key: 'divWithheld', label: 'Tax abroad', cls: 'num', render: (c) => P(c.divWithheld) },
+    { key: 'divToPay', label: 'To pay in PL', cls: 'num', render: (c) => P(c.divToPay) },
+  ], { sortKey: 'country', sortDir: 1, empty: 'Nothing this year.' });
+  const usable = tax.losses.filter((l) => l.remaining > 0.5 && +l.expires >= +y.year);
+  table($('#taxLosses'), usable, [
+    { key: 'year', label: 'Loss year' },
+    { key: 'original', label: 'Loss', cls: 'num', render: (l) => P(l.original) },
+    { key: 'remaining', label: 'Still deductible', cls: 'num', render: (l) => P(l.remaining) },
+    { key: 'expires', label: 'Usable until' },
+  ], { sortKey: 'year', sortDir: 1, empty: st.taxCarryForward === false ? 'Carry-forward is switched off in Settings.' : 'No unused losses.' });
   table($('#taxTrades'), y.trades, [
     { key: 'date', label: 'Sold', render: (t) => fmtDate(t.date) },
     { key: 'ticker', label: 'Ticker', render: (t) => `<b>${esc(t.ticker)}</b>` },
@@ -1014,6 +1035,15 @@ export async function settings(el, ctx) {
     </div>
   </div>
   <div class="card">
+    <h3>Taxes</h3>
+    <div class="form">
+      <label>Exchange-rate date for trades<select id="tDate"><option value="trade">Trade date (NBP rate from the day before)</option><option value="settlement">Settlement date T+2</option></select></label>
+      <label class="check"><input type="checkbox" id="tCarry" ${st.taxCarryForward !== false ? 'checked' : ''}> Deduct prior-year losses automatically</label>
+      <label class="check full"><input type="checkbox" id="tWht" ${st.estimateWithholding !== false ? 'checked' : ''}> Estimated dividends: subtract typical withholding tax of the issuer's country (US 15%, DE 26.4%, CH 35%, PL 19%…)</label>
+      <label class="full">Losses from years before your data (PLN), e.g. <code>2022: 1500, 2023: 300</code><input id="tPrior" value="${esc(Object.entries(st.taxPriorLosses || {}).map(([y, v]) => `${y}: ${v}`).join(', '))}"></label>
+    </div>
+  </div>
+  <div class="card">
     <h3>Manual prices</h3>
     <p class="muted small">For assets without Yahoo data (bonds, private funds, delisted stocks). Used whenever no market price exists.</p>
     <div id="mpList"></div>
@@ -1030,6 +1060,16 @@ export async function settings(el, ctx) {
   }));
   $('#limSelf').addEventListener('change', (e) => store.setSettings({ ikzeSelfEmployed: e.target.checked }));
   $('#sAuto').addEventListener('change', (e) => store.setSettings({ autoDividends: e.target.checked }));
+  $('#tDate').value = st.taxDateMode || 'trade';
+  $('#tDate').addEventListener('change', (e) => store.setSettings({ taxDateMode: e.target.value }));
+  $('#tCarry').addEventListener('change', (e) => store.setSettings({ taxCarryForward: e.target.checked }));
+  $('#tWht').addEventListener('change', (e) => store.setSettings({ estimateWithholding: e.target.checked }));
+  $('#tPrior').addEventListener('change', (e) => {
+    const out = {};
+    for (const m of e.target.value.matchAll(/(\d{4})\s*[:=]\s*([\d\s.,]+)/g)) out[m[1]] = parseFloat(m[2].replace(/\s/g, '').replace(',', '.'));
+    store.setSettings({ taxPriorLosses: out });
+    toast(`Saved ${Object.keys(out).length} prior loss(es)`);
+  });
   $('#pfList').innerHTML = s.portfolios.map((p) => `<div class="mini-row"><span><b>${esc(p.name)}</b> <span class="muted small">${s.transactions.filter((t) => t.portfolioId === p.id).length} tx</span></span>
     <span class="row gap"><select class="sm" data-ptype="${esc(p.id)}" title="Account type">${Object.entries(ACCOUNT_TYPES).map(([k, v]) => `<option value="${k}" ${(p.type || 'regular') === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
     <button class="icon-btn" data-ren="${esc(p.id)}" title="Rename">✎</button>${s.portfolios.length > 1 ? `<button class="icon-btn" data-delp="${esc(p.id)}" title="Delete">🗑</button>` : ''}</span></div>`).join('');

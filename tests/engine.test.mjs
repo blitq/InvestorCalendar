@@ -92,11 +92,15 @@ test('cash mode: deposits are the flows, cash counted in value', () => {
 test('auto dividends from market data when none recorded', () => {
   const market = new Market({ histories: { AAA: { currency: 'PLN', ...daily('2024-01-01', '2024-03-01', () => 10), dividends: [['2024-02-01', 0.5]], splits: [] } } });
   const txs = [{ portfolioId: 'p', date: '2024-01-02', type: 'BUY', ticker: 'AAA', quantity: 10, price: 10, currency: 'PLN' }];
-  const r = computePortfolio(txs, market, { base: 'PLN', today: '2024-03-01' });
+  const r = computePortfolio(txs, market, { base: 'PLN', today: '2024-03-01', estimateWithholding: false });
   assert.equal(r.dividends.length, 1);
   assert.ok(r.dividends[0].estimated);
   close(r.totals.dividends, 5);
   close(r.totals.profit, 5);
+  // default: typical withholding for the issuer country (bare ticker -> US, 15%)
+  const w = computePortfolio(txs, market, { base: 'PLN', today: '2024-03-01' });
+  close(w.totals.dividends, 4.25);
+  close(w.dividends[0].tax, 0.75);
   const off = computePortfolio(txs, market, { base: 'PLN', today: '2024-03-01', autoDividends: false });
   assert.equal(off.dividends.length, 0);
   // recorded dividends suppress estimates for that ticker
@@ -204,4 +208,45 @@ test('IKE contributions by year: deposits or net purchases', async () => {
   assert.equal(net.method, 'net purchases');
   close(net.byYear[2024], 404);
   assert.equal(net.byYear[2025], 0); // sells larger than buys -> floored at 0
+});
+
+test('loss carry-forward: 50% per year or one-off up to 5M within 5 years', async () => {
+  const { applyLossCarryForward } = await import('../docs/js/engine.js');
+  // small loss: one-off lets the whole 1000 go against 2024 income
+  let ys = [{ year: '2023', income: -1000 }, { year: '2024', income: 3000 }];
+  let left = applyLossCarryForward(ys);
+  assert.equal(ys[1].lossDeducted, 1000);
+  assert.equal(left[0].remaining, 0);
+  // after a one-off, later years are capped at 50% of the original loss
+  ys = [{ year: '2020', income: -10000 }, { year: '2021', income: 6000 }, { year: '2022', income: 10000 }];
+  applyLossCarryForward(ys);
+  assert.equal(ys[1].lossDeducted, 6000); // one-off
+  assert.equal(ys[2].lossDeducted, 4000); // remaining, within the 50% (5000) cap
+  // expiry after 5 years and prior losses from settings
+  ys = [{ year: '2026', income: 500 }, { year: '2027', income: 500 }];
+  applyLossCarryForward(ys, { 2021: 800 });
+  assert.equal(ys[0].lossDeducted, 500);
+  assert.equal(ys[1].lossDeducted, 0); // 2021 loss expired after 2026
+});
+
+test('Polish tax: carry-forward reduces the base, T+2 settlement rate, country breakdown', () => {
+  const market = new Market({
+    quotes: { X: { country: 'United States' } },
+    nbp: { USD: { dates: ['2023-03-01', '2023-06-01', '2024-03-01', '2024-03-05', '2024-06-03', '2024-06-05'], rates: [4, 4, 4, 4.5, 4, 4.4] } },
+  });
+  const txs = [
+    { portfolioId: 'p', date: '2023-03-02', type: 'BUY', ticker: 'X', quantity: 10, price: 100, currency: 'USD' },
+    { portfolioId: 'p', date: '2023-06-02', type: 'SELL', ticker: 'X', quantity: 10, price: 90, currency: 'USD' }, // -400 PLN
+    { portfolioId: 'p', date: '2024-03-04', type: 'BUY', ticker: 'X', quantity: 10, price: 100, currency: 'USD' }, // Mon
+    { portfolioId: 'p', date: '2024-06-04', type: 'SELL', ticker: 'X', quantity: 10, price: 120, currency: 'USD' }, // Tue
+  ];
+  const t = computePolishTax(txs, market);
+  const y24 = t.years.find((y) => y.year === '2024');
+  close(y24.income, 800); // 4800 - 4000 at trade-date rates
+  assert.equal(y24.lossDeducted, 400);
+  assert.equal(y24.taxBase, 400);
+  assert.equal(y24.countries[0].country, 'US');
+  // settlement: buy settles Wed 2024-03-06 (rate of 03-05 = 4.5), sell settles Thu 06-06 (rate of 06-05 = 4.4)
+  const s = computePolishTax(txs, market, { dateMode: 'settlement', carryForward: false });
+  close(s.years.find((y) => y.year === '2024').income, 1200 * 4.4 - 1000 * 4.5);
 });

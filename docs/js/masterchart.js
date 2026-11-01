@@ -104,7 +104,7 @@ export async function masterChart(el, ctx, events = []) {
     if (!memo.has(key)) {
       const set = new Set(st.assets);
       const txs = ctx.txs.filter((t) => t.ticker && set.has(t.ticker));
-      memo.set(key, { r: computePortfolio(txs, ctx.market, { base: ctx.base, autoDividends: ctx.settings.autoDividends, today }), txs, filtered: true });
+      memo.set(key, { r: computePortfolio(txs, ctx.market, { base: ctx.base, autoDividends: ctx.settings.autoDividends, estimateWithholding: ctx.settings.estimateWithholding, today }), txs, filtered: true });
     }
     return memo.get(key);
   };

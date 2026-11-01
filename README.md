@@ -27,7 +27,7 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Dividends | received (recorded or estimated from market data), next-12-month forecast, monthly/yearly charts, yield and yield on cost |
 | Analysis | allocation by sector, country, currency, market, asset type and portfolio; volatility, max drawdown, Sharpe; yearly returns vs benchmarks; monthly heatmap; "same money into a benchmark" simulation |
 | Calendar | earnings, dividends, splits and expected dividends for your holdings |
-| Taxes (PIT-38) | FIFO per portfolio, NBP rate from the business day before each transaction, fees as costs, foreign dividend top-up (19% minus withholding) |
+| Taxes (PIT-38) | FIFO per portfolio, NBP rate from the business day before the trade or T+2 settlement date, fees as costs, foreign dividend top-up (19% minus withholding), automatic loss carry-forward (one-off up to PLN 5M or 50%/year, 5 years, plus losses from before your data), per-country breakdown for PIT/ZG |
 | Watchlist | price, 1D/1M/1Y change, 52-week range, P/E, dividend yield, next event |
 | Accounts | portfolio types Regular / IKE / IKZE / OIPE; yearly contribution limits with progress and remaining amount, IKZE PIT deduction estimate; tax-free accounts excluded from PIT-38 |
 | Other | multiple portfolios, any base currency, split handling, manual prices for assets without data, dark mode, mobile layout |
