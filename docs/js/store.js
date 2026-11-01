@@ -39,10 +39,11 @@ function migrate(s) {
   };
 }
 
-function persist() {
+function persist(meta = {}) {
+  if (!meta.fromSync) state.updatedAt = new Date().toISOString();
   try { localStorage.setItem(KEY, JSON.stringify(state)); }
   catch (e) { alert('Saving failed (storage full or blocked): ' + e.message); }
-  for (const fn of listeners) fn(state);
+  for (const fn of listeners) fn(state, meta);
 }
 
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -58,6 +59,7 @@ export const store = {
   renamePortfolio(id, name) { const p = state.portfolios.find((x) => x.id === id); if (p) { p.name = name; persist(); } },
   deletePortfolio(id) {
     if (state.portfolios.length <= 1) return false;
+    state.deleted = [...(state.deleted || []), id, ...state.transactions.filter((t) => t.portfolioId === id).map((t) => t.id)].slice(-5000);
     state.portfolios = state.portfolios.filter((p) => p.id !== id);
     state.transactions = state.transactions.filter((t) => t.portfolioId !== id);
     persist();
@@ -85,8 +87,12 @@ export const store = {
   deleteTransactions(ids) {
     const s = new Set(ids);
     state.transactions = state.transactions.filter((t) => !s.has(t.id));
+    state.deleted = [...(state.deleted || []), ...ids].slice(-5000); // tombstones for sync
     persist();
   },
+  /** Replace the whole state (sync merge); meta is passed to listeners. */
+  replace(next, meta = {}) { state = migrate(next); persist(meta); },
+  markBackup() { state.settings.lastBackupAt = new Date().toISOString(); persist(); },
 
   exportJSON() { return JSON.stringify(state, null, 1); },
   importJSON(text, { merge = false } = {}) {

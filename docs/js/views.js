@@ -8,6 +8,7 @@ import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerpri
 import { store } from './store.js';
 import { masterChart } from './masterchart.js';
 import { detectBroker, PARSERS, BROKER_NAMES } from './brokers.js';
+import { getConfig as getSyncConfig, connect as connectSync, disconnect as disconnectSync, syncNow } from './sync.js';
 import {
   $, $$, esc, money, num, qty, pct, cls, fmtDate, kpi, toast, download, readFile, table, chart, cssVar, PALETTE, downsample,
 } from './ui.js';
@@ -62,6 +63,7 @@ export async function dashboard(el, ctx) {
   const div12 = r.dividends.filter((d) => d.date > addDays(today, -365)).reduce((s, d) => s + d.netBase, 0);
 
   el.innerHTML = `
+  ${backupReminder(ctx)}
   ${warningsBlock(ctx)}
   <div class="kpis">
     ${kpi('Portfolio value', money(t.value, base), t.cashValue ? `incl. cash ${money(t.cashValue, base)}` : `${r.holdings.length} positions`)}
@@ -134,6 +136,45 @@ function accountsCard(ctx) {
       <div class="small ${over ? 'neg' : 'muted'}">${over ? `Over the ${year} limit by ${money(paid - lim, 'PLN')} — the excess must be returned.` : lim ? `${money(left, 'PLN')} left for ${year}` : `No ${year} limit set (Settings)`} · counted from ${method}${(byYear[+year - 1]) ? ` · ${+year - 1}: ${money(byYear[+year - 1], 'PLN', { digits: 0 })}` : ''}</div>${ded}</div>`;
   }).join('');
   return `<div class="card"><div class="card-head"><h3>Retirement accounts ${year}</h3><a href="#/settings" class="link">limits →</a></div>${rows}</div>`;
+}
+
+function drawSync(box) {
+  const cfg = getSyncConfig();
+  if (cfg?.gistId) {
+    box.innerHTML = `<p class="small">Connected${cfg.login ? ` as <b>${esc(cfg.login)}</b>` : ''} · private gist <code>${esc(cfg.gistId.slice(0, 8))}…</code> · ${cfg.passphrase ? '🔒 encrypted' : '⚠ not encrypted'}<br>
+      <span class="muted">Last sync: ${cfg.lastSync ? new Date(cfg.lastSync).toLocaleString() : 'never'}</span>${cfg.error ? `<br><span class="neg">${esc(cfg.error)}</span>` : ''}</p>
+      <div class="row gap wrap"><button class="btn" id="syNow">Sync now</button><button class="btn danger" id="syOff">Disconnect this device</button></div>`;
+    $('#syNow', box).addEventListener('click', async () => {
+      try { await syncNow(store); toast('Synced'); } catch (e) { toast(e.message, 'error'); }
+      drawSync(box);
+    });
+    $('#syOff', box).addEventListener('click', () => { if (confirm('Stop syncing on this device? Your data stays here and in the gist.')) { disconnectSync(); drawSync(box); } });
+    return;
+  }
+  box.innerHTML = `<p class="muted small">Keep the portfolio in a <b>private GitHub Gist</b> and sync it automatically on every device. Create a token with only the
+    <code>gist</code> scope (<a target="_blank" rel="noopener" href="https://github.com/settings/tokens/new?scopes=gist&description=Portfolio%20sync">create token</a>) and use the same token + passphrase on each device.
+    With a passphrase everything is encrypted in your browser before upload.</p>
+    <form id="syForm" class="form"><label>GitHub token<input name="t" type="password" required autocomplete="off" placeholder="ghp_…"></label>
+    <label>Encryption passphrase (recommended)<input name="p" type="password" autocomplete="new-password"></label>
+    <div class="full row gap"><button class="btn primary">Connect</button><span class="muted small">The token and passphrase are stored only in this browser.</span></div></form>`;
+  $('#syForm', box).addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('button', e.target); btn.disabled = true; btn.textContent = 'Connecting…';
+    try {
+      const r = await connectSync(e.target.t.value.trim(), e.target.p.value, store);
+      toast(r.created ? 'Created a private gist and uploaded your portfolio' : 'Connected and merged with your other devices');
+    } catch (err) { toast(err.message, 'error'); }
+    drawSync(box);
+  });
+}
+
+function backupReminder(ctx) {
+  if (getSyncConfig()?.gistId || ctx.state.transactions.length < 3) return '';
+  const last = ctx.settings.lastBackupAt;
+  const days = last ? Math.floor((Date.now() - Date.parse(last)) / 864e5) : null;
+  if (days !== null && days < 30) return '';
+  return `<div class="alert">Your portfolio lives only in this browser. ${days === null ? 'You have never exported a backup.' : `Last backup was ${days} days ago.`}
+    <a href="#/settings">Export a backup or turn on sync →</a></div>`;
 }
 
 function short(s, n = 22) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
@@ -1020,6 +1061,8 @@ export async function settings(el, ctx) {
         <button class="btn danger" id="bReset">Erase all data</button>
       </div>
       <p class="muted small mt">${s.transactions.length} transactions in ${s.portfolios.length} portfolio(s).</p>
+      <h3 class="mt">Sync between devices</h3>
+      <div id="syncBox"></div>
     </div>
   </div>
   <div class="card">
@@ -1080,7 +1123,8 @@ export async function settings(el, ctx) {
     if (d && confirm(`Delete portfolio "${ctx.portfolioName(d.dataset.delp)}" and all its transactions?`)) store.deletePortfolio(d.dataset.delp);
   });
   $('#pfAdd').addEventListener('submit', (e) => { e.preventDefault(); store.addPortfolio(e.target.n.value.trim()); toast('Portfolio added'); });
-  $('#bExp').addEventListener('click', () => download(`portfolio-backup-${todayISO()}.json`, store.exportJSON(), 'application/json'));
+  $('#bExp').addEventListener('click', () => { download(`portfolio-backup-${todayISO()}.json`, store.exportJSON(), 'application/json'); store.markBackup(); });
+  drawSync($('#syncBox'));
   $('#bImp').addEventListener('change', async (e) => {
     const f = e.target.files[0]; if (!f) return;
     try {

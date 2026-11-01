@@ -30,6 +30,7 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 | Taxes (PIT-38) | FIFO per portfolio, NBP rate from the business day before the trade or T+2 settlement date, fees as costs, foreign dividend top-up (19% minus withholding), automatic loss carry-forward (one-off up to PLN 5M or 50%/year, 5 years, plus losses from before your data), per-country breakdown for PIT/ZG |
 | Watchlist | price, 1D/1M/1Y change, 52-week range, P/E, dividend yield, next event |
 | Accounts | portfolio types Regular / IKE / IKZE / OIPE; yearly contribution limits with progress and remaining amount, IKZE PIT deduction estimate; tax-free accounts excluded from PIT-38 |
+| Sync & backup | optional sync between devices through a private GitHub Gist (end-to-end encrypted with a passphrase, merges by transaction, deletions propagate), JSON backup, backup reminder |
 | Other | multiple portfolios, any base currency, split handling, manual prices for assets without data, dark mode, mobile layout |
 
 ### How the numbers work
@@ -73,8 +74,10 @@ The importer also recognises common broker headers in English and Polish (Data, 
 and lets you remap any column before importing.
 
 ## Privacy
-Free GitHub Pages sites are public, but only market data is published. Your transactions never leave your browser.
-Clearing site data deletes them, so **export a backup** from Settings now and then. Import that file to move to another device.
+Free GitHub Pages sites are public, but only market data is published. Your transactions stay in your browser.
+Clearing site data deletes them, so **export a backup** from Settings now and then, or turn on **sync**: it stores the
+portfolio in a private gist of your GitHub account, encrypted in the browser with your passphrase (PBKDF2 + AES-GCM),
+so GitHub only ever sees ciphertext. The token and passphrase never leave the device you typed them on.
 
 ## Roadmap ideas
 - Broker presets (XTB, mBank/eMakler, Bossa, Degiro, IBKR) with ISIN→ticker mapping

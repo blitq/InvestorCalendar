@@ -4,6 +4,7 @@ import { buildMarket, loadMeta, loadQuotes, loadFx } from './data.js';
 import { store } from './store.js';
 import { $, $$, esc, destroyCharts } from './ui.js';
 import * as views from './views.js';
+import { startAutoSync } from './sync.js';
 
 const ROUTES = [
   ['dashboard', 'Dashboard', '◧'],
@@ -116,6 +117,10 @@ function init() {
     render();
   });
   store.subscribe(() => invalidate());
+  startAutoSync(store, (cfg) => {
+    const el = $('#syncStamp');
+    if (el) el.textContent = cfg?.error ? `Sync error: ${cfg.error}` : cfg?.lastSync ? `Synced ${new Date(cfg.lastSync).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : '';
+  });
   window.addEventListener('hashchange', render);
   render();
 }
