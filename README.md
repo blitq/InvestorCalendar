@@ -6,7 +6,8 @@ corporate events calendar and a Polish **PIT-38** tax estimate. No server, no ac
 - **Frontend**: static site in `docs/` (GitHub Pages). Plain ES modules, no build step.
   Your transactions are stored **only in your browser** (localStorage) and can be exported/imported as a JSON backup.
 - **Data pipeline**: `backend/generate.py` runs in a GitHub Action on weekdays. It downloads prices, FX, NBP rates and events
-  from Yahoo Finance / NBP and commits compact JSON into `docs/data/`.
+  from Yahoo Finance / NBP into `docs/data/` and deploys the site together with that data to GitHub Pages.
+  The data is not committed, so the repository stays small; it is cached between workflow runs.
 
 ```
 tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) ──► docs/data/*.json
@@ -39,9 +40,10 @@ tickers.json + config.json ──► GitHub Action (Python, yfinance, NBP API) �
 
 ## Setup
 
-1. Push this repository to GitHub, then go to **Settings → Pages**, choose **Deploy from a branch**, branch `main`, folder `/docs`.
+1. Push this repository to GitHub, then go to **Settings → Pages** and set **Source: GitHub Actions**.
+   The **Build data and deploy site** workflow publishes the site on every push to `main` and on its schedule.
 2. Edit `tickers.json` and list the Yahoo Finance symbols you hold or watch (`AAPL`, `PKO.WA`, `SAP.DE`, `LLOY.L`, …).
-   Pushing that change starts the **Update market data** workflow; you can also run it by hand from the Actions tab.
+   Pushing that change rebuilds and redeploys the site; you can also run the workflow by hand from the Actions tab.
 3. Open the site, then add transactions or import a CSV. **Settings → Market data** lists any of your tickers that have no data yet,
    with a ready-to-paste `tickers.json`.
 

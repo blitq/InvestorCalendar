@@ -857,7 +857,7 @@ export async function settings(el, ctx) {
     <div class="row gap wrap">
       <button class="btn" id="copyT">Copy tickers.json</button>
       <a class="btn" target="_blank" rel="noopener" href="${ctx.repoUrl}/edit/main/tickers.json">Edit tickers.json on GitHub</a>
-      <a class="btn" target="_blank" rel="noopener" href="${ctx.repoUrl}/actions/workflows/update-data.yml">Run data refresh</a>
+      <a class="btn" target="_blank" rel="noopener" href="${ctx.repoUrl}/actions/workflows/deploy.yml">Run data refresh</a>
     </div>
   </div>
   <div class="card">
