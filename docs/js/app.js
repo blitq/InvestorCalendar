@@ -3,7 +3,7 @@ import { computePortfolio } from './engine.js';
 import { buildMarket, loadMeta, loadQuotes, loadFx } from './data.js';
 import { store } from './store.js';
 import { $, $$, esc, destroyCharts } from './ui.js';
-import * as views from './views.js';
+import * as views from './views/index.js';
 import { startAutoSync } from './sync.js';
 import { setLang, startTranslation } from './i18n.js';
 

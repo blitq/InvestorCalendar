@@ -1,8 +1,9 @@
 // Offline support: app shell is cached; market data is network-first with the cached copy as fallback.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = ['./', 'index.html', 'css/app.css', 'manifest.webmanifest', 'icon.svg', 'demo.json',
-  'js/app.js', 'js/views.js', 'js/engine.js', 'js/data.js', 'js/ui.js', 'js/store.js', 'js/importers.js',
-  'js/brokers.js', 'js/masterchart.js', 'js/masterdata.js', 'js/sync.js', 'js/bonds.js', 'js/goals.js'];
+  'js/app.js', 'js/engine.js', 'js/data.js', 'js/ui.js', 'js/store.js', 'js/importers.js',
+  'js/brokers.js', 'js/masterchart.js', 'js/masterdata.js', 'js/sync.js', 'js/bonds.js', 'js/goals.js', 'js/i18n.js',
+  'js/views/analysis.js', 'js/views/calendar.js', 'js/views/common.js', 'js/views/dashboard.js', 'js/views/dividends.js', 'js/views/goals.js', 'js/views/holdings.js', 'js/views/index.js', 'js/views/rebalance.js', 'js/views/settings.js', 'js/views/taxes.js', 'js/views/transactions.js', 'js/views/watchlist.js'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -67,8 +67,19 @@ python backend/manage.py add NVDA     # manage tickers.json
 
 ### Tests
 ```bash
-node --test tests/*.test.mjs          # portfolio engine + CSV import
+node --test tests/*.test.mjs          # engine, importers, brokers, bonds, sync, goals, master chart
 python -m pytest backend/tests -q     # data pipeline
+node tests/e2e/smoke.mjs              # every page in EN + PL in Chromium (needs `playwright`)
+```
+
+### Code layout
+```
+backend/            data pipeline (prices, FX, NBP, CPI, ISIN resolution, events)
+docs/index.html     app shell            docs/js/app.js       routing + shared context
+docs/js/engine.js   portfolio maths, tax, rebalancing (pure, tested in Node)
+docs/js/views/      one module per page  docs/js/i18n.js      Polish translation
+docs/js/brokers.js  broker importers     docs/js/bonds.js     treasury bonds
+docs/js/sync.js     Gist sync            docs/js/masterchart.js + masterdata.js
 ```
 
 ### CSV format
