@@ -165,6 +165,11 @@ const PL = {
   'Report': 'Raport', 'Value at start': 'Wartość na początku', 'Value at end': 'Wartość na końcu', 'Best and worst': 'Najlepsze i najgorsze', 'No changes.': 'Brak zmian.', 'No dividends in this period.': 'Brak dywidend w tym okresie.',
   'Payout': 'Wypłata', 'Div. growth': 'Wzrost dyw.', 'Held': 'W portfelu', 'Not held': 'Poza portfelem', 'My notes': 'Moje notatki', 'Add a note': 'Dodaj notatkę',
   'Why you bought it, target price, when you would sell…': 'Dlaczego kupiłeś, cena docelowa, kiedy sprzedasz…',
+  "Welcome! Let's set up your portfolio": 'Witaj! Skonfigurujmy Twój portfel', 'Language and currency': 'Język i waluta', 'Show values in': 'Pokazuj wartości w', 'Your accounts': 'Twoje rachunki',
+  'One portfolio per broker account. Mark IKE / IKZE accounts so their limits are tracked and they are left out of PIT-38.': 'Jeden portfel na każdy rachunek maklerski. Oznacz IKE / IKZE, aby śledzić limity i pominąć je w PIT-38.',
+  '+ Add account': '+ Dodaj rachunek', 'Add your investments': 'Dodaj swoje inwestycje', 'Import a broker file (XTB, Degiro, IBKR, Revolut, CSV)': 'Zaimportuj plik od brokera (XTB, Degiro, IBKR, Revolut, CSV)',
+  'Add a transaction by hand': 'Dodaj transakcję ręcznie', 'Add treasury bonds': 'Dodaj obligacje skarbowe', 'Just look around (demo data)': 'Tylko się rozejrzę (dane demo)', 'e.g. XTB, mBank, IKE': 'np. XTB, mBank, IKE',
+  'Free and private: everything stays in this browser (you can turn on encrypted sync later). Three quick steps.': 'Za darmo i prywatnie: wszystko zostaje w tej przeglądarce (szyfrowaną synchronizację możesz włączyć później). Trzy szybkie kroki.',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',

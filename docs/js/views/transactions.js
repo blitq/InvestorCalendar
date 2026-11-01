@@ -74,6 +74,7 @@ export async function transactions(el, ctx) {
   draw();
   if (params.get('add')) { history.replaceState(null, '', '#/transactions'); txForm(ctx); }
   if (params.get('import')) { history.replaceState(null, '', '#/transactions'); importDialog(ctx); }
+  if (params.get('bond')) { history.replaceState(null, '', '#/transactions'); bondForm(ctx); }
 }
 
 export function txForm(ctx, tx = null) {

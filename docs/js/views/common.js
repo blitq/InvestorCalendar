@@ -2,9 +2,7 @@
 import { addDays, todayISO } from '../engine.js';
 import { store } from '../store.js';
 import { $, $$, esc, money, num, pct, fmtDate, toast, chart, cssVar, PALETTE } from '../ui.js';
-import { calendar } from './calendar.js';
-import { dividends } from './dividends.js';
-import { transactions } from './transactions.js';
+import { ACCOUNT_TYPES } from '../engine.js';
 
 
 export const RANGES = [['1M', 30], ['3M', 91], ['YTD', 'ytd'], ['1Y', 365], ['3Y', 1096], ['5Y', 1827], ['Max', null]];
@@ -16,12 +14,13 @@ export function rangeStart(range, firstDate, today = todayISO()) {
 }
 
 export function emptyState(el, ctx) {
+  if (!ctx.settings.onboarded) return setupWizard(el, ctx);
   el.innerHTML = `
   <div class="hero card">
     <h2>Track your whole portfolio — free, private, no account</h2>
     <p>Add your transactions (or import a CSV from your broker) and get value history, profit, time- and money-weighted returns,
     dividends, allocation, a corporate events calendar and a Polish PIT-38 tax estimate. Your data stays in this browser.</p>
-    <div class="row gap">
+    <div class="row gap wrap">
       <a class="btn primary" href="#/transactions?add=1">+ Add first transaction</a>
       <a class="btn" href="#/transactions?import=1">Import CSV</a>
       <button class="btn ghost" id="demoBtn">Load demo portfolio</button>
@@ -30,10 +29,66 @@ export function emptyState(el, ctx) {
   $('#demoBtn', el).addEventListener('click', loadDemo);
 }
 
+/** First run: language & currency, accounts, then how to add data. */
+function setupWizard(el, ctx) {
+  const st = ctx.settings;
+  const pf = ctx.state.portfolios.map((p) => ({ ...p }));
+  el.innerHTML = `
+  <div class="hero card wizard">
+    <h2>Welcome! Let's set up your portfolio</h2>
+    <p>Free and private: everything stays in this browser (you can turn on encrypted sync later). Three quick steps.</p>
+    <div class="wz-step"><span class="wz-n">1</span><div class="grow">
+      <h3>Language and currency</h3>
+      <div class="row gap wrap"><label class="muted small">Language <select id="wzLang" class="sm"><option value="en">English</option><option value="pl">Polski</option></select></label>
+      <label class="muted small">Show values in <select id="wzCcy" class="sm">${['PLN', 'EUR', 'USD', 'GBP', 'CHF'].map((c) => `<option ${c === ctx.base ? 'selected' : ''}>${c}</option>`).join('')}</select></label></div>
+    </div></div>
+    <div class="wz-step"><span class="wz-n">2</span><div class="grow">
+      <h3>Your accounts</h3>
+      <p class="muted small">One portfolio per broker account. Mark IKE / IKZE accounts so their limits are tracked and they are left out of PIT-38.</p>
+      <div id="wzPf"></div>
+      <button class="btn sm-btn" id="wzAddPf" type="button">+ Add account</button>
+    </div></div>
+    <div class="wz-step"><span class="wz-n">3</span><div class="grow">
+      <h3>Add your investments</h3>
+      <div class="row gap wrap">
+        <button class="btn primary" data-go="transactions?import=1">Import a broker file (XTB, Degiro, IBKR, Revolut, CSV)</button>
+        <button class="btn" data-go="transactions?add=1">Add a transaction by hand</button>
+        <button class="btn" data-go="transactions?bond=1">Add treasury bonds</button>
+        <button class="btn ghost" id="wzDemo">Just look around (demo data)</button>
+      </div>
+    </div></div>
+  </div>`;
+  $('#wzLang', el).value = st.lang || (document.documentElement.lang === 'pl' ? 'pl' : 'en');
+  const drawPf = () => {
+    $('#wzPf', el).innerHTML = pf.map((p, i) => `<div class="row gap wz-pf"><input class="sm grow" data-i="${i}" data-k="name" value="${esc(p.name)}" placeholder="e.g. XTB, mBank, IKE">
+      <select class="sm" data-i="${i}" data-k="type">${Object.entries(ACCOUNT_TYPES).map(([k, v]) => `<option value="${k}" ${(p.type || 'regular') === k ? 'selected' : ''}>${v}</option>`).join('')}</select>
+      ${pf.length > 1 ? `<button class="icon-btn" type="button" data-rm="${i}">✕</button>` : ''}</div>`).join('');
+  };
+  drawPf();
+  $('#wzPf', el).addEventListener('input', (e) => { const x = e.target.closest('[data-i]'); if (x) pf[+x.dataset.i][x.dataset.k] = x.value; });
+  $('#wzPf', el).addEventListener('click', (e) => { const b = e.target.closest('[data-rm]'); if (b) { pf.splice(+b.dataset.rm, 1); drawPf(); } });
+  $('#wzAddPf', el).addEventListener('click', () => { pf.push({ id: Date.now().toString(36), name: '', type: 'regular' }); drawPf(); });
+  const finish = (to) => {
+    const portfolios = pf.filter((p) => p.name.trim()).map((p) => ({ ...p, name: p.name.trim() }));
+    const lang = $('#wzLang', el).value, langChanged = lang !== (st.lang || document.documentElement.lang);
+    store.replace({ ...store.get(), portfolios: portfolios.length ? portfolios : store.get().portfolios,
+      settings: { ...store.get().settings, lang, baseCurrency: $('#wzCcy', el).value, onboarded: true } });
+    if (langChanged) { location.hash = '#/' + to; location.reload(); } else location.hash = '#/' + to;
+  };
+  $$('[data-go]', el).forEach((b) => b.addEventListener('click', () => finish(b.dataset.go)));
+  $('#wzDemo', el).addEventListener('click', async () => {
+    const r = await fetch('demo.json');
+    const demo = await r.json();
+    store.loadDemo({ ...demo, settings: { ...demo.settings, lang: $('#wzLang', el).value, onboarded: true } });
+    toast('Demo portfolio loaded');
+  });
+}
+
 export async function loadDemo() {
   if (store.get().transactions.length && !confirm('Replace your current data with the demo portfolio?')) return;
   const r = await fetch('demo.json');
-  store.loadDemo(await r.json());
+  const demo = await r.json();
+  store.loadDemo({ ...demo, settings: { ...demo.settings, lang: store.get().settings.lang, onboarded: true } });
   toast('Demo portfolio loaded');
 }
 

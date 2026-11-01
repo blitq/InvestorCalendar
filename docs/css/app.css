@@ -271,3 +271,7 @@ tr.current td { background: var(--accent-soft); }
 }
 .report-title { margin: 4px 0 14px; } .report-title .small { font-weight: 400; margin-left: 8px; }
 .note-box { font-family: inherit; font-size: 0.88rem; } .icon-btn.faint { opacity: 0.35; }
+.wizard h3 { margin-bottom: 6px; }
+.wz-step { display: flex; gap: 14px; align-items: flex-start; padding: 14px 0; border-top: 1px solid var(--border); }
+.wz-n { flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 700; }
+.wz-pf { margin-bottom: 6px; max-width: 520px; }

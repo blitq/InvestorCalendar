@@ -59,7 +59,7 @@ await new Promise((r) => server.listen(0, r));
 const BASE = `http://localhost:${server.address().port}`;
 
 // ---------------------------------------------------------------- browser
-const ROUTES = ['dashboard', 'holdings', 'transactions', 'dividends', 'analysis', 'rebalance', 'goals', 'calendar', 'taxes', 'watchlist', 'settings'];
+const ROUTES = ['dashboard', 'holdings', 'transactions', 'dividends', 'analysis', 'rebalance', 'goals', 'report', 'calendar', 'taxes', 'watchlist', 'settings'];
 const failures = [];
 const browser = await chromium.launch(process.env.PW_EXECUTABLE ? { executablePath: process.env.PW_EXECUTABLE } : {});
 try {
