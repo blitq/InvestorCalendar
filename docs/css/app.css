@@ -252,3 +252,5 @@ td.empty { text-align: center; color: var(--muted); padding: 24px; }
 .acct { padding: 8px 0; border-bottom: 1px dashed var(--border); } .acct:last-child { border-bottom: none; } .bar.big { height: 8px; border-radius: 4px; margin: 6px 0 4px; } .bar.big i { border-radius: 4px; }
 input.tgt { width: 80px; text-align: right; }
 tr.current td { background: var(--accent-soft); }
+.icon-btn.tiny { font-size: 0.7rem; padding: 0 2px; color: inherit; }
+.share-row { margin-bottom: 10px; } .goal-form { grid-template-columns: repeat(3, 1fr); } @media (max-width: 760px) { .goal-form { grid-template-columns: 1fr 1fr; } }

@@ -53,6 +53,12 @@ export const store = {
   subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
 
   setSettings(patch) { state.settings = { ...state.settings, ...patch }; persist(); },
+  /** Save settings without notifying listeners (no re-render), e.g. form inputs saved as you type. */
+  setSettingsQuiet(patch) {
+    state.settings = { ...state.settings, ...patch };
+    state.updatedAt = new Date().toISOString();
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { /* ignore */ }
+  },
 
   addPortfolio(name) { const p = { id: uid(), name }; state.portfolios.push(p); persist(); return p; },
   setPortfolioType(id, type) { const p = state.portfolios.find((x) => x.id === id); if (p) { p.type = type; persist(); } },

@@ -1,0 +1,13 @@
+{
+  "name": "Investor Portfolio",
+  "short_name": "Portfolio",
+  "description": "Free, private portfolio tracker: performance, dividends, allocation, events and PIT-38.",
+  "start_url": "./#/dashboard",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

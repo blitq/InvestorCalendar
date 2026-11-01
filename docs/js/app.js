@@ -13,6 +13,7 @@ const ROUTES = [
   ['dividends', 'Dividends', '◎'],
   ['analysis', 'Analysis', '◔'],
   ['rebalance', 'Rebalance', '⚖'],
+  ['goals', 'Goals', '⚑'],
   ['calendar', 'Calendar', '▦'],
   ['taxes', 'Taxes (PIT-38)', '§'],
   ['watchlist', 'Watchlist', '☆'],
@@ -63,9 +64,10 @@ function setSelected(id) {
 
 function navigate(route) { location.hash = '#/' + route; }
 
+const HIDDEN_ROUTES = ['shared'];
 function currentRoute() {
   const r = location.hash.replace(/^#\/?/, '').split('?')[0];
-  return ROUTES.some(([k]) => k === r) ? r : 'dashboard';
+  return ROUTES.some(([k]) => k === r) || HIDDEN_ROUTES.includes(r) ? r : 'dashboard';
 }
 
 function renderNav(route) {

@@ -9,6 +9,7 @@ import { store } from './store.js';
 import { masterChart } from './masterchart.js';
 import { BOND_TYPES, addMonths, bondTicker, seriesCode, schedule as bondSchedule, redemption as bondRedemption, valueOn as bondValueOn } from './bonds.js';
 import { loadCpi } from './data.js';
+import { project, monthsToGoal, fireNumber, monthlyNeeded } from './goals.js';
 import { detectBroker, PARSERS, BROKER_NAMES } from './brokers.js';
 import { getConfig as getSyncConfig, connect as connectSync, disconnect as disconnectSync, syncNow } from './sync.js';
 import {
@@ -66,6 +67,7 @@ export async function dashboard(el, ctx) {
 
   el.innerHTML = `
   ${backupReminder(ctx)}
+  ${alertsBlock(ctx)}
   ${warningsBlock(ctx)}
   ${driftAlert(ctx)}
   <div class="kpis">
@@ -169,6 +171,27 @@ function drawSync(box) {
     } catch (err) { toast(err.message, 'error'); }
     drawSync(box);
   });
+}
+
+/** Price alerts that have been hit (latest close vs. threshold); also fires a browser notification once a day. */
+export function triggeredAlerts(ctx) {
+  return (ctx.settings.alerts || []).map((a) => {
+    const px = ctx.market.lastPrice(a.ticker) ?? ctx.quotes[a.ticker]?.price;
+    return { ...a, now: px, hit: px !== null && px !== undefined && (a.op === 'above' ? px >= a.price : px <= a.price) };
+  }).filter((a) => a.hit);
+}
+function alertsBlock(ctx) {
+  const hits = triggeredAlerts(ctx);
+  if (!hits.length) return '';
+  try {
+    const today = todayISO(), key = 'scrabfree_notified';
+    const seen = JSON.parse(localStorage.getItem(key) || '{}');
+    if (window.Notification && Notification.permission === 'granted') {
+      for (const a of hits) if (seen[a.id] !== today) { new Notification(`${a.ticker} is ${a.op} ${a.price}`, { body: `Last price ${a.now}`, icon: 'icon.svg' }); seen[a.id] = today; }
+      localStorage.setItem(key, JSON.stringify(seen));
+    }
+  } catch { /* notifications are optional */ }
+  return `<div class="alert info">🔔 ${hits.map((a) => `<b>${esc(a.ticker)}</b> is ${a.op} ${num(a.price, 4)} (now ${num(a.now, 4)})`).join(' · ')} — <a href="#/watchlist">manage alerts</a></div>`;
 }
 
 function backupReminder(ctx) {
@@ -880,6 +903,7 @@ export async function analysis(el, ctx) {
     ${kpi('Sharpe (rf=0)', cagr !== null && vol ? num(cagr / vol, 2) : '—')}
     ${kpi('Positions', String(H.length), `top 3 = ${pct(H.slice(0, 3).reduce((s, h) => s + h.weight, 0), { sign: false, digits: 0 })}`)}
   </div>
+  <div class="row gap end share-row"><button class="btn sm-btn" id="shareBtn" title="Copy a link that shows weights and returns, never amounts">Share allocation link</button></div>
   <div class="grid-3" id="allocGrid">${groups.map(([title], i) => `<div class="card"><div class="card-head"><h3>${title}</h3></div><div class="chart-box small"><canvas id="al${i}"></canvas></div><div id="all${i}" class="legend-list"></div></div>`).join('')}</div>
   <div class="card"><div class="card-head"><h3>Actual vs “same money into a benchmark”</h3><select id="simSel" class="sm"></select></div>
     <p class="muted small">Every contribution and withdrawal you made is replayed into the benchmark (converted to ${base}).</p>
@@ -888,6 +912,11 @@ export async function analysis(el, ctx) {
   <div class="card"><div class="card-head"><h3>Monthly returns (TWR)</h3></div><div id="heat" class="heat"></div></div>`;
 
   groups.forEach(([, g], i) => doughnut($(`#al${i}`), $(`#all${i}`), g.slice(0, 10), base));
+  $('#shareBtn').addEventListener('click', async () => {
+    const link = shareLink(ctx);
+    try { await navigator.clipboard.writeText(link); toast('Link copied — it contains weights and returns only'); }
+    catch { prompt('Copy this link', link); }
+  });
 
   const benches = ctx.benchmarks.filter((b) => market.prices[b]?.length);
   const sel = $('#simSel');
@@ -1191,6 +1220,8 @@ export async function watchlist(el, ctx) {
     { key: 'pe', label: 'P/E', cls: 'num', render: (x) => (x.pe ? num(x.pe, 1) : '—') },
     { key: 'yield', label: 'Div. yield', cls: 'num', render: (x) => (x.yield ? pct(x.yield, { sign: false }) : '—') },
     { key: 'next', label: 'Next event', sort: (x) => x.next?.date || '9999', render: (x) => (x.next ? `<span class="tag ${x.next.type}">${x.next.type}</span> <span class="small">${fmtDate(x.next.date, { month: 'short', day: 'numeric' })}</span>` : '') },
+    { key: 'alert', label: 'Alert', sort: (x) => (settings.alerts || []).filter((a) => a.ticker === x.ticker).length, render: (x) => `${(settings.alerts || []).filter((a) => a.ticker === x.ticker).map((a) => `<span class="tag ${a.op === 'above' ? 'buy' : 'sell'}">${a.op === 'above' ? '≥' : '≤'} ${num(a.price, 4)} <button class="icon-btn tiny" data-rmalert="${esc(a.id)}" title="Remove alert">✕</button></span>`).join(' ')}
+      <button class="icon-btn" data-alert="${esc(x.ticker)}" data-px="${x.price ?? ''}" title="Add price alert">🔔</button>` },
     { key: 'rm', label: '', render: (x) => (x.userAdded ? `<button class="icon-btn" data-rm="${esc(x.ticker)}" title="Remove">✕</button>` : '') },
   ], { sortKey: 'ticker', sortDir: 1 });
   $('#wlAdd').addEventListener('submit', (e) => {
@@ -1201,6 +1232,21 @@ export async function watchlist(el, ctx) {
   $('#wlT').addEventListener('click', (e) => {
     const b = e.target.closest('[data-rm]');
     if (b) store.setSettings({ watchlist: settings.watchlist.filter((x) => x !== b.dataset.rm) });
+    const ra = e.target.closest('[data-rmalert]');
+    if (ra) store.setSettings({ alerts: (settings.alerts || []).filter((a) => a.id !== ra.dataset.rmalert) });
+    const al = e.target.closest('[data-alert]');
+    if (al) {
+      const cur = +al.dataset.px;
+      const ans = prompt(`Alert for ${al.dataset.alert}${cur ? ` (now ${num(cur, 4)})` : ''}.\nType a price; above the current price alerts when it rises to it, below when it falls to it. Prefix with > or < to choose explicitly.`, cur ? num(cur * 1.1, 2).replace(/[^\d.,]/g, '').replace(',', '.') : '');
+      if (!ans) return;
+      const m = ans.trim().match(/^([<>])?\s*([\d.,]+)$/);
+      if (!m) return toast('Could not read that price', 'error');
+      const price = parseFloat(m[2].replace(',', '.'));
+      const op = m[1] === '>' ? 'above' : m[1] === '<' ? 'below' : (cur && price < cur ? 'below' : 'above');
+      store.setSettings({ alerts: [...(settings.alerts || []), { id: Date.now().toString(36), ticker: al.dataset.alert, op, price, created: todayISO() }] });
+      if (window.Notification && Notification.permission === 'default') Notification.requestPermission();
+      toast(`Alert set: ${al.dataset.alert} ${op} ${price}`);
+    }
   });
 }
 
@@ -1326,4 +1372,108 @@ export async function settings(el, ctx) {
     const f = e.target;
     store.setSettings({ manualPrices: { ...mp, [f.t.value.trim().toUpperCase()]: { price: +f.p.value, currency: f.c.value.trim().toUpperCase() } } });
   });
+}
+
+// ======================================================================= goals
+
+export async function goals(el, ctx) {
+  const { result: r, base, market } = ctx;
+  const saved = ctx.settings.goal || {};
+  const { dates, twr } = r.series;
+  const yrs = dates.length ? (Date.parse(dates[dates.length - 1]) - Date.parse(dates[0])) / (365.25 * 864e5) : 0;
+  const cagr = yrs > 1 ? Math.pow(twr[twr.length - 1], 1 / yrs) - 1 : null;
+  const fwdDiv = forecastDividends(r.holdings, market, base, r.today).reduce((a, f) => a + f.amountBase, 0);
+  const divYield = r.totals.holdingsValue ? fwdDiv / r.totals.holdingsValue : 0;
+  const g = {
+    kind: 'fire', amount: 1000000, income: 6000, swr: 4, monthly: 2000, ret: cagr !== null ? Math.round(Math.min(10, Math.max(2, cagr * 100)) * 10) / 10 : 6,
+    infl: 3, growth: 0, start: Math.round(r.totals.value), years: 30, ...saved,
+  };
+  el.innerHTML = `
+  <div class="card">
+    <div class="card-head"><h3>Goal</h3><span class="muted small">projections are in today's money (after inflation)</span></div>
+    <form id="gf" class="form goal-form">
+      <label>Goal type<select name="kind">
+        <option value="fire">Financial independence (live off the portfolio)</option>
+        <option value="dividends">Monthly dividend income</option>
+        <option value="amount">Reach an amount</option></select></label>
+      <label data-k="amount">Target amount (${base})<input type="number" name="amount" step="any" min="0"></label>
+      <label data-k="income">Monthly income wanted (${base})<input type="number" name="income" step="any" min="0"></label>
+      <label data-k="swr">Safe withdrawal rate (%)<input type="number" name="swr" step="0.1" min="0.5"></label>
+      <label>Starting value (${base})<input type="number" name="start" step="any" min="0"><span class="muted small">your portfolio today: ${money(r.totals.value, base)}</span></label>
+      <label>Monthly contribution (${base})<input type="number" name="monthly" step="any" min="0"></label>
+      <label>Expected return (% a year)<input type="number" name="ret" step="0.1"><span class="muted small">${cagr !== null ? `your annualised TWR so far: ${pct(cagr)}` : 'long-run stock markets ≈ 6–8%'}</span></label>
+      <label>Inflation (% a year)<input type="number" name="infl" step="0.1"></label>
+      <label>Contributions grow (% a year)<input type="number" name="growth" step="0.1"></label>
+      <label>Horizon (years)<input type="number" name="years" min="1" max="60"></label>
+    </form>
+  </div>
+  <div class="kpis" id="gk"></div>
+  <div class="card"><div class="card-head"><h3>Projection</h3></div><div class="chart-box"><canvas id="goalChart"></canvas></div></div>`;
+  const f = $('#gf');
+  for (const [k, v] of Object.entries(g)) if (f[k]) f[k].value = v;
+  const draw = () => {
+    const v = Object.fromEntries([...new FormData(f)].map(([k, x]) => [k, k === 'kind' ? x : +x]));
+    store.setSettingsQuiet({ goal: v });
+    $$('[data-k]', f).forEach((l) => { l.hidden = !({ fire: ['income', 'swr'], dividends: ['income'], amount: ['amount'] }[v.kind].includes(l.dataset.k)); });
+    const yieldUsed = divYield || 0.03;
+    const goal = v.kind === 'amount' ? v.amount : v.kind === 'fire' ? fireNumber(v.income, v.swr / 100) : (v.income * 12) / yieldUsed;
+    const opts = { start: v.start, monthly: v.monthly, annualReturn: v.ret / 100, inflation: v.infl / 100, contributionGrowth: v.growth / 100 };
+    const months = monthsToGoal({ ...opts, goal });
+    const proj = project({ ...opts, years: v.years });
+    const need = monthlyNeeded({ ...opts, goal, years: v.years });
+    const eta = months === null ? null : new Date(Date.now() + months * 30.44 * 864e5);
+    $('#gk').innerHTML = [
+      kpi('Target', money(goal, base, { digits: 0 }), v.kind === 'fire' ? `${money(v.income, base, { digits: 0 })}/month at ${num(v.swr, 1)}%` : v.kind === 'dividends' ? `at ${pct(yieldUsed, { sign: false })} dividend yield${divYield ? ' (yours)' : ''}` : ''),
+      kpi('Progress', pct(Math.min(1, v.start / goal), { sign: false, digits: 1 }), `${money(v.start, base, { digits: 0 })} of ${money(goal, base, { compact: true })}`),
+      kpi('Reached in', months === null ? 'not within 80 y' : months === 0 ? 'already there 🎉' : `${Math.floor(months / 12)} y ${months % 12} m`, eta && months ? eta.toLocaleDateString(undefined, { year: 'numeric', month: 'short' }) : ''),
+      kpi(`Needed monthly for ${v.years} y`, money(need, base, { digits: 0 }), need > v.monthly ? `${money(need - v.monthly, base, { digits: 0 })} more than now` : 'you are on track'),
+      kpi(`Value in ${v.years} y`, money(proj[proj.length - 1].real, base, { compact: true }), `nominal ${money(proj[proj.length - 1].value, base, { compact: true })}`),
+    ].join('');
+    const y0 = new Date().getFullYear();
+    chart($('#goalChart'), {
+      type: 'line',
+      data: { labels: proj.map((p) => String(y0 + p.year)), datasets: [
+        { label: 'Projected value (today’s money)', data: proj.map((p) => p.real), borderColor: cssVar('--accent'), backgroundColor: cssVar('--accent-soft'), fill: true, pointRadius: 0, borderWidth: 2 },
+        { label: 'Contributed', data: proj.map((p) => p.contributed), borderColor: cssVar('--muted'), borderDash: [4, 4], pointRadius: 0, borderWidth: 1.5 },
+        { label: 'Goal', data: proj.map(() => goal), borderColor: cssVar('--pos'), pointRadius: 0, borderWidth: 1.5 },
+      ] },
+      options: { ...lineOpts(base), scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } }, y: { ticks: { callback: (x) => money(x, base, { compact: true }) } } } },
+    });
+  };
+  f.addEventListener('input', draw);
+  draw();
+}
+
+// ======================================================================= share (allocation only)
+
+function b64url(str) { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function unb64url(s) { return decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))); }
+
+/** Link that shows weights and returns only — never amounts. */
+export function shareLink(ctx) {
+  const r = ctx.result;
+  const payload = {
+    v: 1, at: r.today, since: r.series.dates[0],
+    twr: Math.round(r.totals.twr * 1000) / 1000, xirr: r.totals.xirr === null ? null : Math.round(r.totals.xirr * 1000) / 1000,
+    w: r.holdings.map((h) => [h.ticker, Math.round(h.weight * 1000), ctx.market.quotes[h.ticker]?.sector || '']),
+  };
+  return `${location.origin}${location.pathname}#/shared?d=${b64url(JSON.stringify(payload))}`;
+}
+
+export async function shared(el) {
+  let p;
+  try { p = JSON.parse(unb64url(new URLSearchParams(location.hash.split('?')[1] || '').get('d') || '')); }
+  catch { el.innerHTML = '<div class="card"><h3>This share link is broken.</h3></div>'; return; }
+  const rows = p.w.map(([ticker, w, sector]) => ({ label: ticker, value: w, weight: w / 1000, sector }));
+  el.innerHTML = `
+  <div class="alert info">A shared portfolio snapshot from ${fmtDate(p.at)} — weights and returns only, no amounts.</div>
+  <div class="kpis">${kpi('Return since start (TWR)', `<span class="${cls(p.twr)}">${pct(p.twr)}</span>`, `since ${fmtDate(p.since)}`)}${kpi('Annual return (XIRR)', pct(p.xirr))}${kpi('Positions', String(rows.length))}</div>
+  <div class="grid-2">
+    <div class="card"><div class="card-head"><h3>Holdings</h3></div><div class="chart-box"><canvas id="shChart"></canvas></div></div>
+    <div class="card"><div class="card-head"><h3>Weights</h3></div><div id="shList" class="legend-list"></div>
+      <div class="card-head mt"><h3>By sector</h3></div><div id="shSec" class="legend-list"></div></div>
+  </div>`;
+  doughnut($('#shChart'), $('#shList'), rows, 'PLN');
+  const secs = groupBy(rows.map((x) => ({ value: x.value, s: x.sector })), (x) => x.s || 'Other');
+  $('#shSec').innerHTML = secs.map((x) => `<div class="mini-row"><span>${esc(x.label)}</span><span>${pct(x.weight, { sign: false, digits: 1 })}</span></div>`).join('');
 }
