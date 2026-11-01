@@ -776,3 +776,62 @@ export function contributionsByYear(transactions, portfolioId, market) {
   for (const y of Object.keys(out)) out[y] = Math.max(0, out[y]);
   return { byYear: out, method: useDeposits ? 'deposits' : 'net purchases' };
 }
+
+// ---------------------------------------------------------------- rebalancing
+
+/**
+ * Plan trades to move towards target weights.
+ * rows: [{ key, value, unitPrice }]  — current value and price of one share, both in base currency
+ *        (unitPrice may be null for assets that cannot be traded in whole shares here)
+ * targets: { key: percent }          — assets without a target are left out of the plan
+ * opts: { cash = 0, mode = 'buy' | 'full', wholeShares = true }
+ * Returns { total, items: [{ key, value, weight, target, targetValue, drift, amount, shares, after }], cashLeft }
+ */
+export function rebalancePlan(rows, targets, { cash = 0, mode = 'buy', wholeShares = true } = {}) {
+  const keys = new Set([...rows.map((r) => r.key), ...Object.keys(targets)]);
+  const byKey = Object.fromEntries(rows.map((r) => [r.key, r]));
+  const items = [...keys].filter((k) => targets[k] !== undefined && targets[k] !== null && targets[k] !== '')
+    .map((k) => ({ key: k, value: byKey[k]?.value || 0, unitPrice: byKey[k]?.unitPrice ?? null, target: +targets[k] / 100 }));
+  const invested = items.reduce((s, i) => s + i.value, 0);
+  const total = invested + cash;
+  const sumT = items.reduce((s, i) => s + i.target, 0) || 1;
+  for (const i of items) {
+    i.target /= sumT; // normalise in case targets do not add up to exactly 100
+    i.weight = invested ? i.value / invested : 0;
+    i.targetValue = total * i.target;
+    i.gap = i.targetValue - i.value;
+  }
+  if (mode === 'full') {
+    for (const i of items) i.amount = i.gap;
+  } else {
+    // buy-only: split the new cash across underweight assets in proportion to how far below target they are
+    const deficits = items.reduce((s, i) => s + Math.max(0, i.gap), 0);
+    const budget = Math.min(cash, deficits);
+    for (const i of items) i.amount = deficits > 0 ? (Math.max(0, i.gap) / deficits) * budget : 0;
+  }
+  let spent = 0;
+  for (const i of items) {
+    if (wholeShares && i.unitPrice) {
+      i.shares = Math.trunc(i.amount / i.unitPrice);
+      i.amount = i.shares * i.unitPrice;
+    } else i.shares = i.unitPrice ? i.amount / i.unitPrice : null;
+    spent += i.amount;
+  }
+  // whole-share rounding leaves change: buy extra single shares of the most underweight assets while it fits
+  if (wholeShares && mode !== 'full') {
+    let left = cash - spent;
+    for (let guard = 0; guard < 1000; guard++) {
+      const cand = items.filter((i) => i.unitPrice && i.unitPrice <= left)
+        .sort((a, b) => (a.value + a.amount) / a.targetValue - (b.value + b.amount) / b.targetValue)[0];
+      if (!cand || (cand.value + cand.amount) >= cand.targetValue) break;
+      cand.shares += 1; cand.amount += cand.unitPrice; left -= cand.unitPrice; spent += cand.unitPrice;
+    }
+  }
+  const after = items.reduce((s, i) => s + i.value + i.amount, 0);
+  for (const i of items) {
+    i.drift = i.weight - i.target;
+    i.after = after ? (i.value + i.amount) / after : 0;
+    delete i.gap;
+  }
+  return { total, items, cashLeft: cash - (mode === 'full' ? items.reduce((s, i) => s + i.amount, 0) : spent) };
+}

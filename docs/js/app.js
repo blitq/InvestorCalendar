@@ -12,6 +12,7 @@ const ROUTES = [
   ['transactions', 'Transactions', '⇄'],
   ['dividends', 'Dividends', '◎'],
   ['analysis', 'Analysis', '◔'],
+  ['rebalance', 'Rebalance', '⚖'],
   ['calendar', 'Calendar', '▦'],
   ['taxes', 'Taxes (PIT-38)', '§'],
   ['watchlist', 'Watchlist', '☆'],

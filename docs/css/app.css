@@ -250,3 +250,4 @@ td.empty { text-align: center; color: var(--muted); padding: 24px; }
 .form details.settle { border: 1px dashed var(--border); border-radius: 8px; padding: 8px 10px; } .form details.settle summary { cursor: pointer; color: var(--muted); }
 .sym-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px 16px; margin-bottom: 10px; } .sym-grid label { display: flex; flex-direction: column; gap: 3px; font-size: 0.82rem; } .sym-grid label > span { font-weight: 600; }
 .acct { padding: 8px 0; border-bottom: 1px dashed var(--border); } .acct:last-child { border-bottom: none; } .bar.big { height: 8px; border-radius: 4px; margin: 6px 0 4px; } .bar.big i { border-radius: 4px; }
+input.tgt { width: 80px; text-align: right; }

@@ -250,3 +250,24 @@ test('Polish tax: carry-forward reduces the base, T+2 settlement rate, country b
   const s = computePolishTax(txs, market, { dateMode: 'settlement', carryForward: false });
   close(s.years.find((y) => y.year === '2024').income, 1200 * 4.4 - 1000 * 4.5);
 });
+
+test('rebalancePlan: buy-only splits new cash by deficit, full mode sells', async () => {
+  const { rebalancePlan } = await import('../docs/js/engine.js');
+  const rows = [{ key: 'A', value: 700, unitPrice: 10 }, { key: 'B', value: 300, unitPrice: 30 }];
+  const buy = rebalancePlan(rows, { A: 50, B: 50 }, { cash: 400, mode: 'buy' });
+  const b = Object.fromEntries(buy.items.map((i) => [i.key, i]));
+  // total 1400 -> targets 700/700: B needs 400, A nothing
+  assert.equal(b.A.shares, 0);
+  assert.equal(b.B.shares, 13); // 13 * 30 = 390, 10 left
+  close(buy.cashLeft, 10);
+  close(b.A.drift, 0.2);
+  const full = rebalancePlan(rows, { A: 50, B: 50 }, { mode: 'full' });
+  const f = Object.fromEntries(full.items.map((i) => [i.key, i]));
+  assert.equal(f.A.shares, -20);
+  assert.equal(f.B.shares, 6);
+  close(f.A.after, 0.5, 0.02);
+  // new asset with a target, holdings without a target are ignored
+  const n = rebalancePlan([...rows, { key: 'C', value: 1000, unitPrice: 5 }], { A: 40, B: 40, D: 20 }, { cash: 1000, mode: 'buy', wholeShares: false });
+  assert.equal(n.items.find((i) => i.key === 'C'), undefined);
+  close(n.items.find((i) => i.key === 'D').amount, 400);
+});
