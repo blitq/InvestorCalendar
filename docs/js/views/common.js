@@ -97,6 +97,9 @@ export function warningsBlock(ctx) {
   if (ctx.missing.length) {
     w.unshift(`No market data for ${ctx.missing.join(', ')}. Add them to tickers.json (Settings → Market data) or set a manual price.`);
   }
+  // prices older than a week for positions you still hold (delisted, renamed, or the data source failed)
+  const stale = ctx.result.holdings.filter((h) => ctx.meta.stale?.[h.ticker]).map((h) => `${h.ticker} (${ctx.meta.stale[h.ticker]})`);
+  if (stale.length) w.push(`Old prices for ${stale.join(', ')} — the ticker may be delisted or renamed (use “Change ticker…” in its details) or set a manual price.`);
   return w.length ? `<div class="alert"><b>Heads up:</b><ul>${w.slice(0, 6).map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 }
 

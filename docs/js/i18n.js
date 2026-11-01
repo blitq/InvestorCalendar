@@ -170,6 +170,8 @@ const PL = {
   '+ Add account': '+ Dodaj rachunek', 'Add your investments': 'Dodaj swoje inwestycje', 'Import a broker file (XTB, Degiro, IBKR, Revolut, CSV)': 'Zaimportuj plik od brokera (XTB, Degiro, IBKR, Revolut, CSV)',
   'Add a transaction by hand': 'Dodaj transakcję ręcznie', 'Add treasury bonds': 'Dodaj obligacje skarbowe', 'Just look around (demo data)': 'Tylko się rozejrzę (dane demo)', 'e.g. XTB, mBank, IKE': 'np. XTB, mBank, IKE',
   'Free and private: everything stays in this browser (you can turn on encrypted sync later). Three quick steps.': 'Za darmo i prywatnie: wszystko zostaje w tej przeglądarce (szyfrowaną synchronizację możesz włączyć później). Trzy szybkie kroki.',
+  'New ticker': 'Nowy ticker', 'New shares per old share': 'Nowe akcje na jedną starą', 'Cost moved to the new company (%)': 'Koszt przeniesiony do nowej spółki (%)',
+  'e.g. the merged or spun-off company': 'np. spółka po fuzji lub wydzielona', "from the company's announcement": 'z komunikatu spółki', 'SPINOFF': 'WYDZIELENIE', 'MERGER': 'FUZJA',
   // misc
   'Heads up:': 'Uwaga:', 'Nothing here yet.': 'Nic tu jeszcze nie ma.', 'No positions.': 'Brak pozycji.', 'BUY': 'KUPNO', 'SELL': 'SPRZEDAŻ',
   'Stocks/ETF': 'Akcje/ETF', 'Poland': 'Polska', 'United States': 'USA', 'Germany': 'Niemcy', 'Netherlands': 'Holandia', 'United Kingdom': 'Wielka Brytania', 'France': 'Francja',
@@ -210,6 +212,8 @@ const PATTERNS = [
   [/^per share, ([A-Z]{3})$/, 'na akcję, $1'], [/^About (.+)$/, 'O spółce: $1'], [/^(\d+) y$/, '$1 lat'],
   [/^PIT-38 (\d{4}) — estimate$/, 'PIT-38 $1 — szacunek'],
   [/^(.+) change$/, 'zmiana $1'], [/^(\d+) payments$/, '$1 wypłat'], [/^Transactions \((\d+)\)$/, 'Transakcje ($1)'],
+  [/^Old prices for (.+) — the ticker may be delisted or renamed \(use “Change ticker…” in its details\) or set a manual price\.$/, 'Stare ceny dla $1 — spółka mogła zostać wycofana lub zmienić ticker (użyj „Zmień ticker…” w szczegółach) albo ustaw cenę ręcznie.'],
+  [/^No market data for (.+)\. Add them to tickers\.json \(Settings → Market data\) or set a manual price\.$/, 'Brak danych rynkowych dla $1. Dodaj je do tickers.json (Ustawienia → Dane rynkowe) lub ustaw cenę ręcznie.'],
   [/^Sync error: (.+)$/, 'Błąd synchronizacji: $1'], [/^Synced (.+)$/, 'Zsynchronizowano $1'], [/^(\d+) transactions ready/, (m) => m.replace(/^(\d+) transactions ready/, '$1 transakcji gotowych')],
 ];
 

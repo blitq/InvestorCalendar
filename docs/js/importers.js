@@ -4,11 +4,11 @@
 export const FIELDS = ['date', 'type', 'ticker', 'quantity', 'price', 'fee', 'amount', 'tax', 'currency', 'settleAmount', 'settleCurrency', 'toAmount', 'toCurrency', 'note'];
 
 const SYNONYMS = {
-  date: ['date', 'data', 'trade date', 'data transakcji', 'czas', 'time', 'open time', 'close time', 'execution date', 'settlement date'],
-  type: ['type', 'typ', 'action', 'operation', 'operacja', 'transaction type', 'rodzaj', 'side', 'kierunek', 'k/s'],
-  ticker: ['ticker', 'symbol', 'instrument', 'walor', 'papier', 'product', 'produkt', 'security', 'stock', 'spółka', 'spolka'],
-  quantity: ['quantity', 'qty', 'shares', 'ilość', 'ilosc', 'liczba', 'volume', 'wolumen', 'units', 'liczba akcji'],
-  price: ['price', 'cena', 'kurs', 'unit price', 'share price', 'price per share', 'open price', 'cena jednostkowa'],
+  date: ['date', 'data', 'trade date', 'data transakcji', 'czas transakcji', 'data operacji', 'data zlecenia', 'data realizacji', 'czas', 'time', 'open time', 'close time', 'execution date', 'settlement date'],
+  type: ['type', 'typ', 'action', 'operation', 'operacja', 'transaction type', 'rodzaj', 'side', 'kierunek', 'k/s', 'strona', 'rodzaj transakcji', 'typ transakcji', 'kupno/sprzedaż'],
+  ticker: ['ticker', 'symbol', 'instrument', 'walor', 'papier', 'product', 'produkt', 'security', 'stock', 'spółka', 'spolka', 'nazwa waloru', 'papier wartościowy', 'nazwa instrumentu'],
+  quantity: ['quantity', 'qty', 'shares', 'ilość', 'ilosc', 'liczba', 'volume', 'wolumen', 'units', 'liczba akcji', 'liczba sztuk', 'ilość sztuk', 'liczba papierów'],
+  price: ['price', 'cena', 'kurs', 'unit price', 'share price', 'price per share', 'open price', 'cena jednostkowa', 'kurs transakcji', 'cena wykonania', 'kurs wykonania'],
   fee: ['fee', 'fees', 'commission', 'prowizja', 'opłata', 'oplata', 'costs', 'transaction costs'],
   amount: ['amount', 'kwota', 'value', 'wartość', 'wartosc', 'total', 'net amount', 'gross amount', 'gross'],
   tax: ['tax', 'podatek', 'withholding tax', 'withholding', 'tax withheld', 'podatek u źródła'],
@@ -156,7 +156,8 @@ export function rowsToTransactions(rows, mapping, defaults = {}) {
     if (!type && qty !== null) type = qty < 0 ? 'SELL' : 'BUY';
     if (!type) { errors.push({ row: rowNo, message: `unknown type "${get(r, 'type')}"` }); return; }
     let ticker = String(get(r, 'ticker') || '').trim().toUpperCase();
-    if (ticker && defaults.tickerSuffix && !ticker.includes('.')) ticker += defaults.tickerSuffix;
+    if (ticker && gpwTicker(ticker)) ticker = gpwTicker(ticker); // mBank/Bossa use GPW short names (PKNORLEN…)
+    else if (ticker && defaults.tickerSuffix && !ticker.includes('.')) ticker += defaults.tickerSuffix;
     const currency = (String(get(r, 'currency') || '').trim().toUpperCase() || defaults.currency || '').slice(0, 3);
     const tx = { portfolioId: defaults.portfolioId, date, type, currency };
     const sAmt = parseNumber(get(r, 'settleAmount'));
@@ -204,4 +205,34 @@ export function toCSV(transactions, portfolios = []) {
 /** Do two transactions look like the same real-world event? Used to skip re-imports. */
 export function txFingerprint(t) {
   return [t.portfolioId, t.date, t.type, t.ticker || '', +(t.quantity || 0).toFixed(6), +(t.price || 0).toFixed(6), +(t.amount || 0).toFixed(4)].join('|');
+}
+
+// ------------------------------------------------------------------ encodings & GPW names
+
+/** Decode file bytes: UTF-8 (with or without BOM), else Windows-1250 (common in Polish broker exports). */
+export function decodeBytes(buf) {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/^\uFEFF/, ''); }
+  catch { return new TextDecoder('windows-1250').decode(bytes); }
+}
+
+/** GPW short names used by mBank eMakler, Bossa and others → Yahoo tickers. */
+export const GPW_NAMES = {
+  PKNORLEN: 'PKN.WA', ORLEN: 'PKN.WA', CDPROJEKT: 'CDR.WA', PKOBP: 'PKO.WA', PZU: 'PZU.WA', KGHM: 'KGH.WA', PEKAO: 'PEO.WA',
+  ORANGEPL: 'OPL.WA', ALLEGRO: 'ALE.WA', DINOPL: 'DNP.WA', LPP: 'LPP.WA', CYFRPLSAT: 'CPS.WA', JSW: 'JSW.WA', PGE: 'PGE.WA',
+  TAURONPE: 'TPE.WA', ENEA: 'ENA.WA', ENERGA: 'ENG.WA', MBANK: 'MBK.WA', SANPL: 'SPL.WA', BUDIMEX: 'BDX.WA', KRUK: 'KRU.WA',
+  ALIOR: 'ALR.WA', PEPCO: 'PCO.WA', ZABKA: 'ZAB.WA', AMREST: 'EAT.WA', CCC: 'CCC.WA', KETY: 'KTY.WA', ASSECOPOL: 'ACP.WA',
+  XTB: 'XTB.WA', PKPCARGO: 'PKP.WA', GPW: 'GPW.WA', MILLENNIUM: 'MIL.WA', HANDLOWY: 'BHW.WA', INGBSK: 'ING.WA', BNPPPL: 'BNP.WA',
+  '11BIT': '11B.WA', TEXT: 'TXT.WA', BENEFIT: 'BFT.WA', AUTOPARTN: 'APR.WA', ASBIS: 'ASB.WA', BOGDANKA: 'LWB.WA', GRUPAAZOTY: 'ATT.WA',
+  TSGAMES: 'TEN.WA', PLAYWAY: 'PLW.WA', CIGAMES: 'CIG.WA', DOMDEV: 'DOM.WA', ATAL: '1AT.WA', DEVELIA: 'DVL.WA', NEUCA: 'NEU.WA',
+  COMARCH: 'CMR.WA', WIRTUALNA: 'WPL.WA', GRUPRACUJ: 'GPP.WA', SNIEZKA: 'SKA.WA', ORBIS: 'ORB.WA', MABION: 'MAB.WA', SELVITA: 'SLV.WA',
+  RYVU: 'RVU.WA', TORPOL: 'TOR.WA', STALPROD: 'STP.WA', MERCATOR: 'MRC.WA', DIGITANET: 'DIG.WA', HUUUGE: 'HUG.WA', VOTUM: 'VOT.WA',
+};
+
+/** Yahoo ticker for a GPW short name (incl. Polish ETFs/ETCs like ETFBW20TR), else null. */
+export function gpwTicker(name) {
+  const k = String(name || '').toUpperCase().replace(/\s+/g, '');
+  if (GPW_NAMES[k]) return GPW_NAMES[k];
+  if (/^(ETF|BETA)[A-Z0-9]+$/.test(k) && !k.includes('.')) return `${k}.WA`;
+  return null;
 }

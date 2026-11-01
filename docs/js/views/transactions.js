@@ -1,7 +1,7 @@
 // transactions page — split from the former views.js
 import { TX_TYPES, todayISO, Series } from '../engine.js';
 import { loadHistories } from '../data.js';
-import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint } from '../importers.js';
+import { parseCSV, detectColumns, rowsToTransactions, toCSV, FIELDS, txFingerprint, gpwTicker } from '../importers.js';
 import { store } from '../store.js';
 import { t as tr } from '../i18n.js';
 import { detectBroker, PARSERS, BROKER_NAMES } from '../brokers.js';
@@ -18,7 +18,7 @@ export function txTable(el, txs, ctx, { compact = false } = {}) {
     { key: 'ticker', label: tr('Ticker'), render: (t) => `<b>${esc(t.ticker || '')}</b>` },
     { key: 'quantity', label: tr('Qty'), cls: 'num', render: (t) => (t.quantity ? qty(t.quantity) : '') },
     { key: 'price', label: tr('Price'), cls: 'num', render: (t) => (t.price ? money(t.price, t.currency) : '') },
-    { key: 'total', label: tr('Total'), cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') + (t.type === 'CONVERSION' ? `<div class="small muted">→ ${money(t.toAmount, t.toCurrency)}</div>` : '') },
+    { key: 'total', label: tr('Total'), cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') + (t.type === 'CONVERSION' ? `<div class="small muted">→ ${money(t.toAmount, t.toCurrency)}</div>` : '') + (t.toTicker && t.type !== 'CONVERSION' ? `<div class="small muted">→ ${esc(t.toTicker)} ×${num(t.ratio, 4)}${t.type === 'SPINOFF' ? ` · ${num(t.costPct, 1)}% cost` : ''}</div>` : '') },
     { key: 'fee', label: tr('Fee / tax'), cls: 'num', sort: (t) => (t.fee || t.tax || 0), render: (t) => (t.fee || t.tax ? money(t.fee || t.tax, t.currency) : '') },
     ...(compact ? [] : [{ key: 'note', label: tr('Note'), render: (t) => `<span class="muted small">${esc(short(t.note || '', 30))}</span>` },
       { key: 'actions', label: '', render: (t) => `<button class="icon-btn" data-edit="${esc(t.id)}" title="Edit">✎</button><button class="icon-btn" data-del="${esc(t.id)}" title="Delete">🗑</button>` }]),
@@ -93,6 +93,9 @@ export function txForm(ctx, tx = null) {
       <label data-f="amount"><span data-amount-label>Amount</span><input type="number" step="any" min="0" name="amount" value="${tx?.amount ?? ''}"></label>
       <label data-f="tax">Tax withheld<input type="number" step="any" min="0" name="tax" value="${tx?.tax ?? ''}"></label>
       <label>Currency<input name="currency" maxlength="3" required value="${esc(tx?.currency || ctx.base)}" style="text-transform:uppercase"></label>
+      <label data-f="toTicker">New ticker<input name="toTicker" value="${esc(tx?.toTicker || '')}" placeholder="e.g. the merged or spun-off company" style="text-transform:uppercase" list="tickerList"></label>
+      <label data-f="ratio">New shares per old share<input type="number" step="any" min="0" name="ratio" value="${tx?.ratio ?? ''}" placeholder="e.g. 0.5"></label>
+      <label data-f="costPct">Cost moved to the new company (%)<input type="number" step="any" min="0" max="100" name="costPct" value="${tx?.costPct ?? ''}" placeholder="from the company's announcement"></label>
       <label data-f="to">Received amount<input type="number" step="any" min="0" name="toAmount" value="${tx?.toAmount ?? ''}"></label>
       <label data-f="to">Received currency<input name="toCurrency" maxlength="3" value="${esc(tx?.toCurrency || '')}" style="text-transform:uppercase" placeholder="USD"></label>
       <details class="full settle" data-f="settle" ${tx?.settleCurrency ? 'open' : ''}><summary class="small">Paid / received in another currency (e.g. PLN account buying USD shares)</summary>
@@ -108,7 +111,7 @@ export function txForm(ctx, tx = null) {
       <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${tx ? 'Save' : 'Add'}</button></div>
     </form>`);
   const f = $('#txf', el);
-  const FIELDS_BY_TYPE = { BUY: ['ticker', 'quantity', 'price', 'fee', 'settle'], SELL: ['ticker', 'quantity', 'price', 'fee', 'settle'], DIVIDEND: ['ticker', 'amount', 'tax', 'settle'], CONVERSION: ['amount', 'to'] };
+  const FIELDS_BY_TYPE = { BUY: ['ticker', 'quantity', 'price', 'fee', 'settle'], SELL: ['ticker', 'quantity', 'price', 'fee', 'settle'], DIVIDEND: ['ticker', 'amount', 'tax', 'settle'], CONVERSION: ['amount', 'to'], MERGER: ['ticker', 'toTicker', 'ratio'], SPINOFF: ['ticker', 'toTicker', 'ratio', 'costPct'] };
   const sync = () => {
     const type = f.type.value;
     const show = FIELDS_BY_TYPE[type] || ['amount'];
@@ -150,6 +153,7 @@ export function txForm(ctx, tx = null) {
     const want = FIELDS_BY_TYPE[type] || ['amount'];
     for (const k of want) {
       if (k === 'ticker') { if (fd.ticker) out.ticker = fd.ticker.trim().toUpperCase(); continue; }
+      if (k === 'toTicker') { out.toTicker = (fd.toTicker || '').trim().toUpperCase(); continue; }
       if (k === 'to') {
         out.toAmount = +fd.toAmount || 0; out.toCurrency = (fd.toCurrency || '').trim().toUpperCase();
         if (!out.toAmount || !out.toCurrency) return toast('Received amount and currency are required', 'error');
@@ -163,7 +167,10 @@ export function txForm(ctx, tx = null) {
       if (fd[k] !== '' && fd[k] !== undefined) out[k] = +fd[k];
     }
     if ((type === 'BUY' || type === 'SELL') && (!out.ticker || !out.quantity || out.price === undefined)) return toast('Ticker, quantity and price are required', 'error');
-    if (!want.includes('quantity') && !out.amount) return toast('Amount is required', 'error');
+    if (type === 'MERGER' || type === 'SPINOFF') {
+      if (!out.ticker || !out.toTicker || !(out.ratio > 0)) return toast('Old ticker, new ticker and ratio are required', 'error');
+      if (type === 'SPINOFF' && out.costPct === undefined) return toast('Enter the cost share (%) for the new company', 'error');
+    } else if (!want.includes('quantity') && !out.amount) return toast('Amount is required', 'error');
     if (type === 'SELL') {
       const held = ctx.state.transactions.filter((t) => t.portfolioId === out.portfolioId && t.ticker === out.ticker && t.id !== out.id && t.date <= out.date)
         .reduce((s2, t) => s2 + (t.type === 'BUY' ? t.quantity : t.type === 'SELL' ? -t.quantity : 0), 0);
@@ -263,7 +270,7 @@ export function importDialog(ctx) {
     // symbol mapping: remembered map → anything unknown or unresolved ISINs
     const saved = s.settings.symbolMap || {};
     const symbols = [...new Set(outcome.transactions.map((t) => t.ticker).filter(Boolean))];
-    for (const sym of symbols) if (!(sym in symMap)) symMap[sym] = saved[sym] || (sym.startsWith('ISIN:') ? '' : sym);
+    for (const sym of symbols) if (!(sym in symMap)) symMap[sym] = saved[sym] || gpwTicker(sym) || (sym.startsWith('ISIN:') ? '' : sym);
     const unknown = symbols.filter((sym) => sym.startsWith('ISIN:') || !known.has(symMap[sym] || sym) || saved[sym]);
     $('#symBox', el).innerHTML = unknown.length ? `<h4>Symbols <span class="muted small">— use Yahoo Finance tickers (AAPL, PKO.WA, VWCE.DE). Saved for future imports.</span></h4>
       <div class="sym-grid">${unknown.map((sym) => {

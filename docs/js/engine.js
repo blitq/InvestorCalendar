@@ -7,6 +7,8 @@
 //   DEPOSIT / WITHDRAWAL amount             -> switches the portfolio into "cash mode"
 //   FEE / INTEREST / TAX amount
 //   CONVERSION           amount (sold, in currency) → toAmount in toCurrency (cash exchange, not a flow)
+//   MERGER               ticker → toTicker, ratio new shares per old share (cost and purchase dates carry over)
+//   SPINOFF              ticker keeps its shares; ratio toTicker shares per share; costPct % of the cost moves to toTicker
 //   optional on BUY/SELL/DIVIDEND: settleAmount + settleCurrency = cash actually moved in the
 //   account currency (e.g. PLN paid for USD shares, incl. fees and FX spread)
 //
@@ -14,8 +16,8 @@
 // its value and deposits/withdrawals are the external flows. Otherwise every buy is
 // treated as fresh money in and every sell / dividend as money taken out.
 
-export const TX_TYPES = ['BUY', 'SELL', 'DIVIDEND', 'DEPOSIT', 'WITHDRAWAL', 'FEE', 'INTEREST', 'TAX', 'CONVERSION'];
-const TYPE_ORDER = { DEPOSIT: 0, INTEREST: 1, CONVERSION: 2, BUY: 3, SELL: 4, DIVIDEND: 5, FEE: 6, TAX: 7, WITHDRAWAL: 8 };
+export const TX_TYPES = ['BUY', 'SELL', 'DIVIDEND', 'DEPOSIT', 'WITHDRAWAL', 'FEE', 'INTEREST', 'TAX', 'CONVERSION', 'SPINOFF', 'MERGER'];
+const TYPE_ORDER = { DEPOSIT: 0, INTEREST: 1, CONVERSION: 2, MERGER: 3, SPINOFF: 4, BUY: 5, SELL: 6, DIVIDEND: 7, FEE: 8, TAX: 9, WITHDRAWAL: 10 };
 export const PL_TAX_RATE = 0.19;
 const EPS = 1e-9;
 
@@ -164,6 +166,21 @@ class FifoBook {
     }
     return { used, shortfall: left > EPS ? left : 0 };
   }
+  /** Merger / ticker change: all lots of `key` become lots of `toKey` (ratio new shares per old). */
+  transfer(key, toKey, ratio) {
+    const lots = this.lots.get(key) || [];
+    for (const l of lots) this._get(toKey).push({ ...l, qty: l.qty * ratio, price: l.price / ratio });
+    this.lots.set(key, []);
+  }
+  /** Spin-off: each lot of `key` gets a sibling lot in `toKey` carrying `costShare` of its cost. */
+  spinoff(key, toKey, ratio, costShare) {
+    for (const l of this.lots.get(key) || []) {
+      if (l.qty <= EPS) continue;
+      this._get(toKey).push({ ...l, qty: l.qty * ratio, price: (l.price * costShare) / ratio, fee: l.fee * costShare });
+      l.price *= 1 - costShare;
+      l.fee *= 1 - costShare;
+    }
+  }
   split(matchTicker, ratio) {
     for (const [key, lots] of this.lots) {
       if (key.split('|')[1] !== matchTicker) continue;
@@ -223,6 +240,7 @@ export function computePortfolio(transactions, market, opts = {}) {
       recordedDiv.get(k).push(t.date);
     }
     if (t.ticker) tickers.add(t.ticker);
+    if (t.toTicker) tickers.add(t.toTicker);
     if (!byDate.has(t.date)) byDate.set(t.date, []);
     byDate.get(t.date).push(t);
   }
@@ -364,6 +382,17 @@ export function computePortfolio(transactions, market, opts = {}) {
           totals.interest += n(t.amount) * rate;
           if (cm) addCash(pid, ccy, n(t.amount)); else flowOut -= n(t.amount) * rate;
           break;
+        case 'MERGER':
+        case 'SPINOFF': {
+          const to = String(t.toTicker || '').toUpperCase();
+          const ratio = n(t.ratio) || 1;
+          if (!to || !t.ticker) { warnings.add(`${t.type} on ${d} needs both tickers.`); break; }
+          const from = `${pid}|${t.ticker}`, dest = `${pid}|${to}`;
+          pos(pid, to, market.currency(to) || posInfo.get(from)?.currency || ccy);
+          if (t.type === 'MERGER') { book.transfer(from, dest, ratio); if (lastTxPrice[t.ticker]) lastTxPrice[to] = lastTxPrice[t.ticker] / ratio; }
+          else book.spinoff(from, dest, ratio, Math.min(1, Math.max(0, n(t.costPct) / 100)));
+          break;
+        }
         case 'CONVERSION':
           // internal: cash changes currency; the FX spread shows up as a (small) loss in value
           if (cm) { addCash(pid, ccy, -n(t.amount)); addCash(pid, (t.toCurrency || base).toUpperCase(), n(t.toAmount)); }
@@ -686,7 +715,7 @@ export function computePolishTax(transactions, market, opts = {}) {
   };
   const tradeRateDate = (d) => (settle ? addBusinessDays(d, 2) : d);
 
-  const tickers = new Set(txs.filter((t) => t.ticker).map((t) => t.ticker));
+  const tickers = new Set(txs.flatMap((t) => [t.ticker, t.toTicker]).filter(Boolean));
   const splits = [];
   for (const tk of tickers) for (const [d, r] of market.splits(tk)) splits.push([d, tk, r]);
   splits.sort((a, b) => a[0].localeCompare(b[0]));
@@ -713,6 +742,10 @@ export function computePolishTax(transactions, market, opts = {}) {
       y.trades.push({ date: t.date, portfolioId: t.portfolioId, ticker: t.ticker, qty, currency: ccy, rate: r,
         proceeds, costs, income: proceeds - costs,
         buys: used.map((l) => ({ date: l.date, qty: l.qty, price: l.price, rate: l.rate })) });
+    } else if ((t.type === 'MERGER' || t.type === 'SPINOFF') && t.toTicker) {
+      const dest = `${t.portfolioId}|${String(t.toTicker).toUpperCase()}`;
+      if (t.type === 'MERGER') book.transfer(key, dest, n(t.ratio) || 1);
+      else book.spinoff(key, dest, n(t.ratio) || 1, Math.min(1, Math.max(0, n(t.costPct) / 100)));
     } else if (t.type === 'DIVIDEND') {
       const r = rate(ccy, t.date) ?? 0;
       const gross = n(t.amount) * r, withheld = n(t.tax) * r;
@@ -856,13 +889,23 @@ export function rebalancePlan(rows, targets, { cash = 0, mode = 'buy', wholeShar
  * value minus money put in, plus dividends paid out. Replays each ticker on its own.
  */
 export function contributions(transactions, market, opts = {}) {
-  const groups = new Map();
-  for (const t of transactions) if (t.ticker) (groups.get(t.ticker) || groups.set(t.ticker, []).get(t.ticker)).push(t);
+  // tickers linked by a merger/spin-off are replayed together (the new shares come out of the old lots)
+  const parent = {};
+  const root = (x) => (parent[x] && parent[x] !== x ? (parent[x] = root(parent[x])) : x);
+  for (const t of transactions) if (t.ticker && t.toTicker) parent[root(String(t.toTicker).toUpperCase())] = root(t.ticker);
+  const groups = new Map(), names = new Map();
+  for (const t of transactions) {
+    if (!t.ticker) continue;
+    const g = root(t.ticker);
+    (groups.get(g) || groups.set(g, []).get(g)).push(t);
+    const ns = names.get(g) || names.set(g, new Set()).get(g);
+    ns.add(t.ticker); if (t.toTicker) ns.add(String(t.toTicker).toUpperCase());
+  }
   const out = [];
   for (const [ticker, txs] of groups) {
     const r = computePortfolio(txs, market, opts);
     const p = periodStats(r.series, opts.from || '0000-00-00', opts.to);
-    if (p) out.push({ ticker, profit: p.profit, startValue: p.startValue, endValue: p.endValue, twr: p.twr });
+    if (p) out.push({ ticker: [...names.get(ticker)].join(' + '), profit: p.profit, startValue: p.startValue, endValue: p.endValue, twr: p.twr });
   }
   return out.sort((a, b) => b.profit - a.profit);
 }

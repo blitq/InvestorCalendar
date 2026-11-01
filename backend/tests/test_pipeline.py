@@ -96,3 +96,35 @@ def test_parse_eurostat_cpi():
     payload = {"dimension": {"time": {"category": {"index": {"2024-02": 1, "2024-01": 0}}}}, "value": {"1": 3.3, "0": 4.5}}
     assert parse_eurostat(payload)["months"] == ["2024-01", "2024-02"]
     assert parse_eurostat(payload)["yoy"] == [4.5, 3.3]
+
+
+def test_stooq_symbols_and_parse():
+    from stooq import parse_csv, stooq_symbol
+    assert stooq_symbol("AAPL") == ("aapl.us", 1.0)
+    assert stooq_symbol("PKO.WA") == ("pko", 1.0)
+    assert stooq_symbol("LLOY.L") == ("lloy.uk", 100.0)
+    assert stooq_symbol("BRK-B") == ("brk.b.us", 1.0)
+    assert stooq_symbol("AIR.PA") is None and stooq_symbol("^GSPC") is None
+    h = parse_csv("Date,Open,High,Low,Close,Volume\n2024-01-02,1,1,1,45.2,100\n2024-01-03,1,1,1,46,100\n", 100.0)
+    assert h["dates"] == ["2024-01-02", "2024-01-03"] and h["close"] == [0.452, 0.46]
+    import pytest
+    with pytest.raises(RuntimeError):
+        parse_csv("Brak danych")
+
+
+def test_step_prices_falls_back_to_stooq(tmp_path, monkeypatch):
+    import json
+    import generate
+    import prices
+    import stooq
+    monkeypatch.setattr(generate, "DATA_DIR", str(tmp_path))
+    (tmp_path / "history").mkdir()
+    (tmp_path / "history" / "PKO.WA.json").write_text(json.dumps({"currency": "PLN", "dividends": [["2024-07-01", 5.5]], "splits": []}))
+    monkeypatch.setattr(prices, "fetch_ticker", lambda sym, start: (_ for _ in ()).throw(RuntimeError("yahoo down")))
+    monkeypatch.setattr(stooq, "fetch_history", lambda sym, start: {"dates": ["2024-07-01", "2024-07-02"], "close": [50.0, 51.0], "dividends": [], "splits": [], "source": "stooq"})
+    monkeypatch.setattr(generate.time, "sleep", lambda s: None)
+    quotes, files = generate.step_prices(["PKO.WA"], {}, "2024-01-01")
+    h = json.loads((tmp_path / "history" / "PKO.WA.json").read_text())
+    assert files == {"PKO.WA": "history/PKO.WA.json"}
+    assert h["close"] == [50.0, 51.0] and h["dividends"] == [["2024-07-01", 5.5]] and h["currency"] == "PLN"
+    assert quotes["PKO.WA"]["price"] == 51.0 and quotes["PKO.WA"]["source"] == "stooq"

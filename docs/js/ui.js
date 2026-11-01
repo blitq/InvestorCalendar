@@ -74,13 +74,10 @@ export function download(filename, text, type = 'text/plain') {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-export function readFile(file) {
-  return new Promise((res, rej) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.onerror = rej;
-    r.readAsText(file);
-  });
+/** Read a text file, detecting UTF-8 vs Windows-1250 (Polish broker exports). */
+export async function readFile(file) {
+  const { decodeBytes } = await import('./importers.js');
+  return decodeBytes(await file.arrayBuffer());
 }
 
 /** Sortable table. columns: [{key, label, render?, sort?, cls?}] */
