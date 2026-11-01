@@ -55,3 +55,10 @@ test('export → import round trip', () => {
   const { transactions } = rowsToTransactions(rows, detectColumns(headers), { portfolioId: 'a' });
   assert.deepEqual(transactions[0], txs[0]);
 });
+
+test('settlement columns round trip', () => {
+  const txs = [{ portfolioId: 'a', date: '2024-01-02', type: 'BUY', ticker: 'AAPL', quantity: 2, price: 100, fee: 0, currency: 'USD', settleAmount: 810.5, settleCurrency: 'PLN' }];
+  const { headers, rows } = parseCSV(toCSV(txs, [{ id: 'a', name: 'Main' }]));
+  const { transactions } = rowsToTransactions(rows, detectColumns(headers), { portfolioId: 'a' });
+  assert.deepEqual(transactions[0], txs[0]);
+});

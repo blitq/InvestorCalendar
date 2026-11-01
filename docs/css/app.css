@@ -247,3 +247,4 @@ td.empty { text-align: center; color: var(--muted); padding: 24px; }
   .dates input { width: 128px; }
 }
 .opts select { max-width: 200px; }
+.form details.settle { border: 1px dashed var(--border); border-radius: 8px; padding: 8px 10px; } .form details.settle summary { cursor: pointer; color: var(--muted); }

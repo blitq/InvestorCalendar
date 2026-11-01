@@ -1,7 +1,7 @@
 // CSV import/export with automatic column detection (English + Polish headers).
 // Pure functions — tested in Node.
 
-export const FIELDS = ['date', 'type', 'ticker', 'quantity', 'price', 'fee', 'amount', 'tax', 'currency', 'note'];
+export const FIELDS = ['date', 'type', 'ticker', 'quantity', 'price', 'fee', 'amount', 'tax', 'currency', 'settleAmount', 'settleCurrency', 'note'];
 
 const SYNONYMS = {
   date: ['date', 'data', 'trade date', 'data transakcji', 'czas', 'time', 'open time', 'close time', 'execution date', 'settlement date'],
@@ -14,6 +14,8 @@ const SYNONYMS = {
   tax: ['tax', 'podatek', 'withholding tax', 'withholding', 'tax withheld', 'podatek u źródła'],
   currency: ['currency', 'waluta', 'ccy', 'curr'],
   note: ['note', 'notes', 'comment', 'komentarz', 'uwagi', 'description', 'opis'],
+  settleAmount: ['settleamount', 'settle amount', 'settlement amount', 'kwota rozliczenia', 'wartość rozliczenia', 'wartosc rozliczenia', 'total in account currency', 'account amount'],
+  settleCurrency: ['settlecurrency', 'settle currency', 'settlement currency', 'waluta rozliczenia', 'account currency', 'waluta rachunku'],
 };
 
 const TYPE_WORDS = [
@@ -154,19 +156,22 @@ export function rowsToTransactions(rows, mapping, defaults = {}) {
     if (ticker && defaults.tickerSuffix && !ticker.includes('.')) ticker += defaults.tickerSuffix;
     const currency = (String(get(r, 'currency') || '').trim().toUpperCase() || defaults.currency || '').slice(0, 3);
     const tx = { portfolioId: defaults.portfolioId, date, type, currency };
+    const sAmt = parseNumber(get(r, 'settleAmount'));
+    const sCcy = String(get(r, 'settleCurrency') || '').trim().toUpperCase().slice(0, 3);
+    const settle = sAmt && sCcy && sCcy !== currency ? { settleAmount: Math.abs(sAmt), settleCurrency: sCcy } : null;
     const note = get(r, 'note');
     if (note) tx.note = String(note);
     if (type === 'BUY' || type === 'SELL') {
       const price = parseNumber(get(r, 'price'));
       qty = qty === null ? null : Math.abs(qty);
       if (!ticker || !qty || price === null) { errors.push({ row: rowNo, message: 'trade needs ticker, quantity and price' }); return; }
-      Object.assign(tx, { ticker, quantity: qty, price: Math.abs(price), fee: Math.abs(parseNumber(get(r, 'fee')) || 0) });
+      Object.assign(tx, { ticker, quantity: qty, price: Math.abs(price), fee: Math.abs(parseNumber(get(r, 'fee')) || 0) }, settle);
     } else {
       const amount = parseNumber(get(r, 'amount'));
       if (amount === null) { errors.push({ row: rowNo, message: 'amount missing' }); return; }
       tx.amount = Math.abs(amount);
       if (ticker) tx.ticker = ticker;
-      if (type === 'DIVIDEND') tx.tax = Math.abs(parseNumber(get(r, 'tax')) || 0);
+      if (type === 'DIVIDEND') { tx.tax = Math.abs(parseNumber(get(r, 'tax')) || 0); Object.assign(tx, settle); }
     }
     transactions.push(tx);
   });

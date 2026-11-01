@@ -270,7 +270,7 @@ function txTable(el, txs, ctx, { compact = false } = {}) {
     { key: 'ticker', label: 'Ticker', render: (t) => `<b>${esc(t.ticker || '')}</b>` },
     { key: 'quantity', label: 'Qty', cls: 'num', render: (t) => (t.quantity ? qty(t.quantity) : '') },
     { key: 'price', label: 'Price', cls: 'num', render: (t) => (t.price ? money(t.price, t.currency) : '') },
-    { key: 'total', label: 'Total', cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) },
+    { key: 'total', label: 'Total', cls: 'num', sort: (t) => txTotal(t), render: (t) => money(txTotal(t), t.currency) + (t.settleCurrency ? `<div class="small muted">${money(t.settleAmount, t.settleCurrency)}</div>` : '') },
     { key: 'fee', label: 'Fee / tax', cls: 'num', sort: (t) => (t.fee || t.tax || 0), render: (t) => (t.fee || t.tax ? money(t.fee || t.tax, t.currency) : '') },
     ...(compact ? [] : [{ key: 'note', label: 'Note', render: (t) => `<span class="muted small">${esc(short(t.note || '', 30))}</span>` },
       { key: 'actions', label: '', render: (t) => `<button class="icon-btn" data-edit="${esc(t.id)}" title="Edit">✎</button><button class="icon-btn" data-del="${esc(t.id)}" title="Delete">🗑</button>` }]),
@@ -340,18 +340,26 @@ function txForm(ctx, tx = null) {
       <label data-f="amount"><span data-amount-label>Amount</span><input type="number" step="any" min="0" name="amount" value="${tx?.amount ?? ''}"></label>
       <label data-f="tax">Tax withheld<input type="number" step="any" min="0" name="tax" value="${tx?.tax ?? ''}"></label>
       <label>Currency<input name="currency" maxlength="3" required value="${esc(tx?.currency || ctx.base)}" style="text-transform:uppercase"></label>
+      <details class="full settle" data-f="settle" ${tx?.settleCurrency ? 'open' : ''}><summary class="small">Paid / received in another currency (e.g. PLN account buying USD shares)</summary>
+        <div class="form">
+          <label>Account currency<input name="settleCurrency" maxlength="3" placeholder="PLN" value="${esc(tx?.settleCurrency || '')}" style="text-transform:uppercase"></label>
+          <label><span data-settle-label>Total charged</span><input type="number" step="any" min="0" name="settleAmount" value="${tx?.settleAmount ?? ''}"></label>
+          <div class="full muted small" id="settleHint">The exact amount that left or reached your account, including fees and the broker's FX spread. Used for cost basis and cash.</div>
+        </div>
+      </details>
       <label class="full">Note<input name="note" value="${esc(tx?.note || '')}"></label>
       <datalist id="tickerList">${known.map((k) => `<option value="${esc(k)}">${esc(ctx.quotes[k]?.name || '')}</option>`).join('')}</datalist>
       <div class="full muted small" id="txHint"></div>
       <div class="full row gap end"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary">${tx ? 'Save' : 'Add'}</button></div>
     </form>`);
   const f = $('#txf', el);
-  const FIELDS_BY_TYPE = { BUY: ['ticker', 'quantity', 'price', 'fee'], SELL: ['ticker', 'quantity', 'price', 'fee'], DIVIDEND: ['ticker', 'amount', 'tax'] };
+  const FIELDS_BY_TYPE = { BUY: ['ticker', 'quantity', 'price', 'fee', 'settle'], SELL: ['ticker', 'quantity', 'price', 'fee', 'settle'], DIVIDEND: ['ticker', 'amount', 'tax', 'settle'] };
   const sync = () => {
     const type = f.type.value;
     const show = FIELDS_BY_TYPE[type] || ['amount'];
     $$('[data-f]', f).forEach((l) => { l.hidden = !show.includes(l.dataset.f); });
     $('[data-amount-label]', f).textContent = type === 'DIVIDEND' ? 'Gross amount' : 'Amount';
+    $('[data-settle-label]', f).textContent = type === 'BUY' ? 'Total charged' : 'Total received';
     const tk = f.ticker.value.trim().toUpperCase();
     const hint = [];
     if (show.includes('ticker') && tk) {
@@ -362,6 +370,11 @@ function txForm(ctx, tx = null) {
     if (type === 'BUY' || type === 'SELL') {
       const tot = (+f.quantity.value || 0) * (+f.price.value || 0);
       if (tot) hint.push(`Total ${money(tot + (type === 'BUY' ? 1 : -1) * (+f.fee.value || 0), f.currency.value.toUpperCase() || ctx.base)}`);
+    }
+    const sa = +f.settleAmount.value, sc = f.settleCurrency.value.trim().toUpperCase();
+    if (show.includes('settle') && sa && sc && sc !== f.currency.value.toUpperCase()) {
+      const local = type === 'DIVIDEND' ? (+f.amount.value || 0) - (+f.tax.value || 0) : (+f.quantity.value || 0) * (+f.price.value || 0) + (type === 'BUY' ? 1 : -1) * (+f.fee.value || 0);
+      if (local > 0) hint.push(`Effective rate ${num(sa / local, 4)} ${sc}/${f.currency.value.toUpperCase()}`);
     }
     $('#txHint', f).textContent = hint.join(' · ');
   };
@@ -382,6 +395,11 @@ function txForm(ctx, tx = null) {
     const want = FIELDS_BY_TYPE[type] || ['amount'];
     for (const k of want) {
       if (k === 'ticker') { if (fd.ticker) out.ticker = fd.ticker.trim().toUpperCase(); continue; }
+      if (k === 'settle') {
+        const sc = (fd.settleCurrency || '').trim().toUpperCase();
+        if (sc && sc !== out.currency && +fd.settleAmount > 0) { out.settleCurrency = sc; out.settleAmount = +fd.settleAmount; }
+        continue;
+      }
       if (fd[k] !== '' && fd[k] !== undefined) out[k] = +fd[k];
     }
     if ((type === 'BUY' || type === 'SELL') && (!out.ticker || !out.quantity || out.price === undefined)) return toast('Ticker, quantity and price are required', 'error');

@@ -162,3 +162,26 @@ test('groupBy weights', () => {
   assert.equal(g[0].label, 'a');
   close(g[0].weight, 0.9);
 });
+
+test('settlement currency: PLN account buying USD shares', () => {
+  const market = new Market({
+    histories: { US: { currency: 'USD', ...daily('2024-01-01', '2024-01-10', () => 11), dividends: [], splits: [] } },
+    fx: { PLN: (({ dates, close }) => ({ dates, usd: close }))(daily('2024-01-01', '2024-01-10', () => 0.25)) },
+  });
+  const txs = [
+    { portfolioId: 'p', date: '2024-01-01', type: 'DEPOSIT', amount: 1000, currency: 'PLN' },
+    // 10 USD share, market FX 4.00 but broker charged 4.05 -> 40.50 PLN
+    { portfolioId: 'p', date: '2024-01-02', type: 'BUY', ticker: 'US', quantity: 1, price: 10, currency: 'USD', settleAmount: 40.5, settleCurrency: 'PLN' },
+    { portfolioId: 'p', date: '2024-01-05', type: 'DIVIDEND', ticker: 'US', amount: 1, tax: 0.15, currency: 'USD', settleAmount: 3.3, settleCurrency: 'PLN' },
+  ];
+  const r = computePortfolio(txs, market, { base: 'PLN', today: '2024-01-10' });
+  close(r.holdings[0].costBase, 40.5);
+  assert.deepEqual(Object.keys(r.cash), ['PLN']);
+  close(r.cash.PLN, 1000 - 40.5 + 3.3);
+  close(r.totals.dividends, 3.3);
+  close(r.totals.value, 1000 - 40.5 + 3.3 + 44);
+  // sell back at 11 USD, broker pays 43.5 PLN
+  const r2 = computePortfolio([...txs, { portfolioId: 'p', date: '2024-01-08', type: 'SELL', ticker: 'US', quantity: 1, price: 11, currency: 'USD', settleAmount: 43.5, settleCurrency: 'PLN' }], market, { base: 'PLN', today: '2024-01-10' });
+  close(r2.totals.realized, 3);
+  close(r2.cash.PLN, 1000 - 40.5 + 3.3 + 43.5);
+});

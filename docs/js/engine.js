@@ -6,6 +6,8 @@
 //   DIVIDEND             ticker, amount (gross), tax (withheld at source)
 //   DEPOSIT / WITHDRAWAL amount             -> switches the portfolio into "cash mode"
 //   FEE / INTEREST / TAX amount
+//   optional on BUY/SELL/DIVIDEND: settleAmount + settleCurrency = cash actually moved in the
+//   account currency (e.g. PLN paid for USD shares, incl. fees and FX spread)
 //
 // Cash mode: when a portfolio has deposits/withdrawals, its cash balances are part of
 // its value and deposits/withdrawals are the external flows. Otherwise every buy is
@@ -292,18 +294,24 @@ export function computePortfolio(transactions, market, opts = {}) {
       const cm = !!cashMode[pid];
       const ccy = t.currency || (t.ticker && market.currency(t.ticker)) || base;
       const rate = fx(ccy, d);
+      // Settlement in another (account) currency, e.g. USD shares bought from a PLN account.
+      // settleAmount is the total cash that moved (incl. fees and the broker's FX spread).
+      const sccy = t.settleCurrency && t.settleCurrency !== ccy && n(t.settleAmount) > 0 ? t.settleCurrency : null;
+      const sAmt = sccy ? n(t.settleAmount) : 0;
+      const sBase = sccy ? sAmt * fx(sccy, d) : 0;
       switch (t.type) {
         case 'BUY': {
           const qty = n(t.quantity), price = n(t.price), fee = n(t.fee);
           if (qty <= 0) { warnings.add(`Ignored BUY ${t.ticker} on ${d} with no quantity.`); break; }
           const p = pos(pid, t.ticker, ccy);
-          book.buy(`${pid}|${t.ticker}`, { date: d, qty, price, fee, currency: ccy, rate });
-          p.fees += fee * rate; totals.fees += fee * rate;
+          const cost = qty * price + fee;
+          const eff = sccy && cost > EPS ? sBase / cost : rate; // base per unit of price currency actually paid
+          book.buy(`${pid}|${t.ticker}`, { date: d, qty, price, fee, currency: ccy, rate: eff });
+          p.fees += fee * eff; totals.fees += fee * eff;
           lastTxPrice[t.ticker] = price;
           const mc = market.currency(t.ticker);
           if (mc && mc !== ccy) warnings.add(`${t.ticker}: transactions in ${ccy} but market data is in ${mc}.`);
-          const cost = qty * price + fee;
-          if (cm) addCash(pid, ccy, -cost); else flowIn += cost * rate;
+          if (cm) addCash(pid, sccy || ccy, -(sccy ? sAmt : cost)); else flowIn += sccy ? sBase : cost * rate;
           break;
         }
         case 'SELL': {
@@ -318,25 +326,29 @@ export function computePortfolio(transactions, market, opts = {}) {
           const proceedsLocal = soldQty * price - sellFee;
           const costLocal = used.reduce((s, l) => s + l.qty * l.price + l.fee, 0);
           const costBase = used.reduce((s, l) => s + (l.qty * l.price + l.fee) * l.rate, 0);
-          const proceedsBase = proceedsLocal * rate;
+          const grossLocal = qty * price - fee;
+          const eff = sccy && grossLocal > EPS ? sBase / grossLocal : rate;
+          const proceedsBase = proceedsLocal * eff;
           const gain = proceedsBase - costBase;
           p.realized += gain; p.realizedLocal += proceedsLocal - costLocal;
-          p.fees += fee * rate; totals.fees += fee * rate;
+          p.fees += fee * eff; totals.fees += fee * eff;
           totals.realized += gain;
           lastTxPrice[t.ticker] = price;
           result.trades.push({ date: d, portfolioId: pid, ticker: t.ticker, qty: soldQty, price, currency: ccy,
             proceedsLocal, costLocal, proceedsBase, costBase, gain, holdingDays: used.length ? Math.round(yearFrac(used[0].date, d) * 365.25) : 0 });
-          if (cm) addCash(pid, ccy, soldQty * price - fee); else flowOut -= (soldQty * price - fee) * rate;
+          if (cm) addCash(pid, sccy || ccy, sccy ? sAmt : soldQty * price - fee);
+          else flowOut -= sccy ? sBase : (soldQty * price - fee) * rate;
           break;
         }
         case 'DIVIDEND': {
           const gross = n(t.amount), tax = n(t.tax), net = gross - tax;
+          const eff = sccy && net > EPS ? sBase / net : rate;
           result.dividends.push({ date: d, portfolioId: pid, ticker: t.ticker, currency: ccy, gross, tax, net,
-            grossBase: gross * rate, netBase: net * rate, estimated: false });
-          if (t.ticker) pos(pid, t.ticker, ccy).dividends += net * rate;
-          totals.dividends += net * rate;
-          totals.taxes += tax * rate;
-          if (cm) addCash(pid, ccy, net); else flowOut -= net * rate;
+            grossBase: gross * eff, netBase: net * eff, estimated: false });
+          if (t.ticker) pos(pid, t.ticker, ccy).dividends += net * eff;
+          totals.dividends += net * eff;
+          totals.taxes += tax * eff;
+          if (cm) addCash(pid, sccy || ccy, sccy ? sAmt : net); else flowOut -= sccy ? sBase : net * rate;
           break;
         }
         case 'DEPOSIT':
